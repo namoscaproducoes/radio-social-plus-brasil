@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Heart, Volume2, Play, Pause, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Heart, Volume2, Play, Pause, ThumbsUp, ThumbsDown, AlertCircle } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
+import HLS from "hls.js";
 
 interface CurrentSongData {
   title: string;
@@ -16,8 +17,10 @@ export default function Home() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(70);
   const [currentSong, setCurrentSong] = useState<CurrentSongData | null>(null);
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [userVote, setUserVote] = useState<"like" | "dislike" | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const hlsRef = useRef<HLS | null>(null);
 
   // Fetch current song
   const { data: songData } = trpc.songs.current.useQuery(undefined, {
@@ -27,26 +30,70 @@ export default function Home() {
   // Mutation para adicionar voto
   const addVoteMutation = trpc.votes.add.useMutation();
 
-  // Inicializar áudio ao montar
+  // Inicializar player com HLS.js
   useEffect(() => {
-    const audioElement = new Audio();
-    audioElement.src = "https://hts09.kshost.com.br:9608";
-    audioElement.crossOrigin = "anonymous";
-    audioElement.volume = volume / 100;
-    setAudio(audioElement);
+    const audio = audioRef.current;
+    if (!audio) return;
 
-    return () => {
-      audioElement.pause();
-      audioElement.src = "";
-    };
+    const streamUrl = "https://s01.brascast.com:7034/live";
+
+    try {
+      // Verificar se o navegador suporta HLS
+      if (HLS.isSupported()) {
+        const hls = new HLS({
+          debug: false,
+          enableWorker: true,
+        });
+
+        hls.loadSource(streamUrl);
+        hls.attachMedia(audio);
+
+        hls.on(HLS.Events.MANIFEST_PARSED, () => {
+          console.log("✓ Stream HLS carregado com sucesso");
+          setError(null);
+        });
+
+        hls.on(HLS.Events.ERROR, (event, data) => {
+          console.error("Erro HLS:", data);
+          if (data.fatal) {
+            switch (data.type) {
+              case HLS.ErrorTypes.NETWORK_ERROR:
+                setError("Erro de conexão com o stream. Verifique sua internet.");
+                break;
+              case HLS.ErrorTypes.MEDIA_ERROR:
+                setError("Erro ao reproduzir o stream.");
+                break;
+              default:
+                setError("Erro ao carregar o stream.");
+            }
+          }
+        });
+
+        hlsRef.current = hls;
+
+        return () => {
+          hls.destroy();
+          hlsRef.current = null;
+        };
+      } else if (audio.canPlayType("application/vnd.apple.mpegurl")) {
+        // Fallback para Safari
+        audio.src = streamUrl;
+        setError(null);
+      } else {
+        setError("Seu navegador não suporta este tipo de stream.");
+      }
+    } catch (err) {
+      console.error("Erro ao inicializar player:", err);
+      setError("Erro ao inicializar o player.");
+    }
   }, []);
 
   // Atualizar volume
   useEffect(() => {
-    if (audio) {
-      audio.volume = volume / 100;
+    if (audioRef.current) {
+      audioRef.current.volume = volume / 100;
     }
-  }, [volume, audio]);
+  }, [volume]);
 
   // Atualizar dados da música atual
   useEffect(() => {
@@ -62,18 +109,22 @@ export default function Home() {
 
   // Controlar play/pause
   const handlePlayPause = async () => {
-    if (!audio) return;
+    if (!audioRef.current) return;
 
     try {
       if (isPlaying) {
-        audio.pause();
+        audioRef.current.pause();
         setIsPlaying(false);
+        setError(null);
       } else {
-        await audio.play();
+        await audioRef.current.play();
         setIsPlaying(true);
+        setError(null);
       }
-    } catch (error) {
-      console.error("Erro ao reproduzir áudio:", error);
+    } catch (err) {
+      console.error("Erro ao reproduzir áudio:", err);
+      setError("Erro ao reproduzir o stream. Tente novamente.");
+      setIsPlaying(false);
     }
   };
 
@@ -93,13 +144,16 @@ export default function Home() {
       });
 
       setUserVote(voteType);
-    } catch (error) {
-      console.error("Erro ao registrar voto:", error);
+    } catch (err) {
+      console.error("Erro ao registrar voto:", err);
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900">
+      {/* Audio Element */}
+      <audio ref={audioRef} crossOrigin="anonymous" />
+
       {/* Navigation */}
       <nav className="bg-gray-900 border-b-4 border-yellow-500 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -148,10 +202,18 @@ export default function Home() {
             <div className="text-center">
               <p className="text-yellow-500 font-bold text-sm mb-4">TOCANDO AGORA</p>
 
+              {/* Error Message */}
+              {error && (
+                <div className="mb-6 bg-red-900 border border-red-500 rounded-lg p-4 flex items-start gap-3">
+                  <AlertCircle size={20} className="text-red-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-red-200 text-sm text-left">{error}</p>
+                </div>
+              )}
+
               {/* Album Cover */}
               <div className="mb-6 flex justify-center">
                 {currentSong?.albumCover ? (
-            <img
+                  <img
                     src={currentSong?.albumCover || ""}
                     alt="Album Cover"
                     className="w-48 h-48 rounded-lg shadow-lg object-cover"

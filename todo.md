@@ -43,6 +43,9 @@
 - [x] Adicionar estatísticas gerais
 
 ## Fase 7: Integração de Metadados
+- [x] Corrigir URL do stream para https://s01.brascast.com:7034/live
+- [x] Implementar suporte para streams HLS (M3U8) com HLS.js
+- [x] Adicionar tratamento de erros melhorado no player
 - [ ] Implementar captura automática de metadados do stream
 - [ ] Atualizar metadados em tempo real
 - [ ] Sincronizar com banco de dados

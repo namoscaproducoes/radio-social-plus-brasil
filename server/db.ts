@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, songs, InsertSong, votes, InsertVote, currentSong, InsertCurrentSong } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -87,6 +87,109 @@ export async function getUserByOpenId(openId: string) {
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
 
   return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Get all songs with vote counts
+ */
+export async function getSongsWithVotes() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db.execute(`
+    SELECT 
+      s.id,
+      s.title,
+      s.artist,
+      s.albumCover,
+      s.duration,
+      COUNT(CASE WHEN v.voteType = 'like' THEN 1 END) as likes,
+      COUNT(CASE WHEN v.voteType = 'dislike' THEN 1 END) as dislikes,
+      COUNT(v.id) as totalVotes
+    FROM songs s
+    LEFT JOIN votes v ON s.id = v.songId
+    GROUP BY s.id
+    ORDER BY totalVotes DESC
+  `);
+  return result;
+}
+
+/**
+ * Get votes for a specific song
+ */
+export async function getVotesForSong(songId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(votes).where(eq(votes.songId, songId));
+}
+
+/**
+ * Create or update a song
+ */
+export async function upsertSong(song: InsertSong) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    await db.insert(songs).values(song).onDuplicateKeyUpdate({
+      set: {
+        title: song.title,
+        artist: song.artist,
+        albumCover: song.albumCover,
+        duration: song.duration,
+      },
+    });
+    return song;
+  } catch (error) {
+    console.error("[Database] Failed to upsert song:", error);
+    throw error;
+  }
+}
+
+/**
+ * Add a vote for a song
+ */
+export async function addVote(vote: InsertVote) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const result = await db.insert(votes).values(vote);
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to add vote:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get current song
+ */
+export async function getCurrentSong() {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db.select().from(currentSong).limit(1);
+  return result.length > 0 ? result[0] : null;
+}
+
+/**
+ * Update current song
+ */
+export async function updateCurrentSong(song: InsertCurrentSong) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    // Delete existing record and insert new one
+    await db.execute(`DELETE FROM currentSong`);
+    await db.insert(currentSong).values(song);
+    return song;
+  } catch (error) {
+    console.error("[Database] Failed to update current song:", error);
+    throw error;
+  }
 }
 
 // TODO: add feature queries here as your schema grows.

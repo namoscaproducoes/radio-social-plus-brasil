@@ -70,6 +70,14 @@
 - [x] Adicionar botões de like/dislike com metadados extraídos
 - [x] Validar que votos são salvos no dashboard
 
+## Fase 10: Novo Player Customizado
+- [x] Criar componente RadioPlayer customizado
+- [x] Integrar stream de rádio com proxy
+- [x] Implementar atualização de metadados a cada 1 segundo
+- [x] Adicionar controles de play/pause e volume
+- [x] Integrar botões de like/dislike com metadados
+- [x] Resetar votos quando música muda
+
 
 ## Bugs Encontrados
 - [x] Metadados fixos em Waka Waka (player não atualiza) - Corrigido com iframe Brascast

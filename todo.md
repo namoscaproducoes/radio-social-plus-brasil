@@ -42,13 +42,16 @@
 - [x] Implementar autenticação (acesso restrito)
 - [x] Adicionar estatísticas gerais
 
-## Fase 7: Integração de Metadados
+## Fase 7: Integracao de Metadados
 - [x] Corrigir URL do stream para https://s01.brascast.com:7034/live
 - [x] Implementar suporte para streams HLS (M3U8) com HLS.js
 - [x] Adicionar tratamento de erros melhorado no player
-- [ ] Implementar captura automática de metadados do stream
+- [ ] Separar URLs: live para reproduzir, sem live para metadados
+- [ ] Implementar captura automatica de metadados do stream ICEcast
+- [ ] Integrar iTunes API para buscar capa do album
+- [ ] Corrigir sistema de votos (like/dislike nao estao funcionando)
+- [ ] Remover mensagem Conectando ao streaming quando musica esta tocando
 - [ ] Atualizar metadados em tempo real
-- [ ] Sincronizar com banco de dados
 - [ ] Testar com stream ao vivo
 
 ## Fase 8: Testes e Otimizações

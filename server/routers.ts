@@ -4,6 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb } from "./db";
+import { fetchIcecastMetadata, searchItunesAlbumCover } from "./metadata";
 
 export const appRouter = router({
   system: systemRouter,
@@ -21,6 +22,29 @@ export const appRouter = router({
   songs: router({
     current: publicProcedure.query(async () => {
       return await getCurrentSong();
+    }),
+
+    metadata: publicProcedure.query(async () => {
+      try {
+        const icecastData = await fetchIcecastMetadata();
+        const albumCover = await searchItunesAlbumCover(
+          icecastData.artist || "Unknown",
+          icecastData.title || "Unknown"
+        );
+
+        return {
+          title: icecastData.title || "Musica Desconhecida",
+          artist: icecastData.artist || "Artista Desconhecido",
+          albumCover: albumCover,
+        };
+      } catch (error) {
+        console.error("Erro ao buscar metadados:", error);
+        return {
+          title: "Musica Desconhecida",
+          artist: "Artista Desconhecido",
+          albumCover: null,
+        };
+      }
     }),
 
     withVotes: publicProcedure.query(async () => {

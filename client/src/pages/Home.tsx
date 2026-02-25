@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Heart, Volume2, Play, Pause, ThumbsUp, ThumbsDown, AlertCircle } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
+import { toast } from "sonner";
 
 interface CurrentSongData {
   title: string;
@@ -22,14 +23,23 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const retryCountRef = useRef(0);
   const maxRetries = 3;
+  const lastSongRef = useRef<string>("");
 
-  // Fetch current song
-  const { data: songData } = trpc.songs.current.useQuery(undefined, {
-    refetchInterval: 5000, // Atualizar a cada 5 segundos
+  // Fetch metadados da música
+  const { data: metadataData, refetch: refetchMetadata } = trpc.songs.metadata.useQuery(undefined, {
+    refetchInterval: 3000, // Atualizar a cada 3 segundos
   });
 
   // Mutation para adicionar voto
-  const addVoteMutation = trpc.votes.add.useMutation();
+  const addVoteMutation = trpc.votes.add.useMutation({
+    onSuccess: () => {
+      toast.success("Voto registrado!");
+    },
+    onError: (error) => {
+      console.error("Erro ao registrar voto:", error);
+      toast.error("Erro ao registrar voto");
+    },
+  });
 
   // Inicializar player
   useEffect(() => {
@@ -133,15 +143,22 @@ export default function Home() {
 
   // Atualizar dados da música atual
   useEffect(() => {
-    if (songData) {
+    if (metadataData) {
+      const songKey = `${metadataData.artist}-${metadataData.title}`;
+      
+      // Se a música mudou, resetar o voto
+      if (songKey !== lastSongRef.current) {
+        lastSongRef.current = songKey;
+        setUserVote(null);
+      }
+
       setCurrentSong({
-        title: songData.title || "Música Desconhecida",
-        artist: songData.artist || "Artista Desconhecido",
-        albumCover: songData.albumCover,
+        title: metadataData.title || "Música Desconhecida",
+        artist: metadataData.artist || "Artista Desconhecido",
+        albumCover: metadataData.albumCover,
       });
-      setUserVote(null); // Reset vote quando muda a música
     }
-  }, [songData]);
+  }, [metadataData]);
 
   // Controlar play/pause
   const handlePlayPause = async () => {
@@ -177,15 +194,20 @@ export default function Home() {
 
   // Adicionar voto
   const handleVote = async (voteType: "like" | "dislike") => {
-    if (!currentSong) return;
+    if (!currentSong) {
+      toast.error("Aguarde o carregamento da música");
+      return;
+    }
 
     try {
-      const songId = 1; // Será atualizado com ID real da música
+      // Usar um ID baseado na música atual
+      const songId = 1; // Em produção, seria um ID real da música
+      const userId = `user_${Math.random().toString(36).substr(2, 9)}`;
 
       await addVoteMutation.mutateAsync({
         songId,
         voteType,
-        userId: `user_${Math.random().toString(36).substr(2, 9)}`,
+        userId,
         userAgent: navigator.userAgent,
       });
 
@@ -239,12 +261,7 @@ export default function Home() {
               disabled={isLoading}
               className="bg-cyan-500 hover:bg-cyan-600 disabled:bg-cyan-400 text-white font-bold px-8 py-6 text-lg rounded-full flex items-center gap-2"
             >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin">⏳</div>
-                  Conectando...
-                </>
-              ) : isPlaying ? (
+              {isPlaying ? (
                 <>
                   <Pause size={24} />
                   Pausar
@@ -298,12 +315,9 @@ export default function Home() {
               <div className="flex justify-center gap-4 mb-6">
                 <Button
                   onClick={handlePlayPause}
-                  disabled={isLoading}
-                  className="bg-cyan-500 hover:bg-cyan-600 disabled:bg-cyan-400 text-white rounded-full p-3"
+                  className="bg-cyan-500 hover:bg-cyan-600 text-white rounded-full p-3"
                 >
-                  {isLoading ? (
-                    <div className="animate-spin">⏳</div>
-                  ) : isPlaying ? (
+                  {isPlaying ? (
                     <Pause size={24} />
                   ) : (
                     <Play size={24} />
@@ -323,10 +337,7 @@ export default function Home() {
               </div>
 
               {/* Status */}
-              {isLoading && (
-                <p className="text-sm text-gray-400 mb-4">⏳ Conectando ao stream...</p>
-              )}
-              {isPlaying && !isLoading && (
+              {isPlaying && (
                 <p className="text-sm text-green-400 mb-4">🔴 Ao vivo</p>
               )}
 
@@ -334,7 +345,7 @@ export default function Home() {
               <div className="flex justify-center gap-4">
                 <Button
                   onClick={() => handleVote("like")}
-                  disabled={isLoading}
+                  disabled={addVoteMutation.isPending}
                   className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold transition disabled:opacity-50 ${
                     userVote === "like"
                       ? "bg-green-500 text-white"
@@ -346,7 +357,7 @@ export default function Home() {
                 </Button>
                 <Button
                   onClick={() => handleVote("dislike")}
-                  disabled={isLoading}
+                  disabled={addVoteMutation.isPending}
                   className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold transition disabled:opacity-50 ${
                     userVote === "dislike"
                       ? "bg-red-500 text-white"

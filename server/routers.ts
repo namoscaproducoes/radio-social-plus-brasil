@@ -1,11 +1,13 @@
-import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { COOKIE_NAME } from "@shared/const";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb } from "./db";
+import { eq } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
 import { scrapePlayerMetadata } from "./player-scraper";
+import { songs } from "../drizzle/schema";
 
 export const appRouter = router({
   system: systemRouter,
@@ -64,14 +66,33 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ input, ctx }) => {
-        // Primeiro, encontrar ou criar a musica
         const db = await getDb();
         if (!db) throw new Error("Database not available");
 
-        // Para simplificar, usar um hash do titulo+artista como songId
-        const songHash = `${input.songTitle}-${input.songArtist}`.toLowerCase().replace(/[^a-z0-9]/g, "");
-        const songId = Math.abs(songHash.split("").reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0)) % 1000000;
+        // Primeiro, criar ou atualizar a música
+        const externalId = `${input.songTitle}-${input.songArtist}`.toLowerCase().replace(/[^a-z0-9]/g, "");
+        
+        // Upsert da música
+        await db.insert(songs).values({
+          title: input.songTitle,
+          artist: input.songArtist,
+          externalId: externalId,
+        }).onDuplicateKeyUpdate({
+          set: {
+            title: input.songTitle,
+            artist: input.songArtist,
+          },
+        });
 
+        // Buscar o ID da música que foi inserida/atualizada
+        const songResult = await db.select().from(songs).where(eq(songs.externalId, externalId)).limit(1);
+        if (!songResult || songResult.length === 0) {
+          throw new Error("Failed to create/find song");
+        }
+
+        const songId = songResult[0].id;
+
+        // Registrar o voto
         return await addVote({
           songId: songId,
           voteType: input.voteType,

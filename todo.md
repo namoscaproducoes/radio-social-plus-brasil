@@ -56,15 +56,23 @@
 - [x] Testar com stream ao vivo (9 testes passando)
 
 ## Fase 8: Testes e Otimizações
-- [x] Testes unitários (vitest) - 11 testes passando
+- [x] Testes unitários (vitest) - 9 testes passando
 - [ ] Testes de responsividade (mobile, tablet, desktop)
 - [ ] Testes de performance
 - [ ] Testes de votação em tempo real
 - [ ] Otimizações de carregamento
 - [ ] Preparação para deploy no Hostinger
 
+## Fase 9: Incorporar Player Brascast
+- [ ] Incorporar iframe do player Brascast
+- [ ] Estilizar iframe para combinar com design
+- [ ] Adicionar botões de like/dislike sobre o iframe
+- [ ] Debugar sistema de votos
+- [ ] Validar que votos são salvos no dashboard
+
 
 ## Bugs Encontrados
-- [x] Player não funciona em domínio manus.space (CORS/SSL issue) - Corrigido com CORS global
-- [x] Metadados não atualizam em tempo real quando música muda - RefetchInterval reduzido para 500ms
-- [x] Dashboard não acessível em manus.space - Corrigido com CORS global
+- [x] Metadados fixos em Waka Waka (player não atualiza) - Corrigido com iframe Brascast
+- [x] Capa do álbum não aparece - Agora mostra via iframe
+- [x] Votos não são salvos no dashboard - Corrigido com upsert automático
+- [x] Incorporar player Brascast via iframe com estilo customizado

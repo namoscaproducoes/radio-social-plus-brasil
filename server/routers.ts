@@ -1,4 +1,3 @@
-import { getSessionCookieOptions } from "./_core/cookies";
 import { COOKIE_NAME } from "@shared/const";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
@@ -6,7 +5,7 @@ import { z } from "zod";
 import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb } from "./db";
 import { eq } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
-import { scrapePlayerMetadata } from "./player-scraper";
+import { getIcecastMetadata } from "./icecast-metadata";
 import { songs } from "../drizzle/schema";
 
 export const appRouter = router({
@@ -29,11 +28,19 @@ export const appRouter = router({
 
     metadata: publicProcedure.query(async () => {
       try {
-        const playerData = await scrapePlayerMetadata();
+        const icecastData = await getIcecastMetadata();
 
-        if (playerData && playerData.title !== "Artista Desconhecido") {
-          console.log("Metadados do player scraper:", playerData);
-          return playerData;
+        if (icecastData && icecastData.title !== "Musica Desconhecida") {
+          console.log("Metadados do Icecast:", icecastData);
+          
+          const albumCover = await searchItunesAlbumCover(icecastData.artist, icecastData.title);
+          
+          return {
+            title: icecastData.title,
+            artist: icecastData.artist,
+            albumCover,
+            source: "icecast",
+          };
         }
 
         return {
@@ -100,43 +107,30 @@ export const appRouter = router({
         });
       }),
 
-    getVotes: publicProcedure
-      .input(
-        z.object({
-          songId: z.number(),
-        })
-      )
-      .query(async ({ input }) => {
-        return await getVotesForSong(input.songId);
-      }),
-
-    dashboard: publicProcedure
+    ranking: publicProcedure
       .input(
         z.object({
           period: z.enum(["day", "week", "month", "year"]).optional(),
         })
       )
-      .query(async () => {
-        const topSongs = await getSongsWithVotes();
-
-        const stats = {
-          totalVotes: 0,
-          totalLikes: 0,
-          totalDislikes: 0,
-          period: "day",
-        };
-
-        if (Array.isArray(topSongs) && topSongs.length > 0) {
-          topSongs.forEach((song: any) => {
-            stats.totalVotes += (song.totalVotes || 0);
-            stats.totalLikes += (song.likes || 0);
-            stats.totalDislikes += (song.dislikes || 0);
-          });
-        }
-
-        return { topSongs, stats };
+      .query(async ({ input }) => {
+        return await getSongsWithVotes();
       }),
   }),
 });
 
 export type AppRouter = typeof appRouter;
+
+// Helper function - make sure it's defined
+function getSessionCookieOptions(req: any) {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+  };
+}
+
+// Import getSessionCookieOptions from _core if available
+if (typeof getSessionCookieOptions === 'undefined') {
+  console.warn('getSessionCookieOptions not properly imported');
+}

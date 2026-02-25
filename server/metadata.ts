@@ -1,4 +1,5 @@
 import https from "https";
+import http from "http";
 
 interface IcecastMetadata {
   title?: string;
@@ -107,6 +108,96 @@ export async function fetchIcecastMetadata(): Promise<IcecastMetadata> {
 }
 
 /**
+ * Busca capa do álbum no Last.fm
+ */
+export async function searchLastfmAlbumCover(
+  artist: string,
+  song: string
+): Promise<string | null> {
+  try {
+    const apiKey = process.env.LASTFM_API_KEY;
+    if (!apiKey) {
+      console.log("Last.fm API key não configurada");
+      return null;
+    }
+
+    // Validar inputs
+    if (!artist || artist === "Unknown" || artist === "Artista Desconhecido") {
+      console.log("Artista inválido para busca Last.fm");
+      return null;
+    }
+
+    if (!song || song === "Unknown" || song === "Música Desconhecida") {
+      console.log("Música inválida para busca Last.fm");
+      return null;
+    }
+
+    // Last.fm API para buscar informações do álbum
+    // Primeiro, buscar track para obter o álbum
+    const trackUrl = `http://ws.audioscrobbler.com/2.0/?method=track.getInfo&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(song)}&api_key=${apiKey}&format=json`;
+
+    console.log("Buscando no Last.fm:", { artist, song, trackUrl });
+
+    return new Promise((resolve) => {
+      const httpModule = trackUrl.startsWith('http://') ? http : https;
+      httpModule
+        .get(trackUrl, { timeout: 5000 }, (res: any) => {
+          let data = "";
+
+          res.on("data", (chunk: any) => {
+            data += chunk;
+          });
+
+          res.on("end", () => {
+            try {
+              const result = JSON.parse(data);
+              console.log("Resposta Last.fm track.getInfo:", result);
+
+              if (result.track && result.track.album && result.track.album.image) {
+                // Procurar pela imagem maior disponível
+                const images = result.track.album.image;
+                let imageUrl = null;
+
+                // Procurar por "extralarge" ou "large"
+                for (const img of images) {
+                  if (img.size === "extralarge" || img.size === "large") {
+                    imageUrl = img["#text"];
+                    break;
+                  }
+                }
+
+                // Se não encontrou, usar a primeira disponível
+                if (!imageUrl && images.length > 0) {
+                  imageUrl = images[images.length - 1]["#text"];
+                }
+
+                if (imageUrl) {
+                  console.log("Capa encontrada no Last.fm:", imageUrl);
+                  resolve(imageUrl);
+                  return;
+                }
+              }
+
+              console.log("Nenhuma capa encontrada no Last.fm");
+              resolve(null);
+            } catch (error) {
+              console.error("Erro ao parsear Last.fm response:", error);
+              resolve(null);
+            }
+          });
+        })
+        .on("error", (error: any) => {
+          console.error("Erro ao buscar Last.fm:", error);
+          resolve(null);
+        });
+    });
+  } catch (error) {
+    console.error("Erro em searchLastfmAlbumCover:", error);
+    return null;
+  }
+}
+
+/**
  * Busca capa do álbum no iTunes
  */
 export async function searchItunesAlbumCover(
@@ -114,6 +205,12 @@ export async function searchItunesAlbumCover(
   song: string
 ): Promise<string | null> {
   try {
+    // Tentar Last.fm primeiro, depois iTunes como fallback
+    const lastfmCover = await searchLastfmAlbumCover(artist, song);
+    if (lastfmCover) {
+      return lastfmCover;
+    }
+
     // Validar inputs
     if (!artist || artist === "Unknown" || artist === "Artista Desconhecido") {
       console.log("Artista inválido para busca iTunes");

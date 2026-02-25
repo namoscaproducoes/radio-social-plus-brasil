@@ -89,10 +89,22 @@
 - [x] Integrar com Home.tsx
 
 
+## Fase 12: Integração com Last.fm API
+- [x] Criar conta Last.fm e obter API key
+- [x] Analisar stream sem "live" para extrair metadados (Icecast)
+- [x] Implementar extração de metadados do Icecast em tempo real
+- [x] Integrar Last.fm API para buscar capa do álbum
+- [x] Implementar fallback para iTunes API
+- [x] Atualizar RadioPlayerV2 para usar tRPC em vez de fetch
+- [x] Implementar polling automático de metadados (1 segundo)
+- [x] Todos os testes passando (9 testes)
+
 ## Bugs Encontrados e Resolvidos
-- [x] Metadados fixos em Waka Waka (player não atualiza) - Corrigido com iframe Brascast
-- [x] Capa do álbum não aparece - Agora mostra via iframe
+- [x] Metadados fixos em Waka Waka (player não atualiza) - Corrigido com Icecast
+- [x] Capa do álbum não aparece - Agora busca via Last.fm com fallback iTunes
 - [x] Votos não são salvos no dashboard - Corrigido com upsert automático
 - [x] Incorporar player Brascast via iframe com estilo customizado
 - [x] TypeScript warnings em RadioPlayerV2 - Corrigido com tipos corretos
 - [x] useRef sem valor inicial - Corrigido com undefined como valor padrão
+- [x] Metadados não carregavam - Corrigido com Icecast API + Last.fm
+- [x] Erro de protocolo HTTP em Last.fm - Corrigido com módulo http dinâmico

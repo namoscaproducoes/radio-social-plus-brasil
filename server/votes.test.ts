@@ -74,9 +74,9 @@ describe("songs router", () => {
 });
 
 /**
- * Test suite para dashboard
+ * Test suite para ranking
  */
-describe("dashboard router", () => {
+describe("ranking router", () => {
   const createPublicContext = (): TrpcContext => {
     return {
       user: null,
@@ -90,36 +90,33 @@ describe("dashboard router", () => {
     };
   };
 
-  it("should get dashboard stats", async () => {
+  it("should get ranking stats", async () => {
     const ctx = createPublicContext();
     const caller = appRouter.createCaller(ctx);
 
-    const result = await caller.songs.dashboard({});
-    expect(result).toHaveProperty("stats");
-    expect(result).toHaveProperty("topSongs");
+    const result = await caller.songs.ranking({ period: "week" });
+    expect(Array.isArray(result)).toBe(true);
   });
 
-  it("should get top songs for dashboard", async () => {
+  it("should get top songs for ranking", async () => {
     const ctx = createPublicContext();
     const caller = appRouter.createCaller(ctx);
 
-    const result = await caller.songs.dashboard({});
-    expect(Array.isArray(result.topSongs)).toBe(true);
+    const result = await caller.songs.ranking({ period: "week" });
+    expect(Array.isArray(result)).toBe(true);
   });
 
-  it("should filter dashboard songs by different periods", async () => {
+  it("should filter ranking songs by different periods", async () => {
     const ctx = createPublicContext();
     const caller = appRouter.createCaller(ctx);
 
     const periods = ["day", "week", "month", "year"] as const;
 
     for (const period of periods) {
-      const result = await caller.songs.dashboard({
+      const result = await caller.songs.ranking({
         period,
       });
-      expect(result).toHaveProperty("topSongs");
-      expect(result).toHaveProperty("stats");
-      expect(Array.isArray(result.topSongs)).toBe(true);
+      expect(Array.isArray(result)).toBe(true);
     }
   });
 });

@@ -15,7 +15,7 @@ export default function Dashboard() {
   const [period, setPeriod] = useState<Period>("week");
 
   // Fetch dashboard stats
-  const { data: dashboardData } = trpc.songs.dashboard.useQuery(
+  const { data: rankingData } = trpc.songs.ranking.useQuery(
     { period: period as any },
     {
       enabled: !!user,
@@ -23,8 +23,12 @@ export default function Dashboard() {
     }
   );
 
-  const stats = dashboardData?.stats;
-  const topSongs = dashboardData?.topSongs;
+  const topSongs = rankingData || [];
+  const stats = {
+    totalVotes: topSongs.reduce((sum: number, song: any) => sum + (song.totalVotes || 0), 0),
+    totalLikes: topSongs.reduce((sum: number, song: any) => sum + (song.likes || 0), 0),
+    totalDislikes: topSongs.reduce((sum: number, song: any) => sum + (song.dislikes || 0), 0),
+  };
 
   if (loading) {
     return (

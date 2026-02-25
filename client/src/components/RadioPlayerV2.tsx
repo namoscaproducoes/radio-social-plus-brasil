@@ -22,7 +22,14 @@ export function RadioPlayerV2() {
   const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(null);
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
   const lastMetadataRef = useRef('');
-  const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
+
+  // Buscar metadados via tRPC com polling automático
+  const { data: metadataResponse, isLoading: isLoadingMetadataQuery } = trpc.songs.metadata.useQuery(
+    undefined,
+    {
+      refetchInterval: 1000, // Atualizar a cada 1 segundo
+    }
+  );
 
   const addVoteMutation = trpc.songs.vote.useMutation({
     onSuccess: () => {
@@ -33,55 +40,31 @@ export function RadioPlayerV2() {
     },
   });
 
-  // Buscar metadados da API Brascast
-  const fetchMetadata = async () => {
-    try {
-      setIsLoadingMetadata(true);
-      
-      // Tentar buscar via endpoint do backend que já faz scraping
-      const response = await fetch('/api/songs/metadata');
-      const data = await response.json();
-
-      if (data.title && data.artist) {
-        const metadataKey = `${data.title}|${data.artist}`;
-
-        // Só atualizar se mudou
-        if (metadataKey !== lastMetadataRef.current) {
-          console.log('🎵 Música atualizada:', data.title, '-', data.artist);
-          
-          setMetadata({
-            title: data.title || 'Música Desconhecida',
-            artist: data.artist || 'Artista Desconhecido',
-            cover: data.albumCover || '',
-          });
-
-          setUserVote(null); // Resetar voto quando música muda
-          lastMetadataRef.current = metadataKey;
-        }
-      }
-    } catch (error) {
-      console.error('Erro ao buscar metadados:', error);
-    } finally {
-      setIsLoadingMetadata(false);
-    }
-  };
-
-  // Iniciar polling de metadados
+  // Atualizar estado local quando metadados mudam
   useEffect(() => {
-    // Buscar imediatamente
-    fetchMetadata();
+    if (metadataResponse && metadataResponse.title && metadataResponse.title !== 'Musica Desconhecida') {
+      const metadataKey = `${metadataResponse.title}|${metadataResponse.artist}`;
 
-    // Configurar polling a cada 500ms para detecção rápida de mudanças
-    pollingIntervalRef.current = setInterval(() => {
-      fetchMetadata();
-    }, 500);
+      // Só atualizar se mudou
+      if (metadataKey !== lastMetadataRef.current) {
+        console.log('🎵 Música atualizada:', metadataResponse.title, '-', metadataResponse.artist);
+        
+        setMetadata({
+          title: metadataResponse.title,
+          artist: metadataResponse.artist,
+          cover: metadataResponse.albumCover || '',
+        });
 
-    return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
+        setUserVote(null); // Resetar voto quando música muda
+        lastMetadataRef.current = metadataKey;
       }
-    };
-  }, []);
+    }
+  }, [metadataResponse]);
+
+  // Atualizar estado de carregamento
+  useEffect(() => {
+    setIsLoadingMetadata(isLoadingMetadataQuery);
+  }, [isLoadingMetadataQuery]);
 
   // Tocar/pausar
   const togglePlay = async () => {
@@ -249,7 +232,8 @@ export function RadioPlayerV2() {
         {/* Debug Info - Apenas em desenvolvimento */}
         {process.env.NODE_ENV === 'development' && (
           <div className="text-xs text-gray-500 mt-4 text-center">
-            <p>Polling: 500ms | Metadados: {lastMetadataRef.current || 'Aguardando...'}</p>
+            <p>Polling: 1s | Metadados: {lastMetadataRef.current || 'Aguardando...'}</p>
+            <p>Fonte: {metadataResponse?.source || 'desconhecida'}</p>
           </div>
         )}
       </div>

@@ -114,7 +114,52 @@ export const appRouter = router({
         })
       )
       .query(async ({ input }) => {
-        return await getSongsWithVotes();
+        const db = await getDb();
+        if (!db) return [];
+
+        // Calcular data de início baseado no período
+        const now = new Date();
+        let startDate = new Date();
+        
+        switch (input.period) {
+          case "day":
+            startDate.setHours(0, 0, 0, 0);
+            break;
+          case "week":
+            startDate.setDate(now.getDate() - now.getDay());
+            startDate.setHours(0, 0, 0, 0);
+            break;
+          case "month":
+            startDate.setDate(1);
+            startDate.setHours(0, 0, 0, 0);
+            break;
+          case "year":
+            startDate.setMonth(0, 1);
+            startDate.setHours(0, 0, 0, 0);
+            break;
+          default:
+            // Sem filtro de data
+            startDate = new Date(0);
+        }
+
+        const result = await db.execute(`
+          SELECT 
+            s.id,
+            s.title,
+            s.artist,
+            s.albumCover,
+            s.duration,
+            COUNT(CASE WHEN v.voteType = 'like' THEN 1 END) as likes,
+            COUNT(CASE WHEN v.voteType = 'dislike' THEN 1 END) as dislikes,
+            COUNT(v.id) as totalVotes
+          FROM songs s
+          LEFT JOIN votes v ON s.id = v.songId AND v.createdAt >= '${startDate.toISOString()}'
+          GROUP BY s.id
+          HAVING totalVotes > 0
+          ORDER BY totalVotes DESC
+        `)
+        
+        return Array.isArray(result) && result.length > 0 ? result[0] : [];
       }),
   }),
 });

@@ -111,7 +111,8 @@ export async function getSongsWithVotes() {
     GROUP BY s.id
     ORDER BY totalVotes DESC
   `);
-  return result;
+  // db.execute retorna [rows, fields], então extrair apenas as linhas
+  return Array.isArray(result) && result.length > 0 ? result[0] : [];
 }
 
 /**

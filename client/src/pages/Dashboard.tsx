@@ -23,7 +23,8 @@ export default function Dashboard() {
     }
   );
 
-  const topSongs = (rankingData || []).map((song: any) => ({
+  const rankingRows = Array.isArray(rankingData) ? rankingData : [];
+  const topSongs = rankingRows.map((song: any) => ({
     ...song,
     likePercentage: song.totalVotes > 0 ? Math.round((song.likes / song.totalVotes) * 100) : 0,
   }));

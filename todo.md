@@ -115,3 +115,7 @@
 - [x] Corrigir cálculo de likePercentage na dashboard
 - [x] Melhorar agregação de dados de votos
 - [x] Todos os testes passando (9 testes)
+
+
+## Bugs Pendentes
+- [x] Dashboard não contabiliza votos corretamente - Corrigido: db.execute retorna [rows, fields], agora extraindo apenas rows

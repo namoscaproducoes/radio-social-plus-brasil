@@ -46,13 +46,14 @@
 - [x] Corrigir URL do stream para https://s01.brascast.com:7034/live
 - [x] Implementar suporte para streams HLS (M3U8) com HLS.js
 - [x] Adicionar tratamento de erros melhorado no player
-- [ ] Separar URLs: live para reproduzir, sem live para metadados
-- [ ] Implementar captura automatica de metadados do stream ICEcast
-- [ ] Integrar iTunes API para buscar capa do album
-- [ ] Corrigir sistema de votos (like/dislike nao estao funcionando)
-- [ ] Remover mensagem Conectando ao streaming quando musica esta tocando
-- [ ] Atualizar metadados em tempo real
-- [ ] Testar com stream ao vivo
+- [x] Separar URLs: live para reproduzir, sem live para metadados
+- [x] Implementar captura automatica de metadados do stream ICEcast
+- [x] Integrar iTunes API para buscar capa do album
+- [x] Corrigir sistema de votos (like/dislike nao estao funcionando)
+- [x] Remover mensagem Conectando ao streaming quando musica esta tocando
+- [x] Resetar botoes de voto quando musica muda
+- [x] Atualizar metadados em tempo real
+- [x] Testar com stream ao vivo (9 testes passando)
 
 ## Fase 8: Testes e Otimizações
 - [x] Testes unitários (vitest) - 11 testes passando

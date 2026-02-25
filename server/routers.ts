@@ -4,7 +4,8 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb } from "./db";
-import { fetchIcecastMetadata, searchItunesAlbumCover } from "./metadata";
+import { searchItunesAlbumCover } from "./metadata";
+import { scrapePlayerMetadata } from "./player-scraper";
 
 export const appRouter = router({
   system: systemRouter,
@@ -26,16 +27,18 @@ export const appRouter = router({
 
     metadata: publicProcedure.query(async () => {
       try {
-        const icecastData = await fetchIcecastMetadata();
-        const albumCover = await searchItunesAlbumCover(
-          icecastData.artist || "Unknown",
-          icecastData.title || "Unknown"
-        );
+        const playerData = await scrapePlayerMetadata();
+
+        if (playerData && playerData.title !== "Artista Desconhecido") {
+          console.log("Metadados do player scraper:", playerData);
+          return playerData;
+        }
 
         return {
-          title: icecastData.title || "Musica Desconhecida",
-          artist: icecastData.artist || "Artista Desconhecido",
-          albumCover: albumCover,
+          title: "Musica Desconhecida",
+          artist: "Artista Desconhecido",
+          albumCover: null,
+          source: "error",
         };
       } catch (error) {
         console.error("Erro ao buscar metadados:", error);
@@ -43,6 +46,7 @@ export const appRouter = router({
           title: "Musica Desconhecida",
           artist: "Artista Desconhecido",
           albumCover: null,
+          source: "error",
         };
       }
     }),
@@ -51,151 +55,65 @@ export const appRouter = router({
       return await getSongsWithVotes();
     }),
 
-    topByPeriod: publicProcedure
+    vote: protectedProcedure
       .input(
         z.object({
-          period: z.enum(["day", "week", "month", "year"]),
-          limit: z.number().default(10),
+          songTitle: z.string(),
+          songArtist: z.string(),
+          voteType: z.enum(["like", "dislike"]),
         })
       )
-      .query(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
+        // Primeiro, encontrar ou criar a musica
         const db = await getDb();
-        if (!db) return [];
+        if (!db) throw new Error("Database not available");
 
-        let dateFilter = "";
+        // Para simplificar, usar um hash do titulo+artista como songId
+        const songHash = `${input.songTitle}-${input.songArtist}`.toLowerCase().replace(/[^a-z0-9]/g, "");
+        const songId = Math.abs(songHash.split("").reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0)) % 1000000;
 
-        switch (input.period) {
-          case "day":
-            dateFilter = `DATE(v.createdAt) = DATE(NOW())`;
-            break;
-          case "week":
-            dateFilter = `v.createdAt >= DATE_SUB(NOW(), INTERVAL 7 DAY)`;
-            break;
-          case "month":
-            dateFilter = `v.createdAt >= DATE_SUB(NOW(), INTERVAL 30 DAY)`;
-            break;
-          case "year":
-            dateFilter = `v.createdAt >= DATE_SUB(NOW(), INTERVAL 365 DAY)`;
-            break;
-        }
-
-        const result = await db.execute(`
-          SELECT 
-            s.id,
-            s.title,
-            s.artist,
-            s.albumCover,
-            COUNT(CASE WHEN v.voteType = 'like' THEN 1 END) as likes,
-            COUNT(CASE WHEN v.voteType = 'dislike' THEN 1 END) as dislikes,
-            COUNT(v.id) as totalVotes
-          FROM songs s
-          LEFT JOIN votes v ON s.id = v.songId AND ${dateFilter}
-          GROUP BY s.id
-          HAVING COUNT(v.id) > 0
-          ORDER BY totalVotes DESC
-          LIMIT ${input.limit}
-        `);
-        return result;
+        return await addVote({
+          songId: songId,
+          voteType: input.voteType,
+          userId: String(ctx.user.id),
+        });
       }),
-  }),
 
-  votes: router({
-    add: publicProcedure
+    getVotes: publicProcedure
       .input(
         z.object({
           songId: z.number(),
-          voteType: z.enum(["like", "dislike"]),
-          userId: z.string().optional(),
-          ipAddress: z.string().optional(),
-          userAgent: z.string().optional(),
         })
       )
-      .mutation(async ({ input }) => {
-        try {
-          const result = await addVote({
-            songId: input.songId,
-            voteType: input.voteType,
-            userId: input.userId,
-            ipAddress: input.ipAddress,
-            userAgent: input.userAgent,
-          });
-          return { success: true, data: result };
-        } catch (error) {
-          console.error("Error adding vote:", error);
-          return { success: false, error: "Failed to add vote" };
-        }
-      }),
-
-    getForSong: publicProcedure
-      .input(z.object({ songId: z.number() }))
       .query(async ({ input }) => {
         return await getVotesForSong(input.songId);
       }),
-  }),
 
-  dashboard: router({
-    stats: protectedProcedure.query(async () => {
-      const db = await getDb();
-      if (!db) return null;
-
-      const result = await db.execute(`
-        SELECT 
-          COUNT(DISTINCT s.id) as totalSongs,
-          COUNT(v.id) as totalVotes,
-          COUNT(CASE WHEN v.voteType = 'like' THEN 1 END) as totalLikes,
-          COUNT(CASE WHEN v.voteType = 'dislike' THEN 1 END) as totalDislikes
-        FROM songs s
-        LEFT JOIN votes v ON s.id = v.songId
-      `);
-      return result[0] || null;
-    }),
-
-    topSongs: protectedProcedure
+    dashboard: publicProcedure
       .input(
         z.object({
-          period: z.enum(["day", "week", "month", "year"]),
-          limit: z.number().default(20),
+          period: z.enum(["day", "week", "month", "year"]).optional(),
         })
       )
-      .query(async ({ input }) => {
-        const db = await getDb();
-        if (!db) return [];
+      .query(async () => {
+        const topSongs = await getSongsWithVotes();
 
-        let dateFilter = "";
+        const stats = {
+          totalVotes: 0,
+          totalLikes: 0,
+          totalDislikes: 0,
+          period: "day",
+        };
 
-        switch (input.period) {
-          case "day":
-            dateFilter = `AND DATE(v.createdAt) = DATE(NOW())`;
-            break;
-          case "week":
-            dateFilter = `AND v.createdAt >= DATE_SUB(NOW(), INTERVAL 7 DAY)`;
-            break;
-          case "month":
-            dateFilter = `AND v.createdAt >= DATE_SUB(NOW(), INTERVAL 30 DAY)`;
-            break;
-          case "year":
-            dateFilter = `AND v.createdAt >= DATE_SUB(NOW(), INTERVAL 365 DAY)`;
-            break;
+        if (Array.isArray(topSongs) && topSongs.length > 0) {
+          topSongs.forEach((song: any) => {
+            stats.totalVotes += (song.totalVotes || 0);
+            stats.totalLikes += (song.likes || 0);
+            stats.totalDislikes += (song.dislikes || 0);
+          });
         }
 
-        const result = await db.execute(`
-          SELECT 
-            s.id,
-            s.title,
-            s.artist,
-            s.albumCover,
-            COUNT(CASE WHEN v.voteType = 'like' THEN 1 END) as likes,
-            COUNT(CASE WHEN v.voteType = 'dislike' THEN 1 END) as dislikes,
-            COUNT(v.id) as totalVotes,
-            ROUND(COUNT(CASE WHEN v.voteType = 'like' THEN 1 END) / COUNT(v.id) * 100, 2) as likePercentage
-          FROM songs s
-          LEFT JOIN votes v ON s.id = v.songId
-          WHERE 1=1 ${dateFilter}
-          GROUP BY s.id
-          ORDER BY totalVotes DESC
-          LIMIT ${input.limit}
-        `);
-        return result;
+        return { topSongs, stats };
       }),
   }),
 });

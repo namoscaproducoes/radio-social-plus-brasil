@@ -26,16 +26,16 @@ export default function Home() {
   const lastSongRef = useRef<string>("");
 
   // Fetch metadados da música
-  const { data: metadataData, refetch: refetchMetadata } = trpc.songs.metadata.useQuery(undefined, {
-    refetchInterval: 3000, // Atualizar a cada 3 segundos
+  const { data: metadataData } = trpc.songs.metadata.useQuery(undefined, {
+    refetchInterval: 2000, // Atualizar a cada 2 segundos para detectar mu00e1sica nova
   });
 
   // Mutation para adicionar voto
-  const addVoteMutation = trpc.votes.add.useMutation({
+  const addVoteMutation = trpc.songs.vote.useMutation({
     onSuccess: () => {
       toast.success("Voto registrado!");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error("Erro ao registrar voto:", error);
       toast.error("Erro ao registrar voto");
     },
@@ -147,10 +147,11 @@ export default function Home() {
       const songKey = `${metadataData.artist}-${metadataData.title}`;
       
       // Se a música mudou, resetar o voto
-      if (songKey !== lastSongRef.current) {
-        lastSongRef.current = songKey;
+      if (songKey !== lastSongRef.current && lastSongRef.current !== "") {
+        console.log("Música mudou, resetando voto", { anterior: lastSongRef.current, novo: songKey });
         setUserVote(null);
       }
+      lastSongRef.current = songKey;
 
       setCurrentSong({
         title: metadataData.title || "Música Desconhecida",
@@ -158,7 +159,7 @@ export default function Home() {
         albumCover: metadataData.albumCover,
       });
     }
-  }, [metadataData]);
+  }, [metadataData?.title, metadataData?.artist, metadataData?.albumCover]);
 
   // Controlar play/pause
   const handlePlayPause = async () => {
@@ -205,10 +206,9 @@ export default function Home() {
       const userId = `user_${Math.random().toString(36).substr(2, 9)}`;
 
       await addVoteMutation.mutateAsync({
-        songId,
+        songTitle: currentSong?.title || "Música Desconhecida",
+        songArtist: currentSong?.artist || "Artista Desconhecido",
         voteType,
-        userId,
-        userAgent: navigator.userAgent,
       });
 
       setUserVote(voteType);
@@ -345,10 +345,10 @@ export default function Home() {
               <div className="flex justify-center gap-4">
                 <Button
                   onClick={() => handleVote("like")}
-                  disabled={addVoteMutation.isPending}
+                  disabled={addVoteMutation.isPending || !currentSong}
                   className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold transition disabled:opacity-50 ${
                     userVote === "like"
-                      ? "bg-green-500 text-white"
+                      ? "bg-green-500 text-white hover:bg-green-600"
                       : "bg-gray-800 text-gray-400 hover:bg-gray-700"
                   }`}
                 >
@@ -357,10 +357,10 @@ export default function Home() {
                 </Button>
                 <Button
                   onClick={() => handleVote("dislike")}
-                  disabled={addVoteMutation.isPending}
+                  disabled={addVoteMutation.isPending || !currentSong}
                   className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold transition disabled:opacity-50 ${
                     userVote === "dislike"
-                      ? "bg-red-500 text-white"
+                      ? "bg-red-500 text-white hover:bg-red-600"
                       : "bg-gray-800 text-gray-400 hover:bg-gray-700"
                   }`}
                 >

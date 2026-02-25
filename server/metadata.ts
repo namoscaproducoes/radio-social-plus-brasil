@@ -23,12 +23,13 @@ export async function fetchIcecastMetadata(): Promise<IcecastMetadata> {
         icyMetaint,
         icyName,
         icyDescription,
+        allHeaders: res.headers,
       });
 
       if (icyMetaint) {
         // Se há suporte a metadados, ler o stream
         let buffer = Buffer.alloc(0);
-        const metaintValue = parseInt(icyMetaint as string);
+        const metaintValue = parseInt(icyMetaint);
 
         res.on("data", (chunk: Buffer) => {
           buffer = Buffer.concat([buffer, chunk]);
@@ -54,11 +55,17 @@ export async function fetchIcecastMetadata(): Promise<IcecastMetadata> {
                 const artist = parts[0] || "Artista Desconhecido";
                 const titleParts = parts.slice(1);
 
+                console.log("Metadados extraídos:", {
+                  artist: artist.trim(),
+                  title: titleParts.join(" - ").trim(),
+                });
+
                 resolve({
                   artist: artist.trim(),
                   title: titleParts.join(" - ").trim() || "Música Desconhecida",
                 });
               } else {
+                console.log("Nenhum StreamTitle encontrado");
                 resolve({
                   artist: "Artista Desconhecido",
                   title: "Música Desconhecida",
@@ -69,11 +76,20 @@ export async function fetchIcecastMetadata(): Promise<IcecastMetadata> {
             }
           }
         });
+
+        res.on("end", () => {
+          console.log("Stream finalizado sem metadados");
+          resolve({
+            artist: "Artista Desconhecido",
+            title: "Música Desconhecida",
+          });
+        });
       } else {
         // Sem suporte a metadados, retornar valores padrão
+        console.log("Sem suporte a icy-metaint");
         resolve({
-          artist: (typeof icyName === "string" ? icyName : "Artista Desconhecido"),
-          title: (typeof icyDescription === "string" ? icyDescription : "Música Desconhecida"),
+          artist: typeof icyName === "string" ? icyName : "Artista Desconhecido",
+          title: typeof icyDescription === "string" ? icyDescription : "Música Desconhecida",
         });
       }
     });
@@ -98,8 +114,21 @@ export async function searchItunesAlbumCover(
   song: string
 ): Promise<string | null> {
   try {
+    // Validar inputs
+    if (!artist || artist === "Unknown" || artist === "Artista Desconhecido") {
+      console.log("Artista inválido para busca iTunes");
+      return null;
+    }
+
+    if (!song || song === "Unknown" || song === "Música Desconhecida") {
+      console.log("Música inválida para busca iTunes");
+      return null;
+    }
+
     const searchTerm = `${artist} ${song}`;
     const url = `https://itunes.apple.com/search?term=${encodeURIComponent(searchTerm)}&media=music&limit=1`;
+
+    console.log("Buscando no iTunes:", { artist, song, searchTerm, url });
 
     return new Promise((resolve) => {
       https
@@ -113,10 +142,14 @@ export async function searchItunesAlbumCover(
           res.on("end", () => {
             try {
               const result = JSON.parse(data);
+              console.log("Resposta iTunes:", result);
+
               if (result.results && result.results.length > 0) {
                 const imageUrl = result.results[0].artworkUrl600 || result.results[0].artworkUrl100;
+                console.log("Capa encontrada:", imageUrl);
                 resolve(imageUrl || null);
               } else {
+                console.log("Nenhum resultado no iTunes");
                 resolve(null);
               }
             } catch (error) {

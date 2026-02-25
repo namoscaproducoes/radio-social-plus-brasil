@@ -15,19 +15,16 @@ export default function Dashboard() {
   const [period, setPeriod] = useState<Period>("week");
 
   // Fetch dashboard stats
-  const { data: stats } = trpc.dashboard.stats.useQuery(undefined, {
-    enabled: !!user,
-    refetchInterval: 10000,
-  });
-
-  // Fetch top songs
-  const { data: topSongs } = trpc.dashboard.topSongs.useQuery(
-    { period, limit: 20 },
+  const { data: dashboardData } = trpc.songs.dashboard.useQuery(
+    { period: period as any },
     {
       enabled: !!user,
       refetchInterval: 10000,
     }
   );
+
+  const stats = dashboardData?.stats;
+  const topSongs = dashboardData?.topSongs;
 
   if (loading) {
     return (

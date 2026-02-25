@@ -64,11 +64,11 @@
 - [ ] Preparação para deploy no Hostinger
 
 ## Fase 9: Incorporar Player Brascast
-- [ ] Incorporar iframe do player Brascast
-- [ ] Estilizar iframe para combinar com design
-- [ ] Adicionar botões de like/dislike sobre o iframe
-- [ ] Debugar sistema de votos
-- [ ] Validar que votos são salvos no dashboard
+- [x] Incorporar iframe do player Brascast
+- [x] Redesenhar layout com capa grande, nome/artista e play
+- [x] Extrair metadados do iframe via DOM inspection
+- [x] Adicionar botões de like/dislike com metadados extraídos
+- [x] Validar que votos são salvos no dashboard
 
 
 ## Bugs Encontrados

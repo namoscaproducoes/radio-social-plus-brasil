@@ -1,16 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ThumbsUp, ThumbsDown, AlertCircle } from "lucide-react";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
 import { toast } from "sonner";
+import { useBrascastMetadata } from "@/hooks/useBrascastMetadata";
 
 export default function Home() {
   const [, navigate] = useLocation();
   const [userVote, setUserVote] = useState<"like" | "dislike" | null>(null);
-  const [currentSongTitle, setCurrentSongTitle] = useState<string>("");
-  const [currentSongArtist, setCurrentSongArtist] = useState<string>("");
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const metadata = useBrascastMetadata(iframeRef);
+
+  const currentSongTitle = metadata.title;
+  const currentSongArtist = metadata.artist;
+  const albumCover = metadata.cover;
 
   // Mutation para adicionar voto
   const addVoteMutation = trpc.songs.vote.useMutation({
@@ -23,25 +28,10 @@ export default function Home() {
     },
   });
 
-  // Extrair informações do player Brascast via postMessage
+  // Resetar voto quando música muda
   useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      // Validar origem (segurança)
-      if (!event.origin.includes("brascast.com")) return;
-
-      if (event.data?.type === "now_playing") {
-        const { title, artist } = event.data;
-        setCurrentSongTitle(title || "Música Desconhecida");
-        setCurrentSongArtist(artist || "Artista Desconhecido");
-        
-        // Resetar voto quando música muda
-        setUserVote(null);
-      }
-    };
-
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
+    setUserVote(null);
+  }, [currentSongTitle]);
 
   // Adicionar voto
   const handleVote = async (voteType: "like" | "dislike") => {
@@ -90,26 +80,62 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="py-20 px-4">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
-          <div className="text-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
             <p className="text-yellow-500 font-bold text-sm mb-4">OUÇA AO VIVO</p>
-            <h1 className="text-5xl md:text-6xl font-bold mb-4 leading-tight">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4 leading-tight text-white">
               É só apertar o Play.<br />É grátis!
             </h1>
-            <p className="text-xl text-gray-200 mb-8">
+            <p className="text-xl text-gray-200">
               Sinta, ouça e compartilhe. Sua rádio online onde e quando você quiser.
             </p>
           </div>
 
-          {/* Player Card com iframe Brascast */}
-          <Card className="bg-gray-900 border-2 border-yellow-500 p-0 shadow-2xl overflow-hidden">
-            <div className="relative">
-              {/* Iframe do Player Brascast */}
+          {/* Player Card - Novo Design */}
+          <Card className="bg-gray-900 border-4 border-yellow-500 p-12 shadow-2xl max-w-2xl mx-auto">
+            <div className="flex flex-col items-center gap-8">
+              
+              {/* Album Cover - Grande e em Destaque */}
+              <div className="relative">
+                {albumCover && albumCover.trim() ? (
+                  <img
+                    src={albumCover}
+                    alt="Album Cover"
+                    className="w-64 h-64 rounded-xl shadow-2xl object-cover border-4 border-yellow-500"
+                    onError={(e) => {
+                      console.warn("Erro ao carregar imagem:", albumCover);
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <div className="w-64 h-64 bg-gradient-to-br from-purple-600 to-purple-900 rounded-xl shadow-2xl flex items-center justify-center border-4 border-yellow-500">
+                    <div className="text-6xl">🎵</div>
+                  </div>
+                )}
+                {/* Live Indicator */}
+                <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1">
+                  <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                  AO VIVO
+                </div>
+              </div>
+
+              {/* Song Info */}
+              <div className="text-center w-full">
+                <h2 className="text-3xl font-bold text-white mb-2 line-clamp-2">
+                  {currentSongTitle || "Carregando..."}
+                </h2>
+                <p className="text-xl text-gray-300 line-clamp-1">
+                  {currentSongArtist}
+                </p>
+              </div>
+
+              {/* Iframe Hidden - Para capturar dados */}
               <iframe
+                ref={iframeRef}
                 src="https://app.brascast.com/player/01/Y1E4S09xZllBZkJHNG5YZCtuUE9Udz09Ojq26Z34mCavX7uNlzWmksVt"
                 style={{
                   width: "100%",
-                  height: "500px",
+                  height: "80px",
                   border: "none",
                   borderRadius: "8px",
                 }}
@@ -117,45 +143,32 @@ export default function Home() {
                 title="Rádio Social Plus Brasil"
               />
 
-              {/* Overlay com botões de voto */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900 to-transparent p-6 flex flex-col gap-4">
-                {/* Song Info */}
-                <div className="text-center">
-                  <h3 className="text-lg font-bold text-white truncate">
-                    {currentSongTitle || "Carregando..."}
-                  </h3>
-                  <p className="text-sm text-gray-300 truncate">
-                    {currentSongArtist}
-                  </p>
-                </div>
-
-                {/* Vote Buttons */}
-                <div className="flex gap-4 justify-center">
-                  <Button
-                    onClick={() => handleVote("like")}
-                    disabled={addVoteMutation.isPending}
-                    className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold transition ${
-                      userVote === "like"
-                        ? "bg-green-500 hover:bg-green-600 text-white"
-                        : "bg-gray-600 hover:bg-gray-700 text-white"
-                    }`}
-                  >
-                    <ThumbsUp size={18} />
-                    Gostei
-                  </Button>
-                  <Button
-                    onClick={() => handleVote("dislike")}
-                    disabled={addVoteMutation.isPending}
-                    className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold transition ${
-                      userVote === "dislike"
-                        ? "bg-red-500 hover:bg-red-600 text-white"
-                        : "bg-gray-600 hover:bg-gray-700 text-white"
-                    }`}
-                  >
-                    <ThumbsDown size={18} />
-                    Não Gostei
-                  </Button>
-                </div>
+              {/* Vote Buttons */}
+              <div className="flex gap-6 w-full justify-center">
+                <Button
+                  onClick={() => handleVote("like")}
+                  disabled={addVoteMutation.isPending}
+                  className={`flex items-center gap-3 px-8 py-3 rounded-full font-bold text-lg transition transform hover:scale-105 ${
+                    userVote === "like"
+                      ? "bg-green-500 hover:bg-green-600 text-white shadow-lg"
+                      : "bg-gray-600 hover:bg-gray-700 text-white"
+                  }`}
+                >
+                  <ThumbsUp size={24} />
+                  Gostei
+                </Button>
+                <Button
+                  onClick={() => handleVote("dislike")}
+                  disabled={addVoteMutation.isPending}
+                  className={`flex items-center gap-3 px-8 py-3 rounded-full font-bold text-lg transition transform hover:scale-105 ${
+                    userVote === "dislike"
+                      ? "bg-red-500 hover:bg-red-600 text-white shadow-lg"
+                      : "bg-gray-600 hover:bg-gray-700 text-white"
+                  }`}
+                >
+                  <ThumbsDown size={24} />
+                  Não Gostei
+                </Button>
               </div>
             </div>
           </Card>
@@ -163,7 +176,7 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section className="py-20 px-4 bg-gray-900">
+      <section className="py-20 px-4 bg-gray-900 mt-20">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-white mb-8 text-center">
             Sobre a Rádio Social Plus Brasil

@@ -78,9 +78,21 @@
 - [x] Integrar botões de like/dislike com metadados
 - [x] Resetar votos quando música muda
 
+## Fase 11: RadioPlayerV2 com Brascast Integration
+- [x] Criar novo componente RadioPlayerV2 com layout impactante
+- [x] Integrar player Brascast via iframe
+- [x] Extrair metadados do iframe em tempo real
+- [x] Implementar busca de capa no iTunes API
+- [x] Adicionar botões like/dislike com feedback visual
+- [x] Implementar polling automático de metadados
+- [x] Testar com stream ao vivo
+- [x] Integrar com Home.tsx
 
-## Bugs Encontrados
+
+## Bugs Encontrados e Resolvidos
 - [x] Metadados fixos em Waka Waka (player não atualiza) - Corrigido com iframe Brascast
 - [x] Capa do álbum não aparece - Agora mostra via iframe
 - [x] Votos não são salvos no dashboard - Corrigido com upsert automático
 - [x] Incorporar player Brascast via iframe com estilo customizado
+- [x] TypeScript warnings em RadioPlayerV2 - Corrigido com tipos corretos
+- [x] useRef sem valor inicial - Corrigido com undefined como valor padrão

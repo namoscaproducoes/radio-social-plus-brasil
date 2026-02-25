@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLocation } from "wouter";
-import { RadioPlayer } from "@/components/RadioPlayer";
+import { RadioPlayerV2 } from "@/components/RadioPlayerV2";
 
 export default function Home() {
   const [, navigate] = useLocation();
@@ -46,7 +46,7 @@ export default function Home() {
 
           {/* Player Card */}
           <Card className="bg-gray-900 border-4 border-yellow-500 p-12 shadow-2xl max-w-2xl mx-auto">
-            <RadioPlayer />
+            <RadioPlayerV2 />
           </Card>
         </div>
       </section>

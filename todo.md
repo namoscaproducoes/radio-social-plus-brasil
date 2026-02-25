@@ -62,3 +62,9 @@
 - [ ] Testes de votação em tempo real
 - [ ] Otimizações de carregamento
 - [ ] Preparação para deploy no Hostinger
+
+
+## Bugs Encontrados
+- [x] Player não funciona em domínio manus.space (CORS/SSL issue) - Corrigido com CORS global
+- [x] Metadados não atualizam em tempo real quando música muda - RefetchInterval reduzido para 500ms
+- [x] Dashboard não acessível em manus.space - Corrigido com CORS global

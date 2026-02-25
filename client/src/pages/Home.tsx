@@ -27,7 +27,7 @@ export default function Home() {
 
   // Fetch metadados da música
   const { data: metadataData } = trpc.songs.metadata.useQuery(undefined, {
-    refetchInterval: 2000, // Atualizar a cada 2 segundos para detectar mu00e1sica nova
+    refetchInterval: 500, // Atualizar a cada 500ms para detectar mudanças em tempo real
   });
 
   // Mutation para adicionar voto

@@ -16,10 +16,16 @@ router.get("/stream", (req: Request, res: Response) => {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.setHeader("Content-Type", "audio/mpeg");
   res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Transfer-Encoding", "chunked");
 
-  // Fazer requisição ao servidor de stream
+  // Fazer requisição ao servidor de stream com opções de SSL
+  const options = {
+    rejectUnauthorized: false, // Aceitar certificados auto-assinados
+    timeout: 30000,
+  };
+
   https
-    .get(streamUrl, (streamRes) => {
+    .get(streamUrl, options, (streamRes) => {
       // Passar headers relevantes
       if (streamRes.headers["content-type"]) {
         res.setHeader("Content-Type", streamRes.headers["content-type"]);

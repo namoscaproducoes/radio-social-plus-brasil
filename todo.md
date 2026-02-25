@@ -108,3 +108,10 @@
 - [x] useRef sem valor inicial - Corrigido com undefined como valor padrão
 - [x] Metadados não carregavam - Corrigido com Icecast API + Last.fm
 - [x] Erro de protocolo HTTP em Last.fm - Corrigido com módulo http dinâmico
+
+## Fase 13: Correções e Melhorias de UX
+- [x] Remover menu do topo (navbar)
+- [x] Integrar rodapé com links (Sobre, Contato, Dashboard)
+- [x] Corrigir cálculo de likePercentage na dashboard
+- [x] Melhorar agregação de dados de votos
+- [x] Todos os testes passando (9 testes)

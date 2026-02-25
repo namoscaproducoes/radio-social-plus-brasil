@@ -7,32 +7,9 @@ export default function Home() {
   const [, navigate] = useLocation();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900">
-      {/* Navigation */}
-      <nav className="bg-gray-900 border-b-4 border-yellow-500 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center font-bold text-gray-900">
-              P
-            </div>
-            <span className="text-white font-bold text-lg">Rádio Social Plus</span>
-          </div>
-          <div className="hidden md:flex gap-6 text-white text-sm">
-            <a href="#" className="hover:text-yellow-500 transition">AO VIVO</a>
-            <a href="#" className="hover:text-yellow-500 transition">SOBRE</a>
-            <a href="#" className="hover:text-yellow-500 transition">CONTATO</a>
-            <Button 
-              onClick={() => navigate("/dashboard")}
-              className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold"
-            >
-              Dashboard
-            </Button>
-          </div>
-        </div>
-      </nav>
-
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900 flex flex-col">
       {/* Hero Section */}
-      <section className="py-20 px-4">
+      <section className="py-20 px-4 flex-1">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-yellow-500 font-bold text-sm mb-4">OUÇA AO VIVO</p>
@@ -81,10 +58,52 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-950 border-t-4 border-yellow-500 py-8 px-4">
-        <div className="max-w-6xl mx-auto text-center text-gray-400">
-          <p className="mb-2">© 2026 Rádio Social Plus Brasil. Todos os direitos reservados.</p>
-          <p className="text-sm">Desenvolvido com ❤️ para os fãs de música</p>
+      <footer className="bg-gray-950 border-t-4 border-yellow-500 py-12 px-4 mt-auto">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 mb-8">
+            {/* About Link */}
+            <div className="text-center">
+              <button 
+                onClick={() => {
+                  document.querySelector('#about-section')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="text-white font-bold text-lg hover:text-yellow-500 transition"
+              >
+                📖 Sobre a Rádio
+              </button>
+              <p className="text-gray-400 text-sm mt-2">Conheça nossa história e missão</p>
+            </div>
+
+            {/* Contact Link */}
+            <div className="text-center">
+              <a 
+                href="https://wa.me/5585999999999?text=Olá%20Rádio%20Social%20Plus%20Brasil"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white font-bold text-lg hover:text-yellow-500 transition inline-block"
+              >
+                💬 Contato
+              </a>
+              <p className="text-gray-400 text-sm mt-2">Entre em contato conosco</p>
+            </div>
+
+            {/* Dashboard Link */}
+            <div className="text-center">
+              <button 
+                onClick={() => navigate("/dashboard")}
+                className="text-white font-bold text-lg hover:text-yellow-500 transition"
+              >
+                📊 Dashboard
+              </button>
+              <p className="text-gray-400 text-sm mt-2">Veja o ranking de músicas</p>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div className="border-t border-gray-700 pt-8 text-center">
+            <p className="text-gray-400 mb-2">© 2026 Rádio Social Plus Brasil. Todos os direitos reservados.</p>
+            <p className="text-gray-500 text-sm">Desenvolvido com ❤️ para os fãs de música</p>
+          </div>
         </div>
       </footer>
     </div>

@@ -23,11 +23,16 @@ export default function Dashboard() {
     }
   );
 
-  const topSongs = rankingData || [];
+  const topSongs = (rankingData || []).map((song: any) => ({
+    ...song,
+    likePercentage: song.totalVotes > 0 ? Math.round((song.likes / song.totalVotes) * 100) : 0,
+  }));
+  
   const stats = {
     totalVotes: topSongs.reduce((sum: number, song: any) => sum + (song.totalVotes || 0), 0),
     totalLikes: topSongs.reduce((sum: number, song: any) => sum + (song.likes || 0), 0),
     totalDislikes: topSongs.reduce((sum: number, song: any) => sum + (song.dislikes || 0), 0),
+    totalSongs: topSongs.length,
   };
 
   if (loading) {
@@ -97,8 +102,8 @@ export default function Dashboard() {
         {/* Stats Cards */}
         <div className="grid md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-gray-800 border-yellow-500 p-6">
-            <div className="text-gray-400 text-sm mb-2">Total de Músicas</div>
-            <div className="text-3xl font-bold text-yellow-500">{(stats as any)?.totalSongs || 0}</div>
+            <div className="text-gray-400 text-sm mb-2">Músicas Votadas</div>
+            <div className="text-3xl font-bold text-yellow-500">{topSongs.length}</div>
           </Card>
           <Card className="bg-gray-800 border-yellow-500 p-6">
             <div className="text-gray-400 text-sm mb-2">Total de Votos</div>

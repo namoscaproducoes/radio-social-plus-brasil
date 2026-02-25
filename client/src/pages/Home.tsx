@@ -35,7 +35,8 @@ export default function Home() {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const streamUrl = "https://s01.brascast.com:7034/live";
+    // Usar proxy do backend para contornar CORS
+    const streamUrl = "/api/stream";
 
     try {
       // Verificar se o navegador suporta HLS
@@ -49,7 +50,7 @@ export default function Home() {
         hls.attachMedia(audio);
 
         hls.on(HLS.Events.MANIFEST_PARSED, () => {
-          console.log("✓ Stream HLS carregado com sucesso");
+          console.log("✓ Stream carregado com sucesso");
           setError(null);
         });
 
@@ -75,12 +76,13 @@ export default function Home() {
           hls.destroy();
           hlsRef.current = null;
         };
-      } else if (audio.canPlayType("application/vnd.apple.mpegurl")) {
-        // Fallback para Safari
+      } else if (audio.canPlayType("audio/mpeg")) {
+        // Fallback para navegadores que suportam MP3
         audio.src = streamUrl;
         setError(null);
       } else {
-        setError("Seu navegador não suporta este tipo de stream.");
+        // Último fallback: tentar reproduzir direto
+        audio.src = streamUrl;
       }
     } catch (err) {
       console.error("Erro ao inicializar player:", err);

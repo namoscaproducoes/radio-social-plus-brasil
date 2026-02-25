@@ -56,7 +56,7 @@ export default function Dashboard() {
 
   // Preparar dados para gráficos
   const chartData = topSongs?.map((song: any) => ({
-    name: song.title.substring(0, 20),
+    name: (song.title || "Música").substring(0, 20),
     likes: song.likes || 0,
     dislikes: song.dislikes || 0,
   })) || [];

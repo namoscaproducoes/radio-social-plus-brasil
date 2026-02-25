@@ -4,7 +4,6 @@ import { Card } from "@/components/ui/card";
 import { Heart, Volume2, Play, Pause, ThumbsUp, ThumbsDown, AlertCircle } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useLocation } from "wouter";
-import HLS from "hls.js";
 
 interface CurrentSongData {
   title: string;
@@ -19,8 +18,10 @@ export default function Home() {
   const [currentSong, setCurrentSong] = useState<CurrentSongData | null>(null);
   const [userVote, setUserVote] = useState<"like" | "dislike" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const hlsRef = useRef<HLS | null>(null);
+  const retryCountRef = useRef(0);
+  const maxRetries = 3;
 
   // Fetch current song
   const { data: songData } = trpc.songs.current.useQuery(undefined, {
@@ -30,64 +31,97 @@ export default function Home() {
   // Mutation para adicionar voto
   const addVoteMutation = trpc.votes.add.useMutation();
 
-  // Inicializar player com HLS.js
+  // Inicializar player
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Usar proxy do backend para contornar CORS
-    const streamUrl = "/api/stream";
+    // Configurar eventos de áudio
+    const handleCanPlay = () => {
+      console.log("✓ Stream pronto para reproduzir");
+      setError(null);
+      setIsLoading(false);
+    };
 
-    try {
-      // Verificar se o navegador suporta HLS
-      if (HLS.isSupported()) {
-        const hls = new HLS({
-          debug: false,
-          enableWorker: true,
-        });
+    const handlePlay = () => {
+      console.log("✓ Áudio iniciado");
+      setIsPlaying(true);
+      retryCountRef.current = 0;
+    };
 
-        hls.loadSource(streamUrl);
-        hls.attachMedia(audio);
+    const handlePause = () => {
+      console.log("⏸ Áudio pausado");
+      setIsPlaying(false);
+    };
 
-        hls.on(HLS.Events.MANIFEST_PARSED, () => {
-          console.log("✓ Stream carregado com sucesso");
-          setError(null);
-        });
+    const handleEnded = () => {
+      console.log("✓ Stream finalizado");
+      setIsPlaying(false);
+    };
 
-        hls.on(HLS.Events.ERROR, (event, data) => {
-          console.error("Erro HLS:", data);
-          if (data.fatal) {
-            switch (data.type) {
-              case HLS.ErrorTypes.NETWORK_ERROR:
-                setError("Erro de conexão com o stream. Verifique sua internet.");
-                break;
-              case HLS.ErrorTypes.MEDIA_ERROR:
-                setError("Erro ao reproduzir o stream.");
-                break;
-              default:
-                setError("Erro ao carregar o stream.");
-            }
-          }
-        });
+    const handleError = (e: Event) => {
+      const audioElement = e.target as HTMLAudioElement;
+      const errorCode = audioElement.error?.code;
+      const errorMessage = audioElement.error?.message;
 
-        hlsRef.current = hls;
+      console.error("Erro de áudio:", { errorCode, errorMessage });
 
-        return () => {
-          hls.destroy();
-          hlsRef.current = null;
-        };
-      } else if (audio.canPlayType("audio/mpeg")) {
-        // Fallback para navegadores que suportam MP3
-        audio.src = streamUrl;
-        setError(null);
-      } else {
-        // Último fallback: tentar reproduzir direto
-        audio.src = streamUrl;
+      let userMessage = "Erro ao conectar ao stream";
+      switch (errorCode) {
+        case 1: // MEDIA_ERR_ABORTED
+          userMessage = "Reprodução cancelada";
+          break;
+        case 2: // MEDIA_ERR_NETWORK
+          userMessage = "Erro de conexão com o stream";
+          break;
+        case 3: // MEDIA_ERR_DECODE
+          userMessage = "Erro ao decodificar o stream";
+          break;
+        case 4: // MEDIA_ERR_SRC_NOT_SUPPORTED
+          userMessage = "Formato de stream não suportado";
+          break;
       }
-    } catch (err) {
-      console.error("Erro ao inicializar player:", err);
-      setError("Erro ao inicializar o player.");
-    }
+
+      setError(userMessage);
+      setIsPlaying(false);
+      setIsLoading(false);
+
+      // Retry automático
+      if (retryCountRef.current < maxRetries) {
+        retryCountRef.current += 1;
+        console.log(`Tentando reconectar... (${retryCountRef.current}/${maxRetries})`);
+        setTimeout(() => {
+          audio.load();
+        }, 2000);
+      }
+    };
+
+    const handleLoadStart = () => {
+      console.log("⏳ Carregando stream...");
+      setIsLoading(true);
+    };
+
+    // Configurar URL do proxy
+    audio.src = "/api/stream";
+    audio.crossOrigin = "anonymous";
+    audio.preload = "auto";
+
+    // Adicionar event listeners
+    audio.addEventListener("canplay", handleCanPlay);
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
+    audio.addEventListener("ended", handleEnded);
+    audio.addEventListener("error", handleError);
+    audio.addEventListener("loadstart", handleLoadStart);
+
+    return () => {
+      audio.removeEventListener("canplay", handleCanPlay);
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
+      audio.removeEventListener("ended", handleEnded);
+      audio.removeEventListener("error", handleError);
+      audio.removeEventListener("loadstart", handleLoadStart);
+    };
   }, []);
 
   // Atualizar volume
@@ -117,16 +151,27 @@ export default function Home() {
       if (isPlaying) {
         audioRef.current.pause();
         setIsPlaying(false);
-        setError(null);
       } else {
-        await audioRef.current.play();
-        setIsPlaying(true);
+        setIsLoading(true);
         setError(null);
+        
+        // Aguardar um pouco antes de tentar reproduzir
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          await playPromise;
+        }
       }
-    } catch (err) {
-      console.error("Erro ao reproduzir áudio:", err);
-      setError("Erro ao reproduzir o stream. Tente novamente.");
+    } catch (err: any) {
+      console.error("Erro ao reproduzir áudio:", err.message);
+      
+      // Não mostrar erro se foi interrompido intencionalmente
+      if (err.name !== "AbortError") {
+        setError("Erro ao reproduzir o stream. Tente novamente.");
+      }
       setIsPlaying(false);
+      setIsLoading(false);
     }
   };
 
@@ -135,7 +180,6 @@ export default function Home() {
     if (!currentSong) return;
 
     try {
-      // Criar ou encontrar a música no banco
       const songId = 1; // Será atualizado com ID real da música
 
       await addVoteMutation.mutateAsync({
@@ -154,7 +198,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900">
       {/* Audio Element */}
-      <audio ref={audioRef} crossOrigin="anonymous" />
+      <audio ref={audioRef} />
 
       {/* Navigation */}
       <nav className="bg-gray-900 border-b-4 border-yellow-500 sticky top-0 z-50">
@@ -192,10 +236,25 @@ export default function Home() {
             </p>
             <Button 
               onClick={handlePlayPause}
-              className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold px-8 py-6 text-lg rounded-full flex items-center gap-2"
+              disabled={isLoading}
+              className="bg-cyan-500 hover:bg-cyan-600 disabled:bg-cyan-400 text-white font-bold px-8 py-6 text-lg rounded-full flex items-center gap-2"
             >
-              {isPlaying ? <Pause size={24} /> : <Play size={24} />}
-              {isPlaying ? "Pausar" : "Ouvir Agora"}
+              {isLoading ? (
+                <>
+                  <div className="animate-spin">⏳</div>
+                  Conectando...
+                </>
+              ) : isPlaying ? (
+                <>
+                  <Pause size={24} />
+                  Pausar
+                </>
+              ) : (
+                <>
+                  <Play size={24} />
+                  Ouvir Agora
+                </>
+              )}
             </Button>
           </div>
 
@@ -239,9 +298,16 @@ export default function Home() {
               <div className="flex justify-center gap-4 mb-6">
                 <Button
                   onClick={handlePlayPause}
-                  className="bg-cyan-500 hover:bg-cyan-600 text-white rounded-full p-3"
+                  disabled={isLoading}
+                  className="bg-cyan-500 hover:bg-cyan-600 disabled:bg-cyan-400 text-white rounded-full p-3"
                 >
-                  {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+                  {isLoading ? (
+                    <div className="animate-spin">⏳</div>
+                  ) : isPlaying ? (
+                    <Pause size={24} />
+                  ) : (
+                    <Play size={24} />
+                  )}
                 </Button>
                 <div className="flex items-center gap-2 bg-gray-800 rounded-full px-4">
                   <Volume2 size={20} className="text-gray-400" />
@@ -256,11 +322,20 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Status */}
+              {isLoading && (
+                <p className="text-sm text-gray-400 mb-4">⏳ Conectando ao stream...</p>
+              )}
+              {isPlaying && !isLoading && (
+                <p className="text-sm text-green-400 mb-4">🔴 Ao vivo</p>
+              )}
+
               {/* Vote Buttons */}
               <div className="flex justify-center gap-4">
                 <Button
                   onClick={() => handleVote("like")}
-                  className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold transition ${
+                  disabled={isLoading}
+                  className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold transition disabled:opacity-50 ${
                     userVote === "like"
                       ? "bg-green-500 text-white"
                       : "bg-gray-800 text-gray-400 hover:bg-gray-700"
@@ -271,7 +346,8 @@ export default function Home() {
                 </Button>
                 <Button
                   onClick={() => handleVote("dislike")}
-                  className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold transition ${
+                  disabled={isLoading}
+                  className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold transition disabled:opacity-50 ${
                     userVote === "dislike"
                       ? "bg-red-500 text-white"
                       : "bg-gray-800 text-gray-400 hover:bg-gray-700"

@@ -131,7 +131,14 @@
 - [x] Melhorar tratamento de erros de stream
 - [x] Todos os testes passando (9 testes)
 
+## Fase 16: Correção de Buffer de Música
+- [x] Corrigir bug de buffer da música anterior que repete
+- [x] Zerar buffer quando música muda
+- [x] Implementar pré-carregamento de 10 segundos
+- [x] Testar com stream ao vivo
+
 ## Bugs Pendentes
 - [x] Dashboard não contabiliza votos corretamente - Corrigido: db.execute retorna [rows, fields], agora extraindo apenas rows
 - [x] Capas do Last.fm em baixa resolução - Corrigido: priorizar extralarge e large, usar artworkUrl600 no iTunes
 - [x] Player desligando ao trocar de música - Corrigido: manter reprodução contínua
+- [x] Buffer da música anterior repete após troca - Corrigido: resetar src com timestamp e preload auto

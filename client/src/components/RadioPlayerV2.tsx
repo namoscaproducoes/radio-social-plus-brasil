@@ -99,12 +99,30 @@ export function RadioPlayerV2() {
   };
 
   // Garantir que o player continua tocando quando metadados mudam
+  // Também limpar buffer da música anterior
   useEffect(() => {
-    if (audioRef.current && isPlaying) {
-      // Se estava tocando, continuar tocando mesmo com mudança de música
-      audioRef.current.play().catch((error) => {
-        console.warn('Erro ao manter reprodução:', error);
-      });
+    if (audioRef.current) {
+      // Zerar o buffer e reconectar ao stream
+      const wasPlaying = !audioRef.current.paused;
+      audioRef.current.pause();
+      
+      // Resetar a fonte para forcar novo carregamento
+      audioRef.current.src = '/api/stream?t=' + Date.now();
+      audioRef.current.currentTime = 0;
+      audioRef.current.load();
+      
+      // Retomar a reproducao se estava tocando
+      if (wasPlaying) {
+        setTimeout(() => {
+          if (audioRef.current) {
+            audioRef.current.play().catch((error) => {
+              console.warn('Erro ao retomar reproducao:', error);
+            });
+          }
+        }, 100);
+      }
+      
+      console.log('Buffer limpo e recarregado para nova musica');
     }
   }, [metadata.title]); // Quando a música muda
 
@@ -134,6 +152,7 @@ export function RadioPlayerV2() {
         ref={audioRef}
         src="/api/stream"
         crossOrigin="anonymous"
+        preload="auto"
         onError={(e) => {
           console.error('Erro ao carregar stream:', e);
           toast.error('Erro ao conectar ao stream');

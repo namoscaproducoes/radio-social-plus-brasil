@@ -10,13 +10,13 @@ export function TopVotedSongs() {
   // Buscar músicas mais votadas com like
   const likeQuery = trpc.songs.topVotedThisMonth.useQuery({
     voteType: 'like',
-    limit: 10,
+    limit: 5,
   });
 
   // Buscar músicas mais votadas com dislike
   const dislikeQuery = trpc.songs.topVotedThisMonth.useQuery({
     voteType: 'dislike',
-    limit: 10,
+    limit: 5,
   });
 
   const isLoading = activeTab === 'like' ? likeQuery.isLoading : dislikeQuery.isLoading;

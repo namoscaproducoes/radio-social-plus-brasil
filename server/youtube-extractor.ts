@@ -1,18 +1,19 @@
-import ytdl from "ytdl-core";
 import { getVideoFromCache, saveVideoToCache } from "./video-cache";
 
 /**
- * Buscar vídeo do YouTube e extrair URL de streaming
+ * Gerar URL de busca do YouTube para a música
+ * Retorna um embed URL que pode ser usado diretamente
  */
 export async function extractYouTubeVideo(songTitle: string, artistName: string) {
   try {
     // Verificar cache primeiro
     const cached = await getVideoFromCache(songTitle, artistName);
-    if (cached) {
+    if (cached && cached.youtubeUrl) {
       console.log(`✅ Vídeo encontrado em cache: ${cached.videoId}`);
       return {
         videoId: cached.videoId,
         youtubeUrl: cached.youtubeUrl,
+        videoUrl: cached.youtubeUrl,
         thumbnail: cached.thumbnail,
         title: cached.title,
         duration: cached.duration,
@@ -20,64 +21,44 @@ export async function extractYouTubeVideo(songTitle: string, artistName: string)
       };
     }
 
-    // Buscar no YouTube
+    // Gerar URL de busca do YouTube
     const searchQuery = `${artistName} ${songTitle} official video`;
-    console.log(`🔍 Buscando no YouTube: ${searchQuery}`);
+    console.log(`🔍 Gerando URL de busca: ${searchQuery}`);
 
-    // Usar a YouTube API para buscar (se disponível)
-    // Caso contrário, usar busca direta
-    const youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(
-      searchQuery
-    )}`;
+    // URL de embed do YouTube com busca
+    const youtubeSearchUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(searchQuery)}`;
+    const youtubeResultsUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(searchQuery)}`;
 
-    // Tentar extrair informações usando ytdl-core
-    // Nota: Isso requer que o vídeo seja encontrado primeiro
-    // Uma abordagem melhor seria usar a YouTube API ou web scraping
+    console.log(`📺 URL de embed gerada`);
 
-    console.log(`📺 URL do YouTube: ${youtubeUrl}`);
+    // Salvar em cache
+    await saveVideoToCache({
+      songTitle,
+      artistName,
+      youtubeUrl: youtubeResultsUrl,
+      videoId: "search",
+      videoUrl: youtubeSearchUrl,
+      thumbnail: undefined,
+      title: `${artistName} - ${songTitle}`,
+      duration: 0,
+    });
+
+    console.log(`💾 Vídeo salvo em cache`);
 
     return {
-      youtubeUrl,
+      videoId: "search",
+      youtubeUrl: youtubeResultsUrl,
+      videoUrl: youtubeSearchUrl,
+      thumbnail: undefined,
+      title: `${artistName} - ${songTitle}`,
+      duration: 0,
       fromCache: false,
     };
   } catch (error) {
-    console.error("❌ Erro ao buscar vídeo:", error);
-    throw error;
-  }
-}
-
-/**
- * Extrair URL de streaming de um vídeo específico do YouTube
- */
-export async function extractStreamingUrl(videoId: string) {
-  try {
-    const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
-
-    console.log(`🎬 Extraindo URL de streaming: ${youtubeUrl}`);
-
-    // Obter informações do vídeo
-    const info = await ytdl.getInfo(youtubeUrl);
-
-    // Encontrar o melhor formato com áudio e vídeo
-    const format = ytdl.chooseFormat(info.formats, {
-      quality: "highest",
-      filter: "audioandvideo",
-    });
-
-    if (!format || !format.url) {
-      throw new Error("Nenhum formato de streaming disponível");
-    }
-
-    console.log(`✅ URL de streaming extraída: ${format.url.substring(0, 50)}...`);
-
+    console.error("❌ Erro ao gerar URL de vídeo:", error);
     return {
-      streamingUrl: format.url,
-      title: info.videoDetails.title,
-      duration: parseInt(info.videoDetails.lengthSeconds),
-      thumbnail: info.videoDetails.thumbnails[0]?.url,
+      error: "Erro ao gerar URL de vídeo",
+      youtubeUrl: null,
     };
-  } catch (error) {
-    console.error("❌ Erro ao extrair URL de streaming:", error);
-    throw error;
   }
 }

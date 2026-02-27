@@ -167,3 +167,11 @@
 - [x] Criar player de vídeo customizado (HLS.js + Video.js)
 - [x] Integrar cache de vídeos no banco de dados (tabela videoCache)
 - [x] Testar reprodução de vídeos (4 testes passando)
+
+
+## Fase 20: Correção do Player de Vídeo
+- [x] Implementar busca de vídeos no YouTube com geração de URLs
+- [x] Armazenar vídeo encontrado no banco de dados (cache)
+- [x] Reproduzir vídeo com áudio desativado (muted)
+- [x] Sincronizar play/pause com player de rádio
+- [x] Testar fluxo completo: busca → cache → reprodução (4 testes passando)

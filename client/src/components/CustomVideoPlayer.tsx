@@ -97,6 +97,8 @@ export function CustomVideoPlayer({
     if (!videoRef.current) return;
 
     if (isPlaying) {
+      // Desativar áudio e iniciar reprodução
+      videoRef.current.muted = true;
       videoRef.current.play().catch(err => {
         console.warn('⚠️ Não foi possível iniciar reprodução:', err);
       });
@@ -133,7 +135,7 @@ export function CustomVideoPlayer({
 
         <div className="youtube-player-container">
           <iframe
-            src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&mute=1&rel=0&modestbranding=1&controls=1`}
+            src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&mute=1&rel=0&modestbranding=1&controls=1&autoplay=${isPlaying ? 1 : 0}`}
             title={title || 'YouTube Video'}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
@@ -188,6 +190,7 @@ export function CustomVideoPlayer({
             ref={videoRef}
             controls
             controlsList="nodownload"
+            muted
             title={title || 'Vídeo'}
           />
         </div>

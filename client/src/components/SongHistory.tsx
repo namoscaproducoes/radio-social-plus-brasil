@@ -117,14 +117,7 @@ export function SongHistory() {
         {songs.map((song, index) => (
           <div
             key={`${song.id}-${index}`}
-            className="rounded-lg p-4 hover:bg-black/20 transition-all duration-200 border border-white/10 backdrop-blur-sm"
-            style={{
-              backgroundImage: song.albumCover ? `url(${song.albumCover})` : 'none',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundBlendMode: 'overlay',
-              backgroundColor: 'rgba(0, 0, 0, 0.1)',
-            }}
+            className="rounded-lg p-4 hover:bg-white/5 transition-all duration-200 border border-white/10"
           >
             <div className="flex items-start gap-4">
               {/* Album Cover */}

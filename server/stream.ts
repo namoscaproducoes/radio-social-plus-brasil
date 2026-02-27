@@ -3,12 +3,6 @@ import https from "https";
 
 const router = Router();
 
-// Buffer global para manter dados do stream
-let globalBuffer: Buffer[] = [];
-let globalBufferSize = 0;
-const MAX_BUFFER_SIZE = 512 * 1024; // 512KB de buffer
-const TARGET_BUFFER_SIZE = 256 * 1024; // 256KB alvo
-
 /**
  * Proxy endpoint para o stream de rádio
  * Implementação robusta com buffer local e envio contínuo
@@ -29,6 +23,7 @@ router.get("/stream", (req: Request, res: Response) => {
   res.setHeader("Transfer-Encoding", "chunked");
   res.setHeader("Connection", "keep-alive");
   res.setHeader("Keep-Alive", "timeout=30, max=100");
+  // Headers importantes para streaming contínuo
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Accept-Ranges", "none");
 
@@ -36,17 +31,7 @@ router.get("/stream", (req: Request, res: Response) => {
   if (res.socket) {
     res.socket.setKeepAlive(true, 30000);
     res.socket.setTimeout(0);
-    res.socket.setNoDelay(true);
-  }
-
-  // Enviar buffer inicial se disponível
-  if (globalBuffer.length > 0) {
-    console.log(`📦 Enviando buffer inicial: ${(globalBufferSize / 1024).toFixed(2)}KB`);
-    for (const chunk of globalBuffer) {
-      if (res.writable) {
-        res.write(chunk);
-      }
-    }
+    res.socket.setNoDelay(true); // Desabilitar algoritmo de Nagle para menor latência
   }
 
   // Fazer requisição ao servidor de stream com opções de SSL
@@ -57,7 +42,6 @@ router.get("/stream", (req: Request, res: Response) => {
 
   let streamRes: any = null;
   let isConnected = true;
-  let clientConnected = true;
 
   const request = https.get(streamUrl, options, (response) => {
     streamRes = response;
@@ -90,32 +74,21 @@ router.get("/stream", (req: Request, res: Response) => {
       // Log a cada 10 segundos
       const now = Date.now();
       if (now - lastLogTime > 10000) {
-        console.log(`📊 Stream: recebido ${(bytesReceived / 1024).toFixed(2)}KB, enviado ${(bytesSent / 1024).toFixed(2)}KB, buffer ${(globalBufferSize / 1024).toFixed(2)}KB`);
+        console.log(`📊 Stream: recebido ${(bytesReceived / 1024).toFixed(2)}KB, enviado ${(bytesSent / 1024).toFixed(2)}KB`);
         bytesReceived = 0;
         bytesSent = 0;
         lastLogTime = now;
       }
 
-      // Adicionar ao buffer global
-      globalBuffer.push(chunk);
-      globalBufferSize += chunk.length;
-
-      // Limpar buffer se ficar muito grande
-      while (globalBufferSize > MAX_BUFFER_SIZE && globalBuffer.length > 0) {
-        const removed = globalBuffer.shift();
-        if (removed) {
-          globalBufferSize -= removed.length;
-        }
-      }
-
       // Enviar chunk para cliente
-      if (clientConnected && res.writable) {
+      if (isConnected && res.writable) {
         try {
           res.write(chunk);
           bytesSent += chunk.length;
         } catch (error) {
           console.error("❌ Erro ao enviar chunk:", error);
-          clientConnected = false;
+          isConnected = false;
+          response.destroy();
         }
       }
     });
@@ -123,7 +96,7 @@ router.get("/stream", (req: Request, res: Response) => {
     response.on("end", () => {
       console.warn("⚠️ Stream Icecast desligou");
       isConnected = false;
-      if (clientConnected && res.writable) {
+      if (res.writable) {
         res.end();
       }
     });
@@ -136,7 +109,7 @@ router.get("/stream", (req: Request, res: Response) => {
           error: "Erro ao conectar ao servidor de stream",
           details: error.message,
         });
-      } else if (clientConnected && res.writable) {
+      } else if (res.writable) {
         res.end();
       }
     });
@@ -165,7 +138,7 @@ router.get("/stream", (req: Request, res: Response) => {
   // Tratar desconexão do cliente
   res.on("close", () => {
     console.log("🔌 Cliente desconectou do stream");
-    clientConnected = false;
+    isConnected = false;
     if (streamRes) {
       streamRes.destroy();
     }
@@ -174,7 +147,7 @@ router.get("/stream", (req: Request, res: Response) => {
 
   res.on("error", (error) => {
     console.error("❌ Erro na resposta:", error.message);
-    clientConnected = false;
+    isConnected = false;
     if (streamRes) {
       streamRes.destroy();
     }

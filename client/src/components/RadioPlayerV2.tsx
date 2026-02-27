@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ThumbsUp, ThumbsDown, Play, Pause, Volume2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -26,7 +26,6 @@ export function RadioPlayerV2() {
   const reconnectTimeoutRef = useRef<any>(undefined);
   const reconnectAttemptsRef = useRef(0);
   const maxReconnectAttemptsRef = useRef(5);
-  const stalledTimeoutRef = useRef<any>(undefined);
   const { setAlbumCover, setSongTitle, setSongArtist } = useMetadata();
 
   // Buscar metadados via tRPC com polling automático
@@ -69,15 +68,9 @@ export function RadioPlayerV2() {
 
         setUserVote(null); // Resetar voto quando música muda
         lastMetadataRef.current = metadataKey;
-
-        // Reconectar ao stream quando a música muda
-        if (isPlaying && audioRef.current) {
-          console.log('🔄 Música mudou, reconectando ao stream...');
-          reconnectToStream('music changed');
-        }
       }
     }
-  }, [metadataResponse, isPlaying]);
+  }, [metadataResponse]);
 
   // Atualizar estado de carregamento
   useEffect(() => {
@@ -101,8 +94,8 @@ export function RadioPlayerV2() {
       return;
     }
 
-    // Delay exponencial: 200ms, 400ms, 600ms, 800ms, 1s
-    const delayMs = Math.min(200 * reconnectAttemptsRef.current, 1000);
+    // Delay exponencial: 500ms, 1s, 1.5s, 2s, 2.5s
+    const delayMs = Math.min(500 * reconnectAttemptsRef.current, 2500);
 
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
@@ -137,30 +130,6 @@ export function RadioPlayerV2() {
       }
     }, delayMs);
   };
-
-  // Monitoramento contínuo do estado do player
-  useEffect(() => {
-    if (!audioRef.current || !isPlaying) return;
-
-    const monitorInterval = setInterval(() => {
-      const audio = audioRef.current;
-      if (!audio || !isPlaying) return;
-
-      // Verificar se o player está parado mas deveria estar tocando
-      if (audio.paused && isPlaying) {
-        console.warn('⚠️ Player parou inesperadamente, reconectando...');
-        reconnectToStream('player paused unexpectedly');
-      }
-
-      // Verificar se há problema de buffer
-      if (audio.buffered.length === 0 && audio.currentTime === 0) {
-        console.warn('⚠️ Buffer vazio, reconectando...');
-        reconnectToStream('empty buffer');
-      }
-    }, 1000);
-
-    return () => clearInterval(monitorInterval);
-  }, [isPlaying]);
 
   // Garantir que o player está sempre conectado
   useEffect(() => {
@@ -204,30 +173,23 @@ export function RadioPlayerV2() {
     const handleStalled = () => {
       console.warn('⚠️ Stream stalled (sem dados)');
       if (isPlaying) {
-        // Reconectar imediatamente ao detectar stalled
-        if (stalledTimeoutRef.current) {
-          clearTimeout(stalledTimeoutRef.current);
-        }
-        stalledTimeoutRef.current = setTimeout(() => {
+        // Dar um tempo antes de reconectar
+        setTimeout(() => {
           if (isPlaying && audioRef.current && audioRef.current.paused) {
             reconnectToStream('stalled');
           }
-        }, 500); // Reduzido para 500ms
+        }, 2000);
       }
     };
 
     const handleSuspend = () => {
       console.warn('⚠️ Stream suspended');
       if (isPlaying) {
-        // Reconectar imediatamente ao detectar suspend
-        if (stalledTimeoutRef.current) {
-          clearTimeout(stalledTimeoutRef.current);
-        }
-        stalledTimeoutRef.current = setTimeout(() => {
+        setTimeout(() => {
           if (isPlaying && audioRef.current && audioRef.current.paused) {
             reconnectToStream('suspend');
           }
-        }, 500); // Reduzido para 500ms
+        }, 2000);
       }
     };
 
@@ -246,132 +208,183 @@ export function RadioPlayerV2() {
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('stalled', handleStalled);
       audio.removeEventListener('suspend', handleSuspend);
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
     };
   }, [isPlaying]);
 
-  const handlePlayPause = async () => {
+  // Tocar/pausar
+  const togglePlay = async () => {
     if (!audioRef.current) return;
 
     try {
       if (isPlaying) {
         audioRef.current.pause();
+        setIsPlaying(false);
       } else {
-        const playPromise = audioRef.current.play();
-        if (playPromise) {
-          await playPromise;
+        // Garantir que o player está conectado ao stream
+        if (!audioRef.current.src || audioRef.current.src === '') {
+          audioRef.current.src = '/api/stream';
+          console.log('🔗 Conectado ao stream de rádio');
         }
+        
+        // Resetar contador de tentativas
+        reconnectAttemptsRef.current = 0;
+        
+        // Tentar reproduzir
+        console.log('▶️ Tentando reproduzir...');
+        await audioRef.current.play();
+        setIsPlaying(true);
       }
     } catch (error) {
-      console.error('Erro ao controlar reprodução:', error);
+      console.error('❌ Erro ao reproduzir áudio:', error);
+      setIsPlaying(false);
     }
   };
 
-  const handleVote = (type: 'like' | 'dislike') => {
-    if (userVote === type) {
-      setUserVote(null);
-    } else {
-      setUserVote(type);
-      addVoteMutation.mutate({ 
+  // Registrar voto
+  const handleVote = async (voteType: 'like' | 'dislike') => {
+    if (!metadata.title || metadata.title === 'Carregando...') {
+      toast.error('Aguarde o carregamento da música');
+      return;
+    }
+
+    try {
+      await addVoteMutation.mutateAsync({
         songTitle: metadata.title,
         songArtist: metadata.artist,
-        voteType: type 
+        voteType,
       });
-    }
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseInt(e.target.value);
-    setVolume(newVolume);
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume / 100;
+      setUserVote(voteType);
+    } catch (error) {
+      console.error('Erro ao registrar voto:', error);
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full">
+      {/* Audio Element - Stream direto */}
       <audio
         ref={audioRef}
+        src="/api/stream"
         crossOrigin="anonymous"
-        onLoadedMetadata={() => console.log('📻 Metadados carregados')}
-        onCanPlay={() => console.log('▶️ Pode reproduzir')}
+        controls={false}
+        autoPlay={false}
+        preload="auto"
       />
 
-      {/* Album Cover */}
-      <div className="mb-6 relative">
-        {metadata.cover ? (
-          <img
-            src={metadata.cover}
-            alt={metadata.title}
-            className="w-full aspect-square object-cover rounded-lg shadow-lg border-2 border-yellow-500"
-          />
-        ) : (
-          <div className="w-full aspect-square bg-gradient-to-br from-gray-700 to-gray-900 rounded-lg shadow-lg border-2 border-yellow-500 flex items-center justify-center">
-            <Music className="w-16 h-16 text-gray-500" />
-          </div>
-        )}
-      </div>
-
-      {/* Song Info */}
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-white mb-2">{metadata.title}</h2>
-        <p className="text-gray-300">{metadata.artist}</p>
-      </div>
-
-      {/* Controls */}
-      <div className="flex items-center justify-center gap-4 mb-6">
-        <Button
-          onClick={() => handleVote('dislike')}
-          variant={userVote === 'dislike' ? 'default' : 'outline'}
-          size="icon"
-          className={userVote === 'dislike' ? 'bg-red-600 hover:bg-red-700' : ''}
-        >
-          <ThumbsDown className="w-5 h-5" />
-        </Button>
-
-        <Button
-          onClick={handlePlayPause}
-          size="lg"
-          className="w-16 h-16 rounded-full bg-yellow-500 hover:bg-yellow-600 text-black"
-        >
-          {isPlaying ? (
-            <Pause className="w-8 h-8" />
+      {/* Player Container */}
+      <div className="flex flex-col items-center gap-8">
+        
+        {/* Album Cover - Grande e em Destaque */}
+        <div className="relative">
+          {metadata.cover && metadata.cover.trim() ? (
+            <img
+              src={metadata.cover}
+              alt={`${metadata.title} - ${metadata.artist}`}
+              className="w-64 h-64 rounded-xl shadow-2xl object-cover border-4 border-yellow-500 transition-all duration-300"
+              onError={(e) => {
+                console.warn('Erro ao carregar capa:', metadata.cover);
+                e.currentTarget.style.display = 'none';
+              }}
+            />
           ) : (
-            <Play className="w-8 h-8 ml-1" />
+            <div className="w-64 h-64 bg-gradient-to-br from-purple-600 to-purple-900 rounded-xl shadow-2xl flex items-center justify-center border-4 border-yellow-500">
+              <div className="text-6xl">🎵</div>
+            </div>
           )}
-        </Button>
-
-        <Button
-          onClick={() => handleVote('like')}
-          variant={userVote === 'like' ? 'default' : 'outline'}
-          size="icon"
-          className={userVote === 'like' ? 'bg-green-600 hover:bg-green-700' : ''}
-        >
-          <ThumbsUp className="w-5 h-5" />
-        </Button>
-      </div>
-
-      {/* Volume Control */}
-      <div className="flex items-center gap-4">
-        <Volume2 className="w-5 h-5 text-gray-400" />
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={volume}
-          onChange={handleVolumeChange}
-          className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-        />
-        <span className="text-sm text-gray-400 w-8">{volume}%</span>
-      </div>
-
-      {/* Loading State */}
-      {isLoadingMetadata && (
-        <div className="mt-4 text-center text-sm text-gray-400">
-          Carregando metadados...
+          
+          {/* Live Badge - Pulsante */}
+          <div className="absolute top-4 right-4 bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg">
+            <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+            AO VIVO
+          </div>
         </div>
-      )}
+
+        {/* Song Info */}
+        <div className="text-center w-full">
+          <h2 className="text-3xl font-bold text-white mb-2 line-clamp-2 min-h-[3.5rem] flex items-center justify-center">
+            {metadata.title}
+          </h2>
+          <p className="text-xl text-gray-300 line-clamp-1 min-h-[1.75rem] flex items-center justify-center">
+            {metadata.artist}
+          </p>
+          {isLoadingMetadata && (
+            <p className="text-sm text-yellow-400 mt-2 animate-pulse">Atualizando metadados...</p>
+          )}
+        </div>
+
+        {/* Controls */}
+        <div className="flex items-center gap-6 w-full justify-center">
+          {/* Play/Pause Button */}
+          <Button
+            onClick={togglePlay}
+            className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 rounded-full p-4 shadow-lg transform transition hover:scale-110 active:scale-95"
+            title={isPlaying ? 'Pausar' : 'Reproduzir'}
+          >
+            {isPlaying ? <Pause size={32} /> : <Play size={32} />}
+          </Button>
+
+          {/* Volume Control */}
+          <div className="flex items-center gap-2">
+            <Volume2 size={20} className="text-gray-300" />
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={volume}
+              onChange={(e) => {
+                const vol = parseInt(e.target.value);
+                setVolume(vol);
+                if (audioRef.current) {
+                  audioRef.current.volume = vol / 100;
+                }
+              }}
+              className="w-24 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
+            />
+            <span className="text-sm text-gray-300 w-8 text-right">{volume}%</span>
+          </div>
+        </div>
+
+        {/* Vote Buttons */}
+        <div className="flex gap-4 w-full justify-center">
+          <Button
+            onClick={() => handleVote('like')}
+            variant={userVote === 'like' ? 'default' : 'outline'}
+            className={`rounded-full px-6 py-2 transition ${
+              userVote === 'like'
+                ? 'bg-green-500 hover:bg-green-600 text-white'
+                : 'border-green-500 text-green-500 hover:bg-green-500 hover:text-white'
+            }`}
+            disabled={addVoteMutation.isPending}
+          >
+            <ThumbsUp size={18} className="mr-2" />
+            Gostei
+          </Button>
+          <Button
+            onClick={() => handleVote('dislike')}
+            variant={userVote === 'dislike' ? 'default' : 'outline'}
+            className={`rounded-full px-6 py-2 transition ${
+              userVote === 'dislike'
+                ? 'bg-red-500 hover:bg-red-600 text-white'
+                : 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white'
+            }`}
+            disabled={addVoteMutation.isPending}
+          >
+            <ThumbsDown size={18} className="mr-2" />
+            Não Gostei
+          </Button>
+        </div>
+
+        {/* Debug Info */}
+        <p className="text-xs text-gray-500 mt-4">
+          Vote agora: {metadata.title}|{metadata.artist}
+        </p>
+        <p className="text-xs text-gray-500">
+          Você faz a nossa programação
+        </p>
+      </div>
     </div>
   );
 }
-
-import { Music } from 'lucide-react';

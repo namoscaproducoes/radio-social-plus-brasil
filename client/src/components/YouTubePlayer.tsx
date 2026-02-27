@@ -69,6 +69,24 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
 
   return (
     <div className="w-full h-64 flex flex-col">
+      <style>{`
+        .youtube-player-container {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          border-radius: 0.5rem;
+          overflow: hidden;
+          border: 2px solid rgb(234, 179, 8);
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .youtube-player-container iframe {
+          width: 100%;
+          height: 100%;
+          border: none;
+        }
+      `}</style>
+
       {isLoading && (
         <div className="flex items-center justify-center h-64 bg-gray-900 rounded-lg border border-gray-700">
           <div className="flex flex-col items-center gap-2">
@@ -88,17 +106,12 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
       )}
 
       {videoId && !isLoading && !error && (
-        <div className="w-full h-64 rounded-lg overflow-hidden border-2 border-yellow-500 shadow-lg">
+        <div className="youtube-player-container">
           <iframe
-            width="100%"
-            height="100%"
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`}
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0&modestbranding=1&controls=0`}
             title={`${artistName} - ${songTitle}`}
-            frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
-            className="w-full h-full"
-            style={{ minHeight: '100%' }}
           />
         </div>
       )}

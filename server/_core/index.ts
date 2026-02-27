@@ -8,6 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import streamRouter from "../stream";
+import youtubeRouter from "../youtube-api";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -51,6 +52,8 @@ async function startServer() {
   registerOAuthRoutes(app);
   // Stream proxy com buffer gerenciado
   app.use("/api", streamRouter);
+  // YouTube API
+  app.use("/api", youtubeRouter);
   // tRPC API
   app.use(
     "/api/trpc",

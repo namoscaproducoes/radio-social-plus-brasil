@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { useLocation } from "wouter";
 import { RadioPlayerV2 } from "@/components/RadioPlayerV2";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
+import { VoteButtons } from "@/components/VoteButtons";
 import { SongHistory } from "@/components/SongHistory";
 import { useMetadata } from "@/contexts/MetadataContext";
 import { useEffect, useRef } from "react";
@@ -78,8 +79,9 @@ export default function Home() {
               </div>
 
               {/* Right: YouTube Video */}
-              <div className="flex flex-col">
+              <div className="flex flex-col gap-4">
                 <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
+                <VoteButtons />
               </div>
             </div>
           </Card>

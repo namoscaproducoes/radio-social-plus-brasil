@@ -11,6 +11,12 @@ interface SongMetadata {
   cover: string;
 }
 
+export interface RadioPlayerV2Ref {
+  handleVote: (vote: 'like' | 'dislike') => void;
+  userVote: 'like' | 'dislike' | null;
+  addVoteMutation: any;
+}
+
 export function RadioPlayerV2() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -347,35 +353,7 @@ export function RadioPlayerV2() {
           </div>
         </div>
 
-        {/* Vote Buttons */}
-        <div className="flex gap-4 w-full justify-center">
-          <Button
-            onClick={() => handleVote('like')}
-            variant={userVote === 'like' ? 'default' : 'outline'}
-            className={`rounded-full px-6 py-2 transition ${
-              userVote === 'like'
-                ? 'bg-green-500 hover:bg-green-600 text-white'
-                : 'border-green-500 text-green-500 hover:bg-green-500 hover:text-white'
-            }`}
-            disabled={addVoteMutation.isPending}
-          >
-            <ThumbsUp size={18} className="mr-2" />
-            Gostei
-          </Button>
-          <Button
-            onClick={() => handleVote('dislike')}
-            variant={userVote === 'dislike' ? 'default' : 'outline'}
-            className={`rounded-full px-6 py-2 transition ${
-              userVote === 'dislike'
-                ? 'bg-red-500 hover:bg-red-600 text-white'
-                : 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white'
-            }`}
-            disabled={addVoteMutation.isPending}
-          >
-            <ThumbsDown size={18} className="mr-2" />
-            Não Gostei
-          </Button>
-        </div>
+
 
 
       </div>

@@ -20,9 +20,9 @@ export default function Home() {
     >
       {/* Blur Overlay */}
       <div 
-        className="absolute inset-0 backdrop-blur-3xl"
+        className="absolute inset-0 backdrop-blur-sm"
         style={{
-          background: 'rgba(75, 0, 130, 0.7)',
+          background: 'rgba(75, 0, 130, 0.4)',
         }}
       />
       

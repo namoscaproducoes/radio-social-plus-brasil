@@ -142,6 +142,13 @@ export default function Home() {
             <Button 
               variant="outline" 
               className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-gray-900"
+              onClick={() => navigate('/dashboard')}
+            >
+              Dashboard de Votos
+            </Button>
+            <Button 
+              variant="outline" 
+              className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-gray-900"
               onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
             >
               WhatsApp

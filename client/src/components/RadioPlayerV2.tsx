@@ -335,7 +335,7 @@ export function RadioPlayerV2() {
       />
 
       {/* Player Container */}
-      <div className="relative rounded-2xl overflow-hidden border-4 border-yellow-400 bg-gradient-to-b from-gray-900 to-black p-8 shadow-2xl">
+      <div className="relative rounded-lg sm:rounded-2xl overflow-hidden border-4 border-yellow-400 bg-gradient-to-b from-gray-900 to-black p-4 sm:p-6 md:p-8 shadow-2xl">
         {/* Background Image */}
         {metadata.cover && (
           <div
@@ -351,8 +351,8 @@ export function RadioPlayerV2() {
         {/* Content */}
         <div className="relative z-10">
           {/* Album Cover */}
-          <div className="flex justify-center mb-8">
-            <div className="w-48 h-48 rounded-lg overflow-hidden border-4 border-yellow-400 shadow-lg">
+          <div className="flex justify-center mb-4 sm:mb-6 md:mb-8">
+            <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-lg overflow-hidden border-4 border-yellow-400 shadow-lg">
               {metadata.cover ? (
                 <img
                   src={metadata.cover}
@@ -365,8 +365,8 @@ export function RadioPlayerV2() {
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-purple-600 to-purple-900 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-4xl mb-2">🎵</div>
-                    <p className="text-gray-400 text-sm">Sem capa</p>
+                    <div className="text-2xl sm:text-3xl md:text-4xl mb-2">🎵</div>
+                    <p className="text-gray-400 text-xs sm:text-sm">Sem capa</p>
                   </div>
                 </div>
               )}
@@ -374,61 +374,67 @@ export function RadioPlayerV2() {
           </div>
 
           {/* Song Info */}
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-2 truncate">{metadata.title}</h2>
-            <p className="text-xl text-gray-300 truncate">{metadata.artist}</p>
+          <div className="text-center mb-4 sm:mb-6 md:mb-8">
+            <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 truncate">{metadata.title}</h2>
+            <p className="text-sm sm:text-base md:text-lg text-gray-300 truncate">{metadata.artist}</p>
           </div>
 
           {/* Controls */}
-          <div className="flex items-center justify-center gap-4 mb-8">
+          <div className="flex items-center justify-center gap-2 sm:gap-4 mb-4 sm:mb-6 md:mb-8 flex-wrap">
             {/* Play/Pause Button */}
             <Button
               onClick={togglePlay}
-              className="w-16 h-16 rounded-full bg-yellow-400 hover:bg-yellow-500 text-black flex items-center justify-center shadow-lg"
+              className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full bg-yellow-400 hover:bg-yellow-500 text-black flex items-center justify-center shadow-lg"
             >
-              {isPlaying ? <Pause size={32} /> : <Play size={32} />}
+              {isPlaying ? <Pause size={20} className="sm:block hidden" /> : <Play size={20} className="sm:block hidden" />}
+              {isPlaying ? <Pause size={16} className="sm:hidden" /> : <Play size={16} className="sm:hidden" />}
             </Button>
 
             {/* Volume Control */}
-            <div className="flex items-center gap-2">
-              <Volume2 size={20} className="text-gray-300" />
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Volume2 size={16} className="sm:block hidden text-gray-300" />
+              <Volume2 size={14} className="sm:hidden text-gray-300" />
               <input
                 type="range"
                 min="0"
                 max="100"
                 value={volume}
                 onChange={handleVolumeChange}
-                className="w-24 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                className="w-16 sm:w-24 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
               />
-              <span className="text-gray-300 text-sm w-8">{volume}%</span>
+              <span className="text-gray-300 text-xs sm:text-sm w-6 sm:w-8">{volume}%</span>
             </div>
           </div>
 
           {/* Vote Buttons */}
-          <div className="flex gap-4 justify-center">
+          <div className="flex gap-2 sm:gap-4 justify-center flex-wrap">
             <Button
               onClick={() => handleVote('like')}
               variant={userVote === 'like' ? 'default' : 'outline'}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+              className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
                 userVote === 'like'
                   ? 'bg-green-600 text-white border-green-600'
                   : 'border-green-600 text-green-600 hover:bg-green-600 hover:text-white'
               }`}
             >
-              <ThumbsUp size={20} />
-              Gostei
+              <ThumbsUp size={16} className="sm:block hidden" />
+              <ThumbsUp size={14} className="sm:hidden" />
+              <span className="hidden sm:inline">Gostei</span>
+              <span className="sm:hidden">Gostei</span>
             </Button>
             <Button
               onClick={() => handleVote('dislike')}
               variant={userVote === 'dislike' ? 'default' : 'outline'}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+              className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-xs sm:text-sm font-semibold transition-all ${
                 userVote === 'dislike'
                   ? 'bg-red-600 text-white border-red-600'
                   : 'border-red-600 text-red-600 hover:bg-red-600 hover:text-white'
               }`}
             >
-              <ThumbsDown size={20} />
-              Não Gostei
+              <ThumbsDown size={16} className="sm:block hidden" />
+              <ThumbsDown size={14} className="sm:hidden" />
+              <span className="hidden sm:inline">Não Gostei</span>
+              <span className="sm:hidden">Não Gostei</span>
             </Button>
           </div>
         </div>

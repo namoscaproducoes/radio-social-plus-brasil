@@ -23,6 +23,7 @@ export function RadioPlayerV2() {
   const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(null);
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
   const lastMetadataRef = useRef('');
+  const reconnectTimeoutRef = useRef<any>(undefined);
   const { setAlbumCover, setSongTitle, setSongArtist } = useMetadata();
 
   // Buscar metadados via tRPC com polling automático
@@ -83,7 +84,46 @@ export function RadioPlayerV2() {
       audioRef.current.src = '/api/stream';
       console.log('🔗 Conectado ao stream de rádio');
     }
-  }, []);
+
+    // Tratar desconexão e reconectar automaticamente
+    const handleEnded = () => {
+      console.warn('⚠️ Stream desligou, reconectando...');
+      if (audioRef.current && isPlaying) {
+        // Reconectar ao stream
+        audioRef.current.src = '/api/stream?' + Date.now();
+        reconnectTimeoutRef.current = setTimeout(() => {
+          audioRef.current?.play().catch(err => {
+            console.error('Erro ao reconectar:', err);
+          });
+        }, 500);
+      }
+    };
+
+    const handleError = (e: Event) => {
+      console.error('❌ Erro no stream:', e);
+      if (audioRef.current && isPlaying) {
+        // Tentar reconectar
+        reconnectTimeoutRef.current = setTimeout(() => {
+          audioRef.current!.src = '/api/stream?' + Date.now();
+          audioRef.current?.play().catch(err => {
+            console.error('Erro ao reconectar:', err);
+          });
+        }, 1000);
+      }
+    };
+
+    const audio = audioRef.current;
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+
+    return () => {
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+    };
+  }, [isPlaying]);
 
   // Tocar/pausar
   const togglePlay = async () => {
@@ -95,7 +135,7 @@ export function RadioPlayerV2() {
         setIsPlaying(false);
       } else {
         // Garantir que o player está conectado ao stream
-        if (!audioRef.current.src) {
+        if (!audioRef.current.src || audioRef.current.src === '') {
           audioRef.current.src = '/api/stream';
         }
         
@@ -106,6 +146,15 @@ export function RadioPlayerV2() {
     } catch (error) {
       console.error('Erro ao reproduzir áudio:', error);
       setIsPlaying(false);
+      // Tentar reconectar
+      if (audioRef.current) {
+        audioRef.current.src = '/api/stream?' + Date.now();
+        setTimeout(() => {
+          audioRef.current?.play().catch(err => {
+            console.error('Erro ao reconectar:', err);
+          });
+        }, 1000);
+      }
     }
   };
 
@@ -135,11 +184,22 @@ export function RadioPlayerV2() {
         ref={audioRef}
         src="/api/stream"
         crossOrigin="anonymous"
+        controls={false}
+        autoPlay={false}
         onError={(e) => {
           console.error('Erro ao carregar stream:', e);
         }}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
+        onEnded={() => {
+          console.warn('Stream ended, reconnecting...');
+          if (isPlaying && audioRef.current) {
+            audioRef.current.src = '/api/stream?' + Date.now();
+            audioRef.current.play().catch(err => {
+              console.error('Erro ao reconectar:', err);
+            });
+          }
+        }}
       />
 
       {/* Player Container */}

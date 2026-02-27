@@ -175,3 +175,13 @@
 - [x] Reproduzir vídeo com áudio desativado (muted)
 - [x] Sincronizar play/pause com player de rádio
 - [x] Testar fluxo completo: busca → cache → reprodução (4 testes passando)
+
+
+## Fase 22: Revert para YouTube API (Implementado)
+- [x] Reverter para YouTube API com 10k requisições diárias
+- [x] Implementar busca de vídeos com YouTube API v3
+- [x] Usar embed do YouTube com videoId extraído
+- [x] Sincronizar player com rádio e desativar áudio
+- [x] Criar testes com tratamento de cota excedida
+- [x] Testes passando (3/3)
+- [x] Aguardando cota se renovar para testar com vídeos reais

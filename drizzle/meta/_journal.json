@@ -22,6 +22,20 @@
       "when": 1772212805153,
       "tag": "0002_naive_salo",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1772219252495,
+      "tag": "0003_wooden_kat_farrell",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1772224572645,
+      "tag": "0004_stale_deathstrike",
+      "breakpoints": true
     }
   ]
 }

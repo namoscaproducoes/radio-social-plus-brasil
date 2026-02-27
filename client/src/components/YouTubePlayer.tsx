@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useMetadata } from '@/contexts/MetadataContext';
+import { trpc } from '@/lib/trpc';
 
 interface YouTubePlayerProps {
   songTitle: string;
@@ -9,66 +10,61 @@ interface YouTubePlayerProps {
 
 export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
   const [videoId, setVideoId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastSearchQuery, setLastSearchQuery] = useState('');
   const { isPlaying } = useMetadata();
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
+  // Usar tRPC para buscar vídeo
+  const youtubeQuery = trpc.youtube.search.useQuery(
+    { q: `${artistName} ${songTitle} official video` },
+    {
+      enabled: !!songTitle && !!artistName && `${artistName} ${songTitle}` !== lastSearchQuery,
+      retry: 1,
+      retryDelay: 1000,
+    }
+  );
+
   useEffect(() => {
     if (!songTitle || !artistName) {
       setVideoId(null);
+      setError(null);
       return;
     }
 
-    const searchQuery = `${artistName} ${songTitle} official video`;
+    const searchQuery = `${artistName} ${songTitle}`;
 
     // Evitar buscar a mesma música novamente
     if (searchQuery === lastSearchQuery && videoId) {
       return;
     }
 
-    const searchYouTube = async () => {
-      setIsLoading(true);
+    if (youtubeQuery.isLoading) {
       setError(null);
+    }
 
-      try {
-        const response = await fetch(
-          `/api/youtube/search?q=${encodeURIComponent(searchQuery)}`
-        );
+    if (youtubeQuery.isError) {
+      console.error('Erro ao buscar vídeo:', youtubeQuery.error);
+      setError('Erro ao buscar vídeo');
+      setVideoId(null);
+    }
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (data.videoId) {
-          setVideoId(data.videoId);
-          setLastSearchQuery(searchQuery);
-          console.log('🎬 Vídeo encontrado:', data.videoId);
-        } else if (data.error) {
-          console.warn('YouTube API error:', data.error);
-          setError('YouTube API não configurada');
-          setVideoId(null);
-        } else {
-          setError('Vídeo não encontrado');
-          setVideoId(null);
-        }
-      } catch (err) {
-        console.error('Erro ao buscar vídeo:', err);
-        setError('Erro ao buscar vídeo');
+    if (youtubeQuery.data) {
+      if (youtubeQuery.data.videoId) {
+        setVideoId(youtubeQuery.data.videoId);
+        setLastSearchQuery(searchQuery);
+        setError(null);
+        console.log('🎬 Vídeo encontrado:', youtubeQuery.data.videoId);
+      } else if (youtubeQuery.data.error) {
+        console.warn('YouTube API error:', youtubeQuery.data.error);
+        setError('YouTube API não configurada');
         setVideoId(null);
-      } finally {
-        setIsLoading(false);
+      } else {
+        setError('Vídeo não encontrado');
+        setVideoId(null);
       }
-    };
-
-    // Aguardar 500ms antes de buscar para evitar requisições em cascata
-    const timer = setTimeout(searchYouTube, 500);
-
-    return () => clearTimeout(timer);
-  }, [songTitle, artistName, lastSearchQuery, videoId]);
+    }
+  }, [youtubeQuery.data, youtubeQuery.isLoading, youtubeQuery.isError, youtubeQuery.error, songTitle, artistName, lastSearchQuery, videoId]);
 
   // Sincronizar reprodução do vídeo com o player de música
   useEffect(() => {
@@ -90,6 +86,8 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
       console.log('⏸️ Pausando vídeo YouTube');
     }
   }, [isPlaying]);
+
+  const isLoading = youtubeQuery.isLoading;
 
   return (
     <div className="w-full h-64 flex flex-col">

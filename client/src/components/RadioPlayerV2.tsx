@@ -142,16 +142,25 @@ export function RadioPlayerV2() {
           audioRef.current.src = '/api/stream';
         }
         
-        // Tentar reproduzir
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          await playPromise;
+        // Tentar reproduzir com tratamento de erro
+        try {
+          await audioRef.current.play();
           setIsPlaying(true);
+        } catch (playError: any) {
+          // Ignorar erros de autoplay policy
+          if (playError.name === 'NotAllowedError') {
+            console.warn('Autoplay bloqueado pelo navegador');
+            // Tentar novamente após interação do usuário
+            setTimeout(() => {
+              audioRef.current?.play().catch(() => {});
+            }, 100);
+          } else {
+            throw playError;
+          }
         }
       }
     } catch (error) {
       console.error('Erro ao reproduzir áudio:', error);
-      toast.error('Erro ao reproduzir áudio');
       setIsPlaying(false);
     }
   };
@@ -240,20 +249,7 @@ export function RadioPlayerV2() {
           )}
         </div>
 
-        {/* Buffer Progress Bar */}
-        {bufferProgress < 100 && (
-          <div className="w-full max-w-xs px-4">
-            <div className="bg-gray-700 rounded-full h-1 overflow-hidden">
-              <div
-                className="bg-yellow-500 h-full transition-all duration-300"
-                style={{ width: `${bufferProgress}%` }}
-              />
-            </div>
-            <p className="text-xs text-gray-400 text-center mt-1">
-              Buffer: {Math.round(bufferProgress)}%
-            </p>
-          </div>
-        )}
+        {/* Buffer Progress Bar - Oculto */}
 
         {/* Controls */}
         <div className="flex items-center gap-6 w-full justify-center">

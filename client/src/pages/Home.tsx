@@ -2,11 +2,31 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLocation } from "wouter";
 import { RadioPlayerV2 } from "@/components/RadioPlayerV2";
+import { SongHistory } from "@/components/SongHistory";
 import { useMetadata } from "@/contexts/MetadataContext";
+import { useEffect, useRef } from "react";
+import { trpc } from "@/lib/trpc";
 
 export default function Home() {
   const [, navigate] = useLocation();
-  const { albumCover } = useMetadata();
+  const { albumCover, songTitle, songArtist } = useMetadata();
+  const lastSongRef = useRef<string>("");
+  const addToHistoryMutation = trpc.songs.addToHistory.useMutation();
+
+  useEffect(() => {
+    if (songTitle && songArtist && songTitle !== "Carregando...") {
+      const currentSong = `${songTitle}|${songArtist}`;
+      if (currentSong !== lastSongRef.current) {
+        console.log("Adicionando ao historico:", songTitle, "-", songArtist);
+        addToHistoryMutation.mutate({
+          title: songTitle,
+          artist: songArtist,
+          albumCover: albumCover || undefined,
+        });
+        lastSongRef.current = currentSong;
+      }
+    }
+  }, [songTitle, songArtist, albumCover, addToHistoryMutation]);
 
   return (
     <div 
@@ -52,6 +72,13 @@ export default function Home() {
           <Card className="bg-gray-900 border-4 border-yellow-500 p-12 shadow-2xl max-w-2xl mx-auto">
             <RadioPlayerV2 />
           </Card>
+          </div>
+        </section>
+
+        {/* Song History Section */}
+        <section className="py-20 px-4 bg-gray-800 mt-0">
+          <div className="max-w-6xl mx-auto">
+            <SongHistory />
           </div>
         </section>
 

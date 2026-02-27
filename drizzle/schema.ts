@@ -73,3 +73,17 @@ export const currentSong = mysqlTable("currentSong", {
 
 export type CurrentSong = typeof currentSong.$inferSelect;
 export type InsertCurrentSong = typeof currentSong.$inferInsert;
+
+/**
+ * SongHistory table - armazena o histórico das últimas músicas tocadas
+ */
+export const songHistory = mysqlTable("songHistory", {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  artist: varchar("artist", { length: 255 }).notNull(),
+  albumCover: text("albumCover"), // URL da capa do álbum
+  playedAt: timestamp("playedAt").defaultNow().notNull(),
+});
+
+export type SongHistory = typeof songHistory.$inferSelect;
+export type InsertSongHistory = typeof songHistory.$inferInsert;

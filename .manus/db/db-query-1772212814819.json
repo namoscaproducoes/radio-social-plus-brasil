@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `songHistory` (\n\t`id` bigint AUTO_INCREMENT NOT NULL,\n\t`title` varchar(255) NOT NULL,\n\t`artist` varchar(255) NOT NULL,\n\t`albumCover` text,\n\t`playedAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `songHistory_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute CREATE TABLE `songHistory` (\n\t`id` bigint AUTO_INCREMENT NOT NULL,\n\t`title` varchar(255) NOT NULL,\n\t`artist` varchar(255) NOT NULL,\n\t`albumCover` text,\n\t`playedAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `songHistory_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 482
+}

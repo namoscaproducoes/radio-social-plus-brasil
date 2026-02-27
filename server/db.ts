@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, songs, InsertSong, votes, InsertVote, currentSong, InsertCurrentSong } from "../drizzle/schema";
+import { InsertUser, users, songs, InsertSong, votes, InsertVote, currentSong, InsertCurrentSong, songHistory, InsertSongHistory } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -190,6 +190,42 @@ export async function updateCurrentSong(song: InsertCurrentSong) {
   } catch (error) {
     console.error("[Database] Failed to update current song:", error);
     throw error;
+  }
+}
+
+/**
+ * Add song to history
+ */
+export async function addToHistory(song: InsertSongHistory) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const result = await db.insert(songHistory).values(song);
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to add to history:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get last 20 songs from history
+ */
+export async function getRecentSongHistory(limit: number = 20) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const result = await db
+      .select()
+      .from(songHistory)
+      .orderBy(desc(songHistory.playedAt))
+      .limit(limit);
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get song history:", error);
+    return [];
   }
 }
 

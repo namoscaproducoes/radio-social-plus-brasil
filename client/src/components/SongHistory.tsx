@@ -19,7 +19,7 @@ export function SongHistory() {
 
   // Buscar histórico de músicas
   const { data: historyData, isLoading: isHistoryLoading, refetch } = trpc.songs.history.useQuery(
-    { limit: 3 },
+    { limit: 5 },
     {
       refetchInterval: 5000, // Atualizar a cada 5 segundos
     }
@@ -113,7 +113,7 @@ export function SongHistory() {
   return (
     <div className="w-full">
       <h3 className="text-2xl font-bold text-white mb-6">Histórico de Músicas</h3>
-      <div className="space-y-3 max-h-none overflow-hidden">
+      <div className="space-y-3">
         {songs.map((song, index) => (
           <div
             key={`${song.id}-${index}`}

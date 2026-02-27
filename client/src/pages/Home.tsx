@@ -69,18 +69,40 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Player and Video Grid */}
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {/* Player Card */}
-            <Card className="bg-gray-900 border-4 border-yellow-500 p-8 shadow-2xl">
-              <RadioPlayerV2 />
-            </Card>
+          {/* Player and Video Container */}
+          <Card className="bg-gray-900 border-4 border-yellow-500 p-8 shadow-2xl max-w-5xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-8 h-full">
+              {/* Left: Album Cover and Radio Player */}
+              <div className="flex flex-col gap-6">
+                {/* Album Cover */}
+                <div className="w-full aspect-square rounded-lg overflow-hidden border-2 border-yellow-500 shadow-lg">
+                  {albumCover ? (
+                    <img
+                      src={albumCover}
+                      alt="Album Cover"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-900 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="text-6xl mb-4">🎵</div>
+                        <p className="text-gray-400">Sem capa</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {/* Radio Player */}
+                <div>
+                  <RadioPlayerV2 />
+                </div>
+              </div>
 
-            {/* YouTube Video Card */}
-            <Card className="bg-gray-900 border-4 border-yellow-500 p-8 shadow-2xl">
-              <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
-            </Card>
-          </div>
+              {/* Right: YouTube Video */}
+              <div className="flex flex-col">
+                <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
+              </div>
+            </div>
+          </Card>
           </div>
         </section>
 
@@ -127,52 +149,28 @@ export default function Home() {
             <img 
               src="/logo-radio.png" 
               alt="Rádio Social Plus Brasil" 
-              className="w-16 h-16 rounded-lg shadow-lg border-2 border-yellow-500"
+              className="w-16 h-16 rounded-lg"
             />
           </div>
-          <div className="grid md:grid-cols-3 gap-8 mb-8">
-            {/* About Link */}
-            <div className="text-center">
-              <button 
-                onClick={() => {
-                  document.querySelector('#about-section')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="text-white font-bold text-lg hover:text-yellow-500 transition"
-              >
-                📖 Sobre a Rádio
-              </button>
-              <p className="text-gray-400 text-sm mt-2">Conheça nossa história e missão</p>
-            </div>
-
-            {/* Contact Link */}
-            <div className="text-center">
-              <a 
-                href="https://wa.me/5585999999999?text=Olá%20Rádio%20Social%20Plus%20Brasil"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white font-bold text-lg hover:text-yellow-500 transition inline-block"
-              >
-                💬 Contato
-              </a>
-              <p className="text-gray-400 text-sm mt-2">Entre em contato conosco</p>
-            </div>
-
-            {/* Dashboard Link */}
-            <div className="text-center">
-              <button 
-                onClick={() => navigate("/dashboard")}
-                className="text-white font-bold text-lg hover:text-yellow-500 transition"
-              >
-                📊 Dashboard
-              </button>
-              <p className="text-gray-400 text-sm mt-2">Veja o ranking de músicas</p>
-            </div>
+          <div className="text-center text-gray-400 mb-6">
+            <p className="mb-2">© 2026 Rádio Social Plus Brasil. Todos os direitos reservados.</p>
+            <p className="text-sm">Transmitindo música e emoção 24/7</p>
           </div>
-
-          {/* Copyright */}
-          <div className="border-t border-gray-700 pt-8 text-center">
-            <p className="text-gray-400 mb-2">© 2026 Rádio Social Plus Brasil. Todos os direitos reservados.</p>
-            <p className="text-gray-500 text-sm">Desenvolvido com ❤️ para os fãs de música</p>
+          <div className="flex justify-center gap-6">
+            <Button 
+              variant="outline" 
+              className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-gray-900"
+              onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
+            >
+              WhatsApp
+            </Button>
+            <Button 
+              variant="outline"
+              className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-gray-900"
+              onClick={() => window.open('https://instagram.com', '_blank')}
+            >
+              Instagram
+            </Button>
           </div>
           </div>
         </footer>

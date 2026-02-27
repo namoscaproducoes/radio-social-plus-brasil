@@ -17,6 +17,7 @@ router.get("/stream", (req: Request, res: Response) => {
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.setHeader("Content-Type", "audio/mpeg");
+  console.log("📡 Enviando stream com Content-Type: audio/mpeg");
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
@@ -47,10 +48,11 @@ router.get("/stream", (req: Request, res: Response) => {
     streamRes = response;
     console.log("✅ Conectado ao stream Icecast");
     
-    // Passar headers relevantes
-    if (response.headers["content-type"]) {
-      res.setHeader("Content-Type", response.headers["content-type"]);
-    }
+    // Passar headers relevantes - mas manter Content-Type como audio/mpeg
+    // Não sobrescrever Content-Type pois o Icecast pode retornar audio/aac
+    // e o navegador não suporta bem
+    console.log("📡 Content-Type do Icecast:", response.headers["content-type"]);
+    console.log("📡 Mantendo Content-Type como audio/mpeg para compatibilidade");
     if (response.headers["icy-metaint"]) {
       res.setHeader("icy-metaint", response.headers["icy-metaint"]);
     }
@@ -70,6 +72,11 @@ router.get("/stream", (req: Request, res: Response) => {
     // Handler para dados chegando do stream
     response.on("data", (chunk: Buffer) => {
       bytesReceived += chunk.length;
+      
+      // Log do primeiro chunk para debug
+      if (bytesReceived <= chunk.length) {
+        console.log("📡 Primeiro chunk recebido, tamanho:", chunk.length, "bytes");
+      }
 
       // Log a cada 10 segundos
       const now = Date.now();

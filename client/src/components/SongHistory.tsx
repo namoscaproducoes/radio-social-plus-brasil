@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Share2, Copy, Check, Music } from 'lucide-react';
+import { Share2, Copy, Check, Music, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { trpc } from '@/lib/trpc';
@@ -12,10 +12,18 @@ interface Song {
   playedAt: Date;
 }
 
+interface SongWithVotes extends Song {
+  voteCount?: {
+    likes: number;
+    dislikes: number;
+  };
+}
+
 export function SongHistory() {
-  const [songs, setSongs] = useState<Song[]>([]);
+  const [songs, setSongs] = useState<SongWithVotes[]>([]);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [voteCounts, setVoteCounts] = useState<Record<number, { likes: number; dislikes: number }>>({});
 
   // Buscar histórico de músicas
   const { data: historyData, isLoading: isHistoryLoading, refetch } = trpc.songs.history.useQuery(
@@ -28,10 +36,29 @@ export function SongHistory() {
   // Atualizar estado local quando dados chegam
   useEffect(() => {
     if (historyData) {
-      setSongs(historyData as Song[]);
+      setSongs(historyData as SongWithVotes[]);
       setIsLoading(false);
     }
   }, [historyData]);
+
+  // Buscar votos para cada musica
+  useEffect(() => {
+    const fetchVotes = async () => {
+      const counts: Record<number, { likes: number; dislikes: number }> = {};
+      for (const song of songs) {
+        try {
+          const result = await fetch(`/api/trpc/songs.voteCount?input=${encodeURIComponent(JSON.stringify({ songId: song.id }))}`).then(r => r.json());
+          counts[song.id] = result as { likes: number; dislikes: number };
+        } catch (error) {
+          counts[song.id] = { likes: 0, dislikes: 0 };
+        }
+      }
+      setVoteCounts(counts);
+    };
+    if (songs.length > 0) {
+      fetchVotes();
+    }
+  }, [songs]);
 
   // Função para compartilhar música
   const shareSong = async (song: Song) => {
@@ -114,87 +141,106 @@ export function SongHistory() {
     <div className="w-full">
       <h3 className="text-2xl font-bold text-white mb-6">Histórico de Músicas</h3>
       <div className="space-y-3">
-        {songs.map((song, index) => (
-          <div
-            key={`${song.id}-${index}`}
-            className="rounded-lg p-4 hover:bg-white/5 transition-all duration-200 border border-white/10"
-          >
-            <div className="flex items-start gap-4">
-              {/* Album Cover */}
-              <div className="flex-shrink-0">
-                {song.albumCover ? (
-                  <img
-                    src={song.albumCover}
-                    alt={`${song.title} - ${song.artist}`}
-                    className="w-16 h-16 rounded-md object-cover border border-gray-600"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                ) : (
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-900 rounded-md flex items-center justify-center border border-gray-600">
-                    <Music size={24} className="text-gray-400" />
-                  </div>
-                )}
-              </div>
-
-              {/* Song Info */}
-              <div className="flex-grow min-w-0">
-                <h4 className="text-white font-semibold truncate">{song.title}</h4>
-                <p className="text-gray-400 text-sm truncate">{song.artist}</p>
-                <p className="text-gray-500 text-xs mt-1">
-                  {new Date(song.playedAt).toLocaleTimeString('pt-BR')}
-                </p>
-              </div>
-
-              {/* Share Buttons */}
-              <div className="flex-shrink-0 flex gap-2">
-                {/* Copy Button */}
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
-                  onClick={() => shareSong(song)}
-                  title="Copiar para compartilhar"
-                >
-                  {copiedId === song.id ? (
-                    <Check size={16} />
+        {songs.map((song, index) => {
+          const votes = voteCounts[song.id] || { likes: 0, dislikes: 0 };
+          return (
+            <div
+              key={`${song.id}-${index}`}
+              className="rounded-lg p-4 hover:bg-white/5 transition-all duration-200 border border-white/10"
+            >
+              <div className="flex items-start gap-4">
+                {/* Album Cover */}
+                <div className="flex-shrink-0">
+                  {song.albumCover ? (
+                    <img
+                      src={song.albumCover}
+                      alt={`${song.title} - ${song.artist}`}
+                      className="w-16 h-16 rounded-md object-cover border border-gray-600"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
                   ) : (
-                    <Copy size={16} />
+                    <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-900 rounded-md flex items-center justify-center border border-gray-600">
+                      <Music size={24} className="text-gray-400" />
+                    </div>
                   )}
-                </Button>
+                </div>
 
-                {/* Share Menu */}
-                <div className="relative group">
+                {/* Song Info */}
+                <div className="flex-grow min-w-0">
+                  <h4 className="text-white font-semibold truncate">{song.title}</h4>
+                  <p className="text-gray-400 text-sm truncate">{song.artist}</p>
+                  <p className="text-gray-500 text-xs mt-1">
+                    {new Date(song.playedAt).toLocaleTimeString('pt-BR')}
+                  </p>
+                </div>
+
+                {/* Vote Indicators */}
+                <div className="flex-shrink-0 flex gap-3 items-center mr-2">
+                  {votes.likes > 0 && (
+                    <div className="flex items-center gap-1 bg-green-900/30 px-2 py-1 rounded">
+                      <ThumbsUp size={14} className="text-green-500" />
+                      <span className="text-xs text-green-500 font-semibold">{votes.likes}</span>
+                    </div>
+                  )}
+                  {votes.dislikes > 0 && (
+                    <div className="flex items-center gap-1 bg-red-900/30 px-2 py-1 rounded">
+                      <ThumbsDown size={14} className="text-red-500" />
+                      <span className="text-xs text-red-500 font-semibold">{votes.dislikes}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Share Buttons */}
+                <div className="flex-shrink-0 flex gap-2">
+                  {/* Copy Button */}
                   <Button
                     size="sm"
                     variant="outline"
                     className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
-                    title="Compartilhar"
+                    onClick={() => shareSong(song)}
+                    title="Copiar para compartilhar"
                   >
-                    <Share2 size={16} />
+                    {copiedId === song.id ? (
+                      <Check size={16} />
+                    ) : (
+                      <Copy size={16} />
+                    )}
                   </Button>
 
-                  {/* Dropdown Menu */}
-                  <div className="absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-                    <button
-                      onClick={() => shareOnWhatsApp(song)}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 hover:text-white first:rounded-t-lg transition-colors"
+                  {/* Share Menu */}
+                  <div className="relative group">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+                      title="Compartilhar"
                     >
-                      WhatsApp
-                    </button>
-                    <button
-                      onClick={() => shareOnTwitter(song)}
-                      className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 hover:text-white last:rounded-b-lg transition-colors"
-                    >
-                      Twitter
-                    </button>
+                      <Share2 size={16} />
+                    </Button>
+
+                    {/* Dropdown Menu */}
+                    <div className="absolute right-0 mt-2 w-40 bg-gray-900 border border-gray-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
+                      <button
+                        onClick={() => shareOnWhatsApp(song)}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 hover:text-white first:rounded-t-lg transition-colors"
+                      >
+                        WhatsApp
+                      </button>
+                      <button
+                        onClick={() => shareOnTwitter(song)}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-300 hover:bg-gray-800 hover:text-white last:rounded-b-lg transition-colors"
+                      >
+                        Twitter
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

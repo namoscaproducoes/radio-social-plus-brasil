@@ -257,3 +257,25 @@ export async function getTopVotedSongsThisMonth(voteType: 'like' | 'dislike' = '
 
   return Array.isArray(result) && result.length > 0 ? result[0] : [];
 }
+
+
+/**
+ * Get vote counts for a specific song
+ */
+export async function getVoteCountsForSong(songId: number) {
+  const db = await getDb();
+  if (!db) return { likes: 0, dislikes: 0 };
+
+  const result = await db.execute(`
+    SELECT 
+      COUNT(CASE WHEN voteType = 'like' THEN 1 END) as likes,
+      COUNT(CASE WHEN voteType = 'dislike' THEN 1 END) as dislikes
+    FROM votes
+    WHERE songId = ${songId}
+  `) as any;
+
+  if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) && result[0].length > 0) {
+    return result[0][0];
+  }
+  return { likes: 0, dislikes: 0 };
+}

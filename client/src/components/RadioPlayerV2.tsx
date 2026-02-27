@@ -24,8 +24,7 @@ export function RadioPlayerV2() {
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
   const lastMetadataRef = useRef('');
   const reconnectTimeoutRef = useRef<any>(undefined);
-  const reconnectAttemptsRef = useRef(0);
-  const maxReconnectAttemptsRef = useRef(5);
+  const preventiveReconnectIntervalRef = useRef<any>(undefined);
   const { setAlbumCover, setSongTitle, setSongArtist } = useMetadata();
 
   // Buscar metadados via tRPC com polling automático
@@ -78,43 +77,49 @@ export function RadioPlayerV2() {
   }, [isLoadingMetadataQuery]);
 
   // Função para reconectar ao stream
-  const reconnectToStream = async () => {
-    if (!audioRef.current || !isPlaying) return;
-
-    reconnectAttemptsRef.current += 1;
-    
-    if (reconnectAttemptsRef.current > maxReconnectAttemptsRef.current) {
-      console.error('❌ Máximo de tentativas de reconexão atingido');
-      toast.error('Não foi possível reconectar ao stream');
-      setIsPlaying(false);
+  const reconnectToStream = async (reason: string = 'unknown') => {
+    if (!audioRef.current) {
+      console.log('❌ Não pode reconectar: sem audio ref');
       return;
     }
 
-    const delayMs = Math.min(500 * reconnectAttemptsRef.current, 3000);
-    console.warn(`⚠️ Reconectando ao stream (tentativa ${reconnectAttemptsRef.current}/${maxReconnectAttemptsRef.current})...`);
-
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
+    if (!isPlaying) {
+      console.log('❌ Não pode reconectar: player não está tocando');
+      return;
     }
 
-    reconnectTimeoutRef.current = setTimeout(async () => {
-      try {
-        // Resetar src com timestamp para forçar nova requisição
-        audioRef.current!.src = '/api/stream?' + Date.now();
-        
-        // Tentar reproduzir
-        const playPromise = audioRef.current?.play();
-        if (playPromise) {
-          await playPromise;
-          console.log('✅ Reconectado ao stream com sucesso');
-          reconnectAttemptsRef.current = 0; // Resetar contador
-        }
-      } catch (error) {
-        console.error('❌ Erro ao reconectar:', error);
-        // Tentar novamente
-        reconnectToStream();
+    console.warn(`⚠️ Reconectando: ${reason}`);
+
+    try {
+      console.log('🔄 Iniciando reconexão...');
+      
+      // Pausar para limpar buffer
+      audioRef.current.pause();
+      
+      // Resetar src com timestamp para forçar nova requisição
+      const newSrc = '/api/stream?' + Date.now();
+      audioRef.current.src = newSrc;
+      console.log('📡 Novo src definido:', newSrc);
+      
+      // Aguardar um pouco para garantir que o src foi definido
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Tentar reproduzir
+      const playPromise = audioRef.current.play();
+      if (playPromise) {
+        await playPromise;
+        console.log('✅ Reconectado ao stream com sucesso');
       }
-    }, delayMs);
+    } catch (error) {
+      console.error('❌ Erro ao reconectar:', error);
+      // Tentar novamente em 1 segundo
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
+      reconnectTimeoutRef.current = setTimeout(() => {
+        reconnectToStream('retry after error');
+      }, 1000);
+    }
   };
 
   // Garantir que o player está sempre conectado
@@ -131,7 +136,6 @@ export function RadioPlayerV2() {
     const handlePlay = () => {
       console.log('▶️ Reprodução iniciada');
       setIsPlaying(true);
-      reconnectAttemptsRef.current = 0; // Resetar contador quando começar a reproduzir
     };
 
     const handlePause = () => {
@@ -140,9 +144,9 @@ export function RadioPlayerV2() {
     };
 
     const handleEnded = () => {
-      console.warn('⚠️ Stream ended, reconectando...');
+      console.warn('⚠️ Stream ended');
       if (isPlaying) {
-        reconnectToStream();
+        reconnectToStream('stream ended');
       }
     };
 
@@ -152,30 +156,21 @@ export function RadioPlayerV2() {
         console.error('❌ Erro no stream:', audio.error?.code, audio.error?.message);
       }
       if (isPlaying) {
-        reconnectToStream();
+        reconnectToStream('audio error');
       }
     };
 
     const handleStalled = () => {
-      console.warn('⚠️ Stream stalled (sem dados), tentando reconectar...');
+      console.warn('⚠️ Stream stalled (sem dados)');
       if (isPlaying) {
-        // Dar um tempo antes de reconectar
-        setTimeout(() => {
-          if (isPlaying && audioRef.current && audioRef.current.paused) {
-            reconnectToStream();
-          }
-        }, 2000);
+        reconnectToStream('stalled');
       }
     };
 
     const handleSuspend = () => {
-      console.warn('⚠️ Stream suspended, tentando reconectar...');
+      console.warn('⚠️ Stream suspended');
       if (isPlaying) {
-        setTimeout(() => {
-          if (isPlaying && audioRef.current && audioRef.current.paused) {
-            reconnectToStream();
-          }
-        }, 2000);
+        reconnectToStream('suspend');
       }
     };
 
@@ -200,6 +195,31 @@ export function RadioPlayerV2() {
     };
   }, [isPlaying]);
 
+  // Reconexão preventiva periódica a cada 30 segundos
+  useEffect(() => {
+    if (!isPlaying) {
+      if (preventiveReconnectIntervalRef.current) {
+        clearInterval(preventiveReconnectIntervalRef.current);
+      }
+      return;
+    }
+
+    console.log('⏱️ Iniciando reconexão preventiva periódica (a cada 30s)');
+
+    preventiveReconnectIntervalRef.current = setInterval(() => {
+      if (isPlaying && audioRef.current) {
+        console.log('🔄 Reconexão preventiva periódica acionada');
+        reconnectToStream('preventive periodic reconnect');
+      }
+    }, 30000); // A cada 30 segundos
+
+    return () => {
+      if (preventiveReconnectIntervalRef.current) {
+        clearInterval(preventiveReconnectIntervalRef.current);
+      }
+    };
+  }, [isPlaying]);
+
   // Tocar/pausar
   const togglePlay = async () => {
     if (!audioRef.current) return;
@@ -212,22 +232,17 @@ export function RadioPlayerV2() {
         // Garantir que o player está conectado ao stream
         if (!audioRef.current.src || audioRef.current.src === '') {
           audioRef.current.src = '/api/stream';
+          console.log('🔗 Conectado ao stream de rádio');
         }
         
-        // Resetar contador de tentativas
-        reconnectAttemptsRef.current = 0;
-        
         // Tentar reproduzir
+        console.log('▶️ Tentando reproduzir...');
         await audioRef.current.play();
         setIsPlaying(true);
       }
     } catch (error) {
-      console.error('Erro ao reproduzir áudio:', error);
+      console.error('❌ Erro ao reproduzir áudio:', error);
       setIsPlaying(false);
-      // Tentar reconectar
-      if (audioRef.current) {
-        reconnectToStream();
-      }
     }
   };
 
@@ -252,7 +267,7 @@ export function RadioPlayerV2() {
 
   return (
     <div className="w-full">
-      {/* Audio Element - Stream direto com preload */}
+      {/* Audio Element - Stream direto */}
       <audio
         ref={audioRef}
         src="/api/stream"

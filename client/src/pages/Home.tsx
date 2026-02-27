@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLocation } from "wouter";
 import { RadioPlayerV2 } from "@/components/RadioPlayerV2";
+import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { SongHistory } from "@/components/SongHistory";
 import { useMetadata } from "@/contexts/MetadataContext";
 import { useEffect, useRef } from "react";
@@ -68,10 +69,18 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Player Card */}
-          <Card className="bg-gray-900 border-4 border-yellow-500 p-12 shadow-2xl max-w-2xl mx-auto">
-            <RadioPlayerV2 />
-          </Card>
+          {/* Player and Video Grid */}
+          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            {/* Player Card */}
+            <Card className="bg-gray-900 border-4 border-yellow-500 p-8 shadow-2xl">
+              <RadioPlayerV2 />
+            </Card>
+
+            {/* YouTube Video Card */}
+            <Card className="bg-gray-900 border-4 border-yellow-500 p-8 shadow-2xl">
+              <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
+            </Card>
+          </div>
           </div>
         </section>
 

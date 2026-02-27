@@ -7,9 +7,11 @@ import { eq } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
 import { getIcecastMetadata } from "./icecast-metadata";
 import { songs } from "../drizzle/schema";
+import { youtubeRouter } from "./youtube-router";
 
 export const appRouter = router({
   system: systemRouter,
+  youtube: youtubeRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

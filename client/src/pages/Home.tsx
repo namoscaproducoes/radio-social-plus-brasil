@@ -2,15 +2,35 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLocation } from "wouter";
 import { RadioPlayerV2 } from "@/components/RadioPlayerV2";
+import { useMetadata } from "@/contexts/MetadataContext";
 
 export default function Home() {
   const [, navigate] = useLocation();
+  const { albumCover } = useMetadata();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900 flex flex-col">
-      {/* Hero Section */}
-      <section className="py-20 px-4 flex-1">
-        <div className="max-w-6xl mx-auto">
+    <div 
+      className="min-h-screen flex flex-col relative"
+      style={{
+        backgroundImage: albumCover ? `url(${albumCover})` : 'linear-gradient(to bottom right, rgb(147, 51, 234), rgb(88, 28, 135), rgb(75, 0, 130))',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }}
+    >
+      {/* Blur Overlay */}
+      <div 
+        className="absolute inset-0 backdrop-blur-3xl"
+        style={{
+          background: 'rgba(75, 0, 130, 0.7)',
+        }}
+      />
+      
+      {/* Content */}
+      <div className="relative z-10 flex flex-col min-h-screen">
+        {/* Hero Section */}
+        <section className="py-20 px-4 flex-1">
+          <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-yellow-500 font-bold text-sm mb-4">OUÇA AO VIVO</p>
             <div className="flex items-center justify-center gap-6 mb-4">
@@ -32,12 +52,12 @@ export default function Home() {
           <Card className="bg-gray-900 border-4 border-yellow-500 p-12 shadow-2xl max-w-2xl mx-auto">
             <RadioPlayerV2 />
           </Card>
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* About Section */}
-      <section className="py-20 px-4 bg-gray-900 mt-20">
-        <div className="max-w-6xl mx-auto">
+        {/* About Section */}
+        <section className="py-20 px-4 bg-gray-900 mt-20">
+          <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-white mb-8 text-center">
             Sobre a Rádio Social Plus Brasil
           </h2>
@@ -61,12 +81,12 @@ export default function Home() {
               </p>
             </Card>
           </div>
-        </div>
-      </section>
+          </div>
+        </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-950 border-t-4 border-yellow-500 py-12 px-4 mt-auto">
-        <div className="max-w-6xl mx-auto">
+        {/* Footer */}
+        <footer className="bg-gray-950 border-t-4 border-yellow-500 py-12 px-4 mt-auto">
+          <div className="max-w-6xl mx-auto">
           <div className="flex justify-center mb-8">
             <img 
               src="/logo-radio.png" 
@@ -118,8 +138,9 @@ export default function Home() {
             <p className="text-gray-400 mb-2">© 2026 Rádio Social Plus Brasil. Todos os direitos reservados.</p>
             <p className="text-gray-500 text-sm">Desenvolvido com ❤️ para os fãs de música</p>
           </div>
-        </div>
-      </footer>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }

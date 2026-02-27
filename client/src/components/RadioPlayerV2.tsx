@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { ThumbsUp, ThumbsDown, Play, Pause, Volume2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { trpc } from '@/lib/trpc';
+import { useMetadata } from '@/contexts/MetadataContext';
 
 interface SongMetadata {
   title: string;
@@ -22,6 +23,7 @@ export function RadioPlayerV2() {
   const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(null);
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
   const lastMetadataRef = useRef('');
+  const { setAlbumCover, setSongTitle, setSongArtist } = useMetadata();
 
   // Buscar metadados via tRPC com polling automático
   const { data: metadataResponse, isLoading: isLoadingMetadataQuery } = trpc.songs.metadata.useQuery(
@@ -51,11 +53,17 @@ export function RadioPlayerV2() {
         
         // NÃO pausar o player quando a música muda - deixar tocando
         // Apenas atualizar os metadados
+        const newCover = metadataResponse.albumCover || '';
         setMetadata({
           title: metadataResponse.title,
           artist: metadataResponse.artist,
-          cover: metadataResponse.albumCover || '',
+          cover: newCover,
         });
+        
+        // Atualizar contexto para background blur
+        setAlbumCover(newCover);
+        setSongTitle(metadataResponse.title);
+        setSongArtist(metadataResponse.artist);
 
         setUserVote(null); // Resetar voto quando música muda
         lastMetadataRef.current = metadataKey;

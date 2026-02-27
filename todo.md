@@ -149,3 +149,10 @@
 - [x] Capas do Last.fm em baixa resolução - Corrigido: priorizar extralarge e large, usar artworkUrl600 no iTunes
 - [x] Player desligando ao trocar de música - Corrigido: manter reprodução contínua
 - [x] Buffer da música anterior repete após troca - Corrigido com sistema robusto de buffer gerenciado
+
+## Fase 18: Sincronização de Players (YouTube + Rádio)
+- [x] Criar PlaybackContext para compartilhar estado entre players
+- [x] Modificar RadioPlayerV2 para notificar quando play é acionado
+- [x] Modificar YouTubePlayer para sincronizar com estado de reprodução
+- [x] Testar sincronização entre players
+- [x] Vídeo YouTube inicia apenas quando usuário clica play no player de rádio

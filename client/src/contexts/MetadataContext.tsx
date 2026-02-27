@@ -7,6 +7,8 @@ interface MetadataContextType {
   setSongTitle: (title: string) => void;
   songArtist: string;
   setSongArtist: (artist: string) => void;
+  isPlaying: boolean;
+  setIsPlaying: (playing: boolean) => void;
 }
 
 const MetadataContext = createContext<MetadataContextType | undefined>(undefined);
@@ -15,6 +17,7 @@ export function MetadataProvider({ children }: { children: ReactNode }) {
   const [albumCover, setAlbumCover] = useState('');
   const [songTitle, setSongTitle] = useState('Carregando...');
   const [songArtist, setSongArtist] = useState('Artista Desconhecido');
+  const [isPlaying, setIsPlaying] = useState(false);
 
   return (
     <MetadataContext.Provider
@@ -25,6 +28,8 @@ export function MetadataProvider({ children }: { children: ReactNode }) {
         setSongTitle,
         songArtist,
         setSongArtist,
+        isPlaying,
+        setIsPlaying,
       }}
     >
       {children}

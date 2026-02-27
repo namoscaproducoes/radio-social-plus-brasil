@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
+import { useMetadata } from '@/contexts/MetadataContext';
 
 interface YouTubePlayerProps {
   songTitle: string;
@@ -11,6 +12,8 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastSearchQuery, setLastSearchQuery] = useState('');
+  const { isPlaying } = useMetadata();
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     if (!songTitle || !artistName) {
@@ -67,6 +70,27 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
     return () => clearTimeout(timer);
   }, [songTitle, artistName, lastSearchQuery, videoId]);
 
+  // Sincronizar reprodução do vídeo com o player de música
+  useEffect(() => {
+    if (!iframeRef.current) return;
+
+    if (isPlaying) {
+      // Enviar comando de play para o iframe do YouTube
+      iframeRef.current.contentWindow?.postMessage(
+        { event: 'command', func: 'playVideo' },
+        '*'
+      );
+      console.log('▶️ Iniciando vídeo YouTube');
+    } else {
+      // Enviar comando de pause para o iframe do YouTube
+      iframeRef.current.contentWindow?.postMessage(
+        { event: 'command', func: 'pauseVideo' },
+        '*'
+      );
+      console.log('⏸️ Pausando vídeo YouTube');
+    }
+  }, [isPlaying]);
+
   return (
     <div className="w-full h-64 flex flex-col">
       <style>{`
@@ -108,7 +132,8 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
       {videoId && !isLoading && !error && (
         <div className="youtube-player-container">
           <iframe
-            src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&rel=0&modestbranding=1&controls=0`}
+            ref={iframeRef}
+            src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&mute=1&rel=0&modestbranding=1&controls=0`}
             title={`${artistName} - ${songTitle}`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen

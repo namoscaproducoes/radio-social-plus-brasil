@@ -32,7 +32,7 @@ export function RadioPlayerV2() {
   const reconnectTimeoutRef = useRef<any>(undefined);
   const reconnectAttemptsRef = useRef(0);
   const maxReconnectAttemptsRef = useRef(5);
-  const { setAlbumCover, setSongTitle, setSongArtist } = useMetadata();
+  const { setAlbumCover, setSongTitle, setSongArtist, setIsPlaying: setContextIsPlaying } = useMetadata();
 
   // Buscar metadados via tRPC com polling automático
   const { data: metadataResponse, isLoading: isLoadingMetadataQuery } = trpc.songs.metadata.useQuery(
@@ -228,6 +228,7 @@ export function RadioPlayerV2() {
       if (isPlaying) {
         audioRef.current.pause();
         setIsPlaying(false);
+        setContextIsPlaying(false);
       } else {
         // Garantir que o player está conectado ao stream
         if (!audioRef.current.src || audioRef.current.src === '') {
@@ -242,10 +243,12 @@ export function RadioPlayerV2() {
         console.log('▶️ Tentando reproduzir...');
         await audioRef.current.play();
         setIsPlaying(true);
+        setContextIsPlaying(true);
       }
     } catch (error) {
       console.error('❌ Erro ao reproduzir áudio:', error);
       setIsPlaying(false);
+      setContextIsPlaying(false);
     }
   };
 

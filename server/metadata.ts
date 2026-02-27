@@ -182,6 +182,8 @@ export async function searchLastfmAlbumCover(
                 }
 
                 if (imageUrl && imageUrl.trim() !== "") {
+                  // Garantir que a URL do Last.fm está em alta resolução
+                  // Last.fm retorna URLs com /300x300/ ou similares, vamos manter como está
                   console.log("Capa encontrada no Last.fm (alta resolução):", imageUrl);
                   resolve(imageUrl);
                   return;
@@ -254,8 +256,12 @@ export async function searchItunesAlbumCover(
 
               if (result.results && result.results.length > 0) {
                 // Preferir artworkUrl600 (600x600) em vez de artworkUrl100
-                const imageUrl = result.results[0].artworkUrl600 || result.results[0].artworkUrl100;
+                let imageUrl = result.results[0].artworkUrl600 || result.results[0].artworkUrl100;
+                
+                // Se conseguiu uma URL, converter para alta resolução
                 if (imageUrl) {
+                  // Substituir /100x100bb.jpg por /600x600bb.jpg para alta resolução
+                  imageUrl = imageUrl.replace(/\/(\d+)x(\d+)bb\.jpg/, '/600x600bb.jpg');
                   console.log("Capa encontrada no iTunes (alta resolução):", imageUrl);
                   resolve(imageUrl);
                 } else {

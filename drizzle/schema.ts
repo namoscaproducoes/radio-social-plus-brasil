@@ -87,3 +87,24 @@ export const songHistory = mysqlTable("songHistory", {
 
 export type SongHistory = typeof songHistory.$inferSelect;
 export type InsertSongHistory = typeof songHistory.$inferInsert;
+
+/**
+ * VideoCache table - armazena URLs de vídeos do YouTube em cache
+ */
+export const videoCache = mysqlTable("videoCache", {
+  id: int("id").autoincrement().primaryKey(),
+  songTitle: varchar("songTitle", { length: 255 }).notNull(),
+  artistName: varchar("artistName", { length: 255 }).notNull(),
+  youtubeUrl: text("youtubeUrl").notNull(), // URL completa do vídeo no YouTube
+  videoId: varchar("videoId", { length: 255 }).notNull(), // ID do vídeo
+  videoUrl: text("videoUrl"), // URL de streaming direto (pode expirar)
+  thumbnail: text("thumbnail"), // URL da thumbnail
+  title: text("title"), // Título do vídeo
+  duration: int("duration"), // Duração em segundos
+  expiresAt: timestamp("expiresAt"), // Quando o cache expira
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type VideoCache = typeof videoCache.$inferSelect;
+export type InsertVideoCache = typeof videoCache.$inferInsert;

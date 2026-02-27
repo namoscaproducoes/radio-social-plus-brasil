@@ -156,3 +156,14 @@
 - [x] Modificar YouTubePlayer para sincronizar com estado de reprodução
 - [x] Testar sincronização entre players
 - [x] Vídeo YouTube inicia apenas quando usuário clica play no player de rádio
+
+## Bugs Atuais
+- [x] Erro HTTP 500 ao buscar vídeo do YouTube - Resolvido: Implementado novo sistema com ytdl-core e cache
+
+
+## Fase 19: Player de Vídeo Customizado com Extração de URL do YouTube
+- [x] Pesquisar bibliotecas de extração de URL (yt-dlp, ytdl-core)
+- [x] Implementar scraping de URL do YouTube com ytdl-core
+- [x] Criar player de vídeo customizado (HLS.js + Video.js)
+- [x] Integrar cache de vídeos no banco de dados (tabela videoCache)
+- [x] Testar reprodução de vídeos (4 testes passando)

@@ -377,13 +377,7 @@ export function RadioPlayerV2() {
           </Button>
         </div>
 
-        {/* Debug Info */}
-        <p className="text-xs text-gray-500 mt-4">
-          Vote agora: {metadata.title}|{metadata.artist}
-        </p>
-        <p className="text-xs text-gray-500">
-          Você faz a nossa programação
-        </p>
+
       </div>
     </div>
   );

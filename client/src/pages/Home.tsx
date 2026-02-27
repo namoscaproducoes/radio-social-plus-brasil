@@ -13,9 +13,16 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-yellow-500 font-bold text-sm mb-4">OUÇA AO VIVO</p>
-            <h1 className="text-5xl md:text-6xl font-bold mb-4 leading-tight text-white">
-              É só apertar o Play.<br />É grátis!
-            </h1>
+            <div className="flex items-center justify-center gap-6 mb-4">
+              <img 
+                src="/logo-radio.png" 
+                alt="Rádio Social Plus Brasil" 
+                className="w-32 h-32 rounded-2xl shadow-lg border-4 border-yellow-500"
+              />
+              <h1 className="text-5xl md:text-6xl font-bold leading-tight text-white">
+                É só apertar o Play.<br />É grátis!
+              </h1>
+            </div>
             <p className="text-xl text-gray-200">
               Sinta, ouça e compartilhe. Sua rádio online onde e quando você quiser.
             </p>
@@ -60,6 +67,13 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-gray-950 border-t-4 border-yellow-500 py-12 px-4 mt-auto">
         <div className="max-w-6xl mx-auto">
+          <div className="flex justify-center mb-8">
+            <img 
+              src="/logo-radio.png" 
+              alt="Rádio Social Plus Brasil" 
+              className="w-16 h-16 rounded-lg shadow-lg border-2 border-yellow-500"
+            />
+          </div>
           <div className="grid md:grid-cols-3 gap-8 mb-8">
             {/* About Link */}
             <div className="text-center">

@@ -137,8 +137,15 @@
 - [x] Implementar pré-carregamento de 10 segundos
 - [x] Testar com stream ao vivo
 
+## Fase 17: Sistema Robusto de Streaming com Buffer Gerenciado
+- [x] Implementar gerenciador de buffer no backend
+- [x] Reescrever RadioPlayerV2 com estratégia de buffer melhorada
+- [x] Implementar pré-carregamento de 5 segundos
+- [x] Garantir fluxo contínuo sem interrupções
+- [x] Testar resiliência contra queda de internet
+
 ## Bugs Pendentes
 - [x] Dashboard não contabiliza votos corretamente - Corrigido: db.execute retorna [rows, fields], agora extraindo apenas rows
 - [x] Capas do Last.fm em baixa resolução - Corrigido: priorizar extralarge e large, usar artworkUrl600 no iTunes
 - [x] Player desligando ao trocar de música - Corrigido: manter reprodução contínua
-- [x] Buffer da música anterior repete após troca - Corrigido: resetar src com timestamp e preload auto
+- [x] Buffer da música anterior repete após troca - Corrigido com sistema robusto de buffer gerenciado

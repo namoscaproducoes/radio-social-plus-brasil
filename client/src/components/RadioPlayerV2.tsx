@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { ThumbsUp, ThumbsDown, Play, Pause, Volume2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -22,7 +22,9 @@ export function RadioPlayerV2() {
   });
   const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(null);
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
+  const [bufferProgress, setBufferProgress] = useState(0);
   const lastMetadataRef = useRef('');
+  const streamResetRef = useRef(false);
   const { setAlbumCover, setSongTitle, setSongArtist } = useMetadata();
 
   // Buscar metadados via tRPC com polling automático
@@ -42,6 +44,33 @@ export function RadioPlayerV2() {
     },
   });
 
+  // Resetar buffer quando música muda
+  const resetStreamBuffer = async () => {
+    try {
+      console.log('🔄 Resetando buffer do stream...');
+      await fetch('/api/stream/reset', { method: 'POST' });
+      streamResetRef.current = true;
+      console.log('✅ Buffer resetado com sucesso');
+    } catch (error) {
+      console.error('❌ Erro ao resetar buffer:', error);
+    }
+  };
+
+  // Monitorar progresso de buffer
+  const handleProgress = () => {
+    if (!audioRef.current) return;
+
+    const buffered = audioRef.current.buffered;
+    if (buffered.length > 0) {
+      const bufferedEnd = buffered.end(buffered.length - 1);
+      const duration = audioRef.current.duration;
+      if (duration > 0) {
+        const progress = (bufferedEnd / duration) * 100;
+        setBufferProgress(Math.min(progress, 100));
+      }
+    }
+  };
+
   // Atualizar estado local quando metadados mudam
   useEffect(() => {
     if (metadataResponse && metadataResponse.title && metadataResponse.title !== 'Musica Desconhecida') {
@@ -51,8 +80,9 @@ export function RadioPlayerV2() {
       if (metadataKey !== lastMetadataRef.current) {
         console.log('🎵 Música atualizada:', metadataResponse.title, '-', metadataResponse.artist);
         
-        // NÃO pausar o player quando a música muda - deixar tocando
-        // Apenas atualizar os metadados
+        // Resetar buffer quando música muda
+        resetStreamBuffer();
+
         const newCover = metadataResponse.albumCover || '';
         setMetadata({
           title: metadataResponse.title,
@@ -76,6 +106,28 @@ export function RadioPlayerV2() {
     setIsLoadingMetadata(isLoadingMetadataQuery);
   }, [isLoadingMetadataQuery]);
 
+  // Garantir que o player está sempre conectado
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    // Se não tem src, conectar ao stream
+    if (!audioRef.current.src) {
+      audioRef.current.src = '/api/stream';
+      console.log('🔗 Conectado ao stream de rádio');
+    }
+
+    // Monitorar eventos de buffer
+    const audio = audioRef.current;
+    audio.addEventListener('progress', handleProgress);
+    audio.addEventListener('canplaythrough', () => {
+      console.log('✅ Buffer suficiente para reprodução contínua');
+    });
+
+    return () => {
+      audio.removeEventListener('progress', handleProgress);
+    };
+  }, []);
+
   // Tocar/pausar
   const togglePlay = async () => {
     if (!audioRef.current) return;
@@ -89,42 +141,20 @@ export function RadioPlayerV2() {
         if (!audioRef.current.src) {
           audioRef.current.src = '/api/stream';
         }
-        await audioRef.current.play();
-        setIsPlaying(true);
+        
+        // Tentar reproduzir
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          await playPromise;
+          setIsPlaying(true);
+        }
       }
     } catch (error) {
       console.error('Erro ao reproduzir áudio:', error);
       toast.error('Erro ao reproduzir áudio');
+      setIsPlaying(false);
     }
   };
-
-  // Garantir que o player continua tocando quando metadados mudam
-  // Também limpar buffer da música anterior
-  useEffect(() => {
-    if (audioRef.current) {
-      // Zerar o buffer e reconectar ao stream
-      const wasPlaying = !audioRef.current.paused;
-      audioRef.current.pause();
-      
-      // Resetar a fonte para forcar novo carregamento
-      audioRef.current.src = '/api/stream?t=' + Date.now();
-      audioRef.current.currentTime = 0;
-      audioRef.current.load();
-      
-      // Retomar a reproducao se estava tocando
-      if (wasPlaying) {
-        setTimeout(() => {
-          if (audioRef.current) {
-            audioRef.current.play().catch((error) => {
-              console.warn('Erro ao retomar reproducao:', error);
-            });
-          }
-        }, 100);
-      }
-      
-      console.log('Buffer limpo e recarregado para nova musica');
-    }
-  }, [metadata.title]); // Quando a música muda
 
   // Registrar voto
   const handleVote = async (voteType: 'like' | 'dislike') => {
@@ -147,7 +177,7 @@ export function RadioPlayerV2() {
 
   return (
     <div className="w-full">
-      {/* Audio Element - Conecta ao stream via proxy */}
+      {/* Audio Element - Conecta ao stream via proxy com buffer gerenciado */}
       <audio
         ref={audioRef}
         src="/api/stream"
@@ -161,7 +191,7 @@ export function RadioPlayerV2() {
         onPause={() => setIsPlaying(false)}
         onEnded={() => {
           // Quando o stream termina, tentar reconectar
-          if (audioRef.current) {
+          if (audioRef.current && isPlaying) {
             audioRef.current.play().catch((error) => {
               console.warn('Erro ao reconectar ao stream:', error);
             });
@@ -210,6 +240,21 @@ export function RadioPlayerV2() {
           )}
         </div>
 
+        {/* Buffer Progress Bar */}
+        {bufferProgress < 100 && (
+          <div className="w-full max-w-xs px-4">
+            <div className="bg-gray-700 rounded-full h-1 overflow-hidden">
+              <div
+                className="bg-yellow-500 h-full transition-all duration-300"
+                style={{ width: `${bufferProgress}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-400 text-center mt-1">
+              Buffer: {Math.round(bufferProgress)}%
+            </p>
+          </div>
+        )}
+
         {/* Controls */}
         <div className="flex items-center gap-6 w-full justify-center">
           {/* Play/Pause Button */}
@@ -218,11 +263,7 @@ export function RadioPlayerV2() {
             className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 rounded-full p-4 shadow-lg transform transition hover:scale-110 active:scale-95"
             title={isPlaying ? 'Pausar' : 'Reproduzir'}
           >
-            {isPlaying ? (
-              <Pause size={32} />
-            ) : (
-              <Play size={32} className="ml-1" />
-            )}
+            {isPlaying ? <Pause size={32} /> : <Play size={32} />}
           </Button>
 
           {/* Volume Control */}
@@ -240,53 +281,49 @@ export function RadioPlayerV2() {
                   audioRef.current.volume = vol / 100;
                 }
               }}
-              className="w-24 h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer"
-              style={{
-                background: `linear-gradient(to right, #eab308 0%, #eab308 ${volume}%, #4b5563 ${volume}%, #4b5563 100%)`,
-              }}
-              title={`Volume: ${volume}%`}
+              className="w-24 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
             />
-            <span className="text-sm text-gray-300 w-8">{volume}%</span>
+            <span className="text-sm text-gray-300 w-8 text-right">{volume}%</span>
           </div>
         </div>
 
         {/* Vote Buttons */}
-        <div className="flex gap-6 w-full justify-center">
+        <div className="flex gap-4 w-full justify-center">
           <Button
             onClick={() => handleVote('like')}
-            disabled={addVoteMutation.isPending}
-            className={`flex items-center gap-3 px-8 py-3 rounded-full font-bold text-lg transition transform hover:scale-105 active:scale-95 ${
+            variant={userVote === 'like' ? 'default' : 'outline'}
+            className={`rounded-full px-6 py-2 transition ${
               userVote === 'like'
-                ? 'bg-green-500 hover:bg-green-600 text-white shadow-lg'
-                : 'bg-gray-600 hover:bg-gray-700 text-white'
+                ? 'bg-green-500 hover:bg-green-600 text-white'
+                : 'border-green-500 text-green-500 hover:bg-green-500 hover:text-white'
             }`}
-            title="Gostei desta música"
+            disabled={addVoteMutation.isPending}
           >
-            <ThumbsUp size={24} />
+            <ThumbsUp size={18} className="mr-2" />
             Gostei
           </Button>
           <Button
             onClick={() => handleVote('dislike')}
-            disabled={addVoteMutation.isPending}
-            className={`flex items-center gap-3 px-8 py-3 rounded-full font-bold text-lg transition transform hover:scale-105 active:scale-95 ${
+            variant={userVote === 'dislike' ? 'default' : 'outline'}
+            className={`rounded-full px-6 py-2 transition ${
               userVote === 'dislike'
-                ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg'
-                : 'bg-gray-600 hover:bg-gray-700 text-white'
+                ? 'bg-red-500 hover:bg-red-600 text-white'
+                : 'border-red-500 text-red-500 hover:bg-red-500 hover:text-white'
             }`}
-            title="Não gostei desta música"
+            disabled={addVoteMutation.isPending}
           >
-            <ThumbsDown size={24} />
+            <ThumbsDown size={18} className="mr-2" />
             Não Gostei
           </Button>
         </div>
 
-        {/* Debug Info - Apenas em desenvolvimento */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="text-xs text-gray-500 mt-4 text-center">
-            <p>Vote agora: {lastMetadataRef.current || 'Aguardando...'}</p>
-            <p>Você faz a nossa programação</p>
-          </div>
-        )}
+        {/* Debug Info */}
+        <p className="text-xs text-gray-500 mt-4">
+          Vote agora: {metadata.title}|{metadata.artist}
+        </p>
+        <p className="text-xs text-gray-500">
+          Você faz a nossa programação
+        </p>
       </div>
     </div>
   );

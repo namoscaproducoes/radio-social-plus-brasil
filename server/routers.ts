@@ -12,28 +12,6 @@ import { youtubeRouter } from "./youtube-router";
 export const appRouter = router({
   system: systemRouter,
   youtube: youtubeRouter,
-  videos: router({
-    search: publicProcedure
-      .input(
-        z.object({
-          songTitle: z.string(),
-          artistName: z.string(),
-        })
-      )
-      .query(async ({ input }) => {
-        try {
-          const { extractYouTubeVideo } = await import("./youtube-extractor");
-          const result = await extractYouTubeVideo(input.songTitle, input.artistName);
-          return result;
-        } catch (error) {
-          console.error("Erro ao buscar vídeo:", error);
-          return {
-            error: "Erro ao buscar vídeo",
-            youtubeUrl: null,
-          };
-        }
-      }),
-  }),
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

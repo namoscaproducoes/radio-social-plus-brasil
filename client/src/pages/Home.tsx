@@ -2,23 +2,18 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLocation } from "wouter";
 import { RadioPlayerV2 } from "@/components/RadioPlayerV2";
-import { CustomVideoPlayer } from "@/components/CustomVideoPlayer";
+import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { VoteButtons } from "@/components/VoteButtons";
 import { SongHistory } from "@/components/SongHistory";
 import { useMetadata } from "@/contexts/MetadataContext";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 
 export default function Home() {
   const [, navigate] = useLocation();
-  const { albumCover, songTitle, songArtist, isPlaying } = useMetadata();
-  const [youtubeUrl, setYoutubeUrl] = useState<string>("");
+  const { albumCover, songTitle, songArtist } = useMetadata();
   const lastSongRef = useRef<string>("");
   const addToHistoryMutation = trpc.songs.addToHistory.useMutation();
-  const videoSearchQuery = trpc.videos.search.useQuery(
-    { songTitle, artistName: songArtist },
-    { enabled: !!songTitle && !!songArtist }
-  );
 
   useEffect(() => {
     if (songTitle && songArtist && songTitle !== "Carregando...") {
@@ -83,14 +78,9 @@ export default function Home() {
                 <RadioPlayerV2 />
               </div>
 
-              {/* Right: Video Player */}
+              {/* Right: YouTube Video */}
               <div className="flex flex-col gap-4">
-                <CustomVideoPlayer 
-                  youtubeUrl={(videoSearchQuery.data && 'youtubeUrl' in videoSearchQuery.data && videoSearchQuery.data.youtubeUrl) || ""}
-                  videoId={(videoSearchQuery.data && 'videoId' in videoSearchQuery.data ? videoSearchQuery.data.videoId : undefined)}
-                  title={(videoSearchQuery.data && 'title' in videoSearchQuery.data && videoSearchQuery.data.title) || undefined}
-                  isPlaying={isPlaying}
-                />
+                <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
                 <VoteButtons />
               </div>
             </div>

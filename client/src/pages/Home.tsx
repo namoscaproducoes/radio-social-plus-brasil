@@ -103,34 +103,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* About Section */}
-        <section className="py-20 px-4 bg-gray-900 mt-20">
-          <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-white mb-8 text-center">
-            Sobre a Rádio Social Plus Brasil
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="bg-purple-800 border-2 border-yellow-500 p-6">
-              <h3 className="text-xl font-bold text-yellow-500 mb-3">🎵 Música Diversa</h3>
-              <p className="text-gray-200">
-                Ouça o melhor da música brasileira e internacional, selecionada especialmente para você.
-              </p>
-            </Card>
-            <Card className="bg-purple-800 border-2 border-yellow-500 p-6">
-              <h3 className="text-xl font-bold text-yellow-500 mb-3">📱 Sempre Conectado</h3>
-              <p className="text-gray-200">
-                Ouça em qualquer lugar, a qualquer hora. No celular, tablet ou computador.
-              </p>
-            </Card>
-            <Card className="bg-purple-800 border-2 border-yellow-500 p-6">
-              <h3 className="text-xl font-bold text-yellow-500 mb-3">❤️ Sua Opinião Importa</h3>
-              <p className="text-gray-200">
-                Vote nas suas músicas favoritas e ajude a moldar a programação da rádio.
-              </p>
-            </Card>
-          </div>
-          </div>
-        </section>
+
 
         {/* Footer */}
         <footer className="bg-gray-950 border-t-4 border-yellow-500 py-12 px-4 mt-auto">

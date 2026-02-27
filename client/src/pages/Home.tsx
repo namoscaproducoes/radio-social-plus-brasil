@@ -71,30 +71,10 @@ export default function Home() {
 
           {/* Player and Video Container */}
           <Card className="bg-gray-900 border-4 border-yellow-500 p-8 shadow-2xl max-w-5xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-8 h-full">
-              {/* Left: Album Cover and Radio Player */}
-              <div className="flex flex-col gap-6">
-                {/* Album Cover */}
-                <div className="w-full aspect-square rounded-lg overflow-hidden border-2 border-yellow-500 shadow-lg">
-                  {albumCover ? (
-                    <img
-                      src={albumCover}
-                      alt="Album Cover"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-purple-600 to-indigo-900 flex items-center justify-center">
-                      <div className="text-center">
-                        <div className="text-6xl mb-4">🎵</div>
-                        <p className="text-gray-400">Sem capa</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {/* Radio Player */}
-                <div>
-                  <RadioPlayerV2 />
-                </div>
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Left: Radio Player */}
+              <div>
+                <RadioPlayerV2 />
               </div>
 
               {/* Right: YouTube Video */}

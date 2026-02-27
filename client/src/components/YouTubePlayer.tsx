@@ -68,9 +68,9 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
   }, [songTitle, artistName, lastSearchQuery, videoId]);
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className="w-full h-64 flex flex-col">
       {isLoading && (
-        <div className="flex items-center justify-center flex-1 bg-gray-900 rounded-lg border border-gray-700">
+        <div className="flex items-center justify-center h-64 bg-gray-900 rounded-lg border border-gray-700">
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="w-8 h-8 animate-spin text-yellow-500" />
             <p className="text-sm text-gray-400">Buscando clipe...</p>
@@ -79,7 +79,7 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
       )}
 
       {error && (
-        <div className="flex items-center justify-center flex-1 bg-gray-900 rounded-lg border border-gray-700">
+        <div className="flex items-center justify-center h-64 bg-gray-900 rounded-lg border border-gray-700">
           <div className="flex flex-col items-center gap-2 text-center px-4">
             <AlertCircle className="w-8 h-8 text-red-500" />
             <p className="text-sm text-gray-400">{error}</p>
@@ -88,7 +88,7 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
       )}
 
       {videoId && !isLoading && !error && (
-        <div className="w-full flex-1 rounded-lg overflow-hidden border-2 border-yellow-500 shadow-lg">
+        <div className="w-full h-64 rounded-lg overflow-hidden border-2 border-yellow-500 shadow-lg">
           <iframe
             width="100%"
             height="100%"
@@ -104,7 +104,7 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
       )}
 
       {!videoId && !isLoading && !error && (
-        <div className="flex items-center justify-center flex-1 bg-gray-900 rounded-lg border border-gray-700">
+        <div className="flex items-center justify-center h-64 bg-gray-900 rounded-lg border border-gray-700">
           <p className="text-gray-400">Aguardando música...</p>
         </div>
       )}

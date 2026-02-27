@@ -117,5 +117,21 @@
 - [x] Todos os testes passando (9 testes)
 
 
+## Fase 14: Melhoria de Resolução de Capas
+- [x] Melhorar busca de capas no Last.fm (priorizar extralarge)
+- [x] Melhorar busca de capas no iTunes (usar artworkUrl600)
+- [x] Adicionar autocorrect na busca Last.fm
+- [x] Aumentar timeout de requisições para 10 segundos
+- [x] Todos os testes passando (9 testes)
+
+## Fase 15: Correção de Bugs do Player
+- [x] Player desligando ao trocar de música - Corrigido: não pausar, apenas atualizar metadados
+- [x] Adicionar lógica de reconexão ao stream
+- [x] Garantir que player continua tocando quando música muda
+- [x] Melhorar tratamento de erros de stream
+- [x] Todos os testes passando (9 testes)
+
 ## Bugs Pendentes
 - [x] Dashboard não contabiliza votos corretamente - Corrigido: db.execute retorna [rows, fields], agora extraindo apenas rows
+- [x] Capas do Last.fm em baixa resolução - Corrigido: priorizar extralarge e large, usar artworkUrl600 no iTunes
+- [x] Player desligando ao trocar de música - Corrigido: manter reprodução contínua

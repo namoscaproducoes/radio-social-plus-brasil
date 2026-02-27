@@ -133,15 +133,15 @@ export async function searchLastfmAlbumCover(
     }
 
     // Last.fm API para buscar informações do álbum
-    // Primeiro, buscar track para obter o álbum
-    const trackUrl = `http://ws.audioscrobbler.com/2.0/?method=track.getInfo&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(song)}&api_key=${apiKey}&format=json`;
+    // Usar method=track.getInfo para obter informações detalhadas com imagens em alta resolução
+    const trackUrl = `http://ws.audioscrobbler.com/2.0/?method=track.getInfo&artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(song)}&api_key=${apiKey}&format=json&autocorrect=1`;
 
     console.log("Buscando no Last.fm:", { artist, song, trackUrl });
 
     return new Promise((resolve) => {
       const httpModule = trackUrl.startsWith('http://') ? http : https;
       httpModule
-        .get(trackUrl, { timeout: 5000 }, (res: any) => {
+        .get(trackUrl, { timeout: 10000 }, (res: any) => {
           let data = "";
 
           res.on("data", (chunk: any) => {
@@ -158,21 +158,31 @@ export async function searchLastfmAlbumCover(
                 const images = result.track.album.image;
                 let imageUrl = null;
 
-                // Procurar por "extralarge" ou "large"
+                // Procurar por "extralarge" (maior resolução disponível)
                 for (const img of images) {
-                  if (img.size === "extralarge" || img.size === "large") {
+                  if (img.size === "extralarge") {
                     imageUrl = img["#text"];
                     break;
                   }
                 }
 
-                // Se não encontrou, usar a primeira disponível
+                // Se não encontrou extralarge, procurar por large
+                if (!imageUrl) {
+                  for (const img of images) {
+                    if (img.size === "large") {
+                      imageUrl = img["#text"];
+                      break;
+                    }
+                  }
+                }
+
+                // Se ainda não encontrou, usar a última disponível (geralmente a maior)
                 if (!imageUrl && images.length > 0) {
                   imageUrl = images[images.length - 1]["#text"];
                 }
 
-                if (imageUrl) {
-                  console.log("Capa encontrada no Last.fm:", imageUrl);
+                if (imageUrl && imageUrl.trim() !== "") {
+                  console.log("Capa encontrada no Last.fm (alta resolução):", imageUrl);
                   resolve(imageUrl);
                   return;
                 }
@@ -223,13 +233,14 @@ export async function searchItunesAlbumCover(
     }
 
     const searchTerm = `${artist} ${song}`;
-    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(searchTerm)}&media=music&limit=1`;
+    // Adicionar entity=song para melhorar resultados
+    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(searchTerm)}&media=music&entity=song&limit=1`;
 
     console.log("Buscando no iTunes:", { artist, song, searchTerm, url });
 
     return new Promise((resolve) => {
       https
-        .get(url, { timeout: 5000 }, (res) => {
+        .get(url, { timeout: 10000 }, (res) => {
           let data = "";
 
           res.on("data", (chunk) => {
@@ -242,9 +253,15 @@ export async function searchItunesAlbumCover(
               console.log("Resposta iTunes:", result);
 
               if (result.results && result.results.length > 0) {
+                // Preferir artworkUrl600 (600x600) em vez de artworkUrl100
                 const imageUrl = result.results[0].artworkUrl600 || result.results[0].artworkUrl100;
-                console.log("Capa encontrada:", imageUrl);
-                resolve(imageUrl || null);
+                if (imageUrl) {
+                  console.log("Capa encontrada no iTunes (alta resolução):", imageUrl);
+                  resolve(imageUrl);
+                } else {
+                  console.log("Nenhuma URL de capa disponível no iTunes");
+                  resolve(null);
+                }
               } else {
                 console.log("Nenhum resultado no iTunes");
                 resolve(null);

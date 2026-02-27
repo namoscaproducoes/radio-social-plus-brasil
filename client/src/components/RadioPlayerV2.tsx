@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ThumbsUp, ThumbsDown, Play, Pause, Volume2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -49,6 +49,8 @@ export function RadioPlayerV2() {
       if (metadataKey !== lastMetadataRef.current) {
         console.log('🎵 Música atualizada:', metadataResponse.title, '-', metadataResponse.artist);
         
+        // NÃO pausar o player quando a música muda - deixar tocando
+        // Apenas atualizar os metadados
         setMetadata({
           title: metadataResponse.title,
           artist: metadataResponse.artist,
@@ -75,6 +77,10 @@ export function RadioPlayerV2() {
         audioRef.current.pause();
         setIsPlaying(false);
       } else {
+        // Garantir que o player está conectado ao stream
+        if (!audioRef.current.src) {
+          audioRef.current.src = '/api/stream';
+        }
         await audioRef.current.play();
         setIsPlaying(true);
       }
@@ -83,6 +89,16 @@ export function RadioPlayerV2() {
       toast.error('Erro ao reproduzir áudio');
     }
   };
+
+  // Garantir que o player continua tocando quando metadados mudam
+  useEffect(() => {
+    if (audioRef.current && isPlaying) {
+      // Se estava tocando, continuar tocando mesmo com mudança de música
+      audioRef.current.play().catch((error) => {
+        console.warn('Erro ao manter reprodução:', error);
+      });
+    }
+  }, [metadata.title]); // Quando a música muda
 
   // Registrar voto
   const handleVote = async (voteType: 'like' | 'dislike') => {
@@ -116,6 +132,14 @@ export function RadioPlayerV2() {
         }}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
+        onEnded={() => {
+          // Quando o stream termina, tentar reconectar
+          if (audioRef.current) {
+            audioRef.current.play().catch((error) => {
+              console.warn('Erro ao reconectar ao stream:', error);
+            });
+          }
+        }}
       />
 
       {/* Player Container */}

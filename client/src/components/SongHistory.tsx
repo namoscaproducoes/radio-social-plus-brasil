@@ -19,7 +19,7 @@ export function SongHistory() {
 
   // Buscar histórico de músicas
   const { data: historyData, isLoading: isHistoryLoading, refetch } = trpc.songs.history.useQuery(
-    { limit: 20 },
+    { limit: 10 },
     {
       refetchInterval: 5000, // Atualizar a cada 5 segundos
     }
@@ -113,11 +113,17 @@ export function SongHistory() {
   return (
     <div className="w-full">
       <h3 className="text-2xl font-bold text-white mb-6">Histórico de Músicas</h3>
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      <div className="space-y-3 max-h-96 overflow-y-auto backdrop-blur-sm bg-black/20 rounded-lg p-4">
         {songs.map((song, index) => (
           <div
             key={`${song.id}-${index}`}
-            className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg p-4 hover:from-gray-700 hover:to-gray-800 transition-all duration-200 border border-gray-700"
+            className="bg-black/40 backdrop-blur-sm rounded-lg p-4 hover:bg-black/60 transition-all duration-200 border border-white/10"
+            style={{
+              backgroundImage: song.albumCover ? `url(${song.albumCover})` : 'none',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundBlendMode: 'overlay',
+            }}
           >
             <div className="flex items-start gap-4">
               {/* Album Cover */}

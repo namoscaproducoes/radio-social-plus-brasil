@@ -24,7 +24,8 @@ export function RadioPlayerV2() {
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
   const lastMetadataRef = useRef('');
   const reconnectTimeoutRef = useRef<any>(undefined);
-  const preventiveReconnectIntervalRef = useRef<any>(undefined);
+  const reconnectAttemptsRef = useRef(0);
+  const maxReconnectAttemptsRef = useRef(5);
   const { setAlbumCover, setSongTitle, setSongArtist } = useMetadata();
 
   // Buscar metadados via tRPC com polling automático
@@ -78,48 +79,56 @@ export function RadioPlayerV2() {
 
   // Função para reconectar ao stream
   const reconnectToStream = async (reason: string = 'unknown') => {
-    if (!audioRef.current) {
-      console.log('❌ Não pode reconectar: sem audio ref');
+    if (!audioRef.current || !isPlaying) {
+      console.log('❌ Não pode reconectar:', reason);
       return;
     }
 
-    if (!isPlaying) {
-      console.log('❌ Não pode reconectar: player não está tocando');
+    reconnectAttemptsRef.current += 1;
+    console.warn(`⚠️ Reconectando (tentativa ${reconnectAttemptsRef.current}/${maxReconnectAttemptsRef.current}): ${reason}`);
+
+    if (reconnectAttemptsRef.current > maxReconnectAttemptsRef.current) {
+      console.error('❌ Máximo de tentativas de reconexão atingido');
+      toast.error('Não foi possível reconectar ao stream');
+      setIsPlaying(false);
       return;
     }
 
-    console.warn(`⚠️ Reconectando: ${reason}`);
+    // Delay exponencial: 500ms, 1s, 1.5s, 2s, 2.5s
+    const delayMs = Math.min(500 * reconnectAttemptsRef.current, 2500);
 
-    try {
-      console.log('🔄 Iniciando reconexão...');
-      
-      // Pausar para limpar buffer
-      audioRef.current.pause();
-      
-      // Resetar src com timestamp para forçar nova requisição
-      const newSrc = '/api/stream?' + Date.now();
-      audioRef.current.src = newSrc;
-      console.log('📡 Novo src definido:', newSrc);
-      
-      // Aguardar um pouco para garantir que o src foi definido
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Tentar reproduzir
-      const playPromise = audioRef.current.play();
-      if (playPromise) {
-        await playPromise;
-        console.log('✅ Reconectado ao stream com sucesso');
-      }
-    } catch (error) {
-      console.error('❌ Erro ao reconectar:', error);
-      // Tentar novamente em 1 segundo
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-      }
-      reconnectTimeoutRef.current = setTimeout(() => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+    }
+
+    reconnectTimeoutRef.current = setTimeout(async () => {
+      try {
+        console.log('🔄 Iniciando reconexão...');
+        
+        // Pausar para limpar buffer
+        audioRef.current!.pause();
+        
+        // Resetar src com timestamp para forçar nova requisição
+        const newSrc = '/api/stream?' + Date.now();
+        audioRef.current!.src = newSrc;
+        console.log('📡 Novo src definido:', newSrc);
+        
+        // Aguardar um pouco para garantir que o src foi definido
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Tentar reproduzir
+        const playPromise = audioRef.current?.play();
+        if (playPromise) {
+          await playPromise;
+          console.log('✅ Reconectado ao stream com sucesso');
+          reconnectAttemptsRef.current = 0; // Resetar contador
+        }
+      } catch (error) {
+        console.error('❌ Erro ao reconectar:', error);
+        // Tentar novamente
         reconnectToStream('retry after error');
-      }, 1000);
-    }
+      }
+    }, delayMs);
   };
 
   // Garantir que o player está sempre conectado
@@ -136,6 +145,7 @@ export function RadioPlayerV2() {
     const handlePlay = () => {
       console.log('▶️ Reprodução iniciada');
       setIsPlaying(true);
+      reconnectAttemptsRef.current = 0; // Resetar contador quando começar a reproduzir
     };
 
     const handlePause = () => {
@@ -163,14 +173,23 @@ export function RadioPlayerV2() {
     const handleStalled = () => {
       console.warn('⚠️ Stream stalled (sem dados)');
       if (isPlaying) {
-        reconnectToStream('stalled');
+        // Dar um tempo antes de reconectar
+        setTimeout(() => {
+          if (isPlaying && audioRef.current && audioRef.current.paused) {
+            reconnectToStream('stalled');
+          }
+        }, 2000);
       }
     };
 
     const handleSuspend = () => {
       console.warn('⚠️ Stream suspended');
       if (isPlaying) {
-        reconnectToStream('suspend');
+        setTimeout(() => {
+          if (isPlaying && audioRef.current && audioRef.current.paused) {
+            reconnectToStream('suspend');
+          }
+        }, 2000);
       }
     };
 
@@ -195,31 +214,6 @@ export function RadioPlayerV2() {
     };
   }, [isPlaying]);
 
-  // Reconexão preventiva periódica a cada 30 segundos
-  useEffect(() => {
-    if (!isPlaying) {
-      if (preventiveReconnectIntervalRef.current) {
-        clearInterval(preventiveReconnectIntervalRef.current);
-      }
-      return;
-    }
-
-    console.log('⏱️ Iniciando reconexão preventiva periódica (a cada 30s)');
-
-    preventiveReconnectIntervalRef.current = setInterval(() => {
-      if (isPlaying && audioRef.current) {
-        console.log('🔄 Reconexão preventiva periódica acionada');
-        reconnectToStream('preventive periodic reconnect');
-      }
-    }, 30000); // A cada 30 segundos
-
-    return () => {
-      if (preventiveReconnectIntervalRef.current) {
-        clearInterval(preventiveReconnectIntervalRef.current);
-      }
-    };
-  }, [isPlaying]);
-
   // Tocar/pausar
   const togglePlay = async () => {
     if (!audioRef.current) return;
@@ -234,6 +228,9 @@ export function RadioPlayerV2() {
           audioRef.current.src = '/api/stream';
           console.log('🔗 Conectado ao stream de rádio');
         }
+        
+        // Resetar contador de tentativas
+        reconnectAttemptsRef.current = 0;
         
         // Tentar reproduzir
         console.log('▶️ Tentando reproduzir...');

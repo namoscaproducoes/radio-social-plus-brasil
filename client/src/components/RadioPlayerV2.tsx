@@ -22,9 +22,7 @@ export function RadioPlayerV2() {
   });
   const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(null);
   const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
-  const [bufferProgress, setBufferProgress] = useState(0);
   const lastMetadataRef = useRef('');
-  const streamResetRef = useRef(false);
   const { setAlbumCover, setSongTitle, setSongArtist } = useMetadata();
 
   // Buscar metadados via tRPC com polling automático
@@ -44,33 +42,6 @@ export function RadioPlayerV2() {
     },
   });
 
-  // Resetar buffer quando música muda
-  const resetStreamBuffer = async () => {
-    try {
-      console.log('🔄 Resetando buffer do stream...');
-      await fetch('/api/stream/reset', { method: 'POST' });
-      streamResetRef.current = true;
-      console.log('✅ Buffer resetado com sucesso');
-    } catch (error) {
-      console.error('❌ Erro ao resetar buffer:', error);
-    }
-  };
-
-  // Monitorar progresso de buffer
-  const handleProgress = () => {
-    if (!audioRef.current) return;
-
-    const buffered = audioRef.current.buffered;
-    if (buffered.length > 0) {
-      const bufferedEnd = buffered.end(buffered.length - 1);
-      const duration = audioRef.current.duration;
-      if (duration > 0) {
-        const progress = (bufferedEnd / duration) * 100;
-        setBufferProgress(Math.min(progress, 100));
-      }
-    }
-  };
-
   // Atualizar estado local quando metadados mudam
   useEffect(() => {
     if (metadataResponse && metadataResponse.title && metadataResponse.title !== 'Musica Desconhecida') {
@@ -80,9 +51,6 @@ export function RadioPlayerV2() {
       if (metadataKey !== lastMetadataRef.current) {
         console.log('🎵 Música atualizada:', metadataResponse.title, '-', metadataResponse.artist);
         
-        // Resetar buffer quando música muda
-        resetStreamBuffer();
-
         const newCover = metadataResponse.albumCover || '';
         setMetadata({
           title: metadataResponse.title,
@@ -115,17 +83,6 @@ export function RadioPlayerV2() {
       audioRef.current.src = '/api/stream';
       console.log('🔗 Conectado ao stream de rádio');
     }
-
-    // Monitorar eventos de buffer
-    const audio = audioRef.current;
-    audio.addEventListener('progress', handleProgress);
-    audio.addEventListener('canplaythrough', () => {
-      console.log('✅ Buffer suficiente para reprodução contínua');
-    });
-
-    return () => {
-      audio.removeEventListener('progress', handleProgress);
-    };
   }, []);
 
   // Tocar/pausar
@@ -142,22 +99,9 @@ export function RadioPlayerV2() {
           audioRef.current.src = '/api/stream';
         }
         
-        // Tentar reproduzir com tratamento de erro
-        try {
-          await audioRef.current.play();
-          setIsPlaying(true);
-        } catch (playError: any) {
-          // Ignorar erros de autoplay policy
-          if (playError.name === 'NotAllowedError') {
-            console.warn('Autoplay bloqueado pelo navegador');
-            // Tentar novamente após interação do usuário
-            setTimeout(() => {
-              audioRef.current?.play().catch(() => {});
-            }, 100);
-          } else {
-            throw playError;
-          }
-        }
+        // Tentar reproduzir
+        await audioRef.current.play();
+        setIsPlaying(true);
       }
     } catch (error) {
       console.error('Erro ao reproduzir áudio:', error);
@@ -186,26 +130,16 @@ export function RadioPlayerV2() {
 
   return (
     <div className="w-full">
-      {/* Audio Element - Conecta ao stream via proxy com buffer gerenciado */}
+      {/* Audio Element - Stream direto */}
       <audio
         ref={audioRef}
         src="/api/stream"
         crossOrigin="anonymous"
-        preload="auto"
         onError={(e) => {
           console.error('Erro ao carregar stream:', e);
-          toast.error('Erro ao conectar ao stream');
         }}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
-        onEnded={() => {
-          // Quando o stream termina, tentar reconectar
-          if (audioRef.current && isPlaying) {
-            audioRef.current.play().catch((error) => {
-              console.warn('Erro ao reconectar ao stream:', error);
-            });
-          }
-        }}
       />
 
       {/* Player Container */}
@@ -248,8 +182,6 @@ export function RadioPlayerV2() {
             <p className="text-sm text-yellow-400 mt-2 animate-pulse">Atualizando metadados...</p>
           )}
         </div>
-
-        {/* Buffer Progress Bar - Oculto */}
 
         {/* Controls */}
         <div className="flex items-center gap-6 w-full justify-center">

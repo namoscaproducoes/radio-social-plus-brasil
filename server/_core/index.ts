@@ -7,7 +7,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import streamRouter from "../stream-buffer";
+import streamRouter from "../stream";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {

@@ -5,10 +5,12 @@ const router = Router();
 
 /**
  * Proxy endpoint para o stream de rádio
- * Contorna bloqueios CORS e problemas de conexão direta
+ * Proxy direto com keep-alive e tratamento robusto de reconexão
  */
 router.get("/stream", (req: Request, res: Response) => {
   const streamUrl = "https://s01.brascast.com:7034/live";
+
+  console.log("📡 Cliente conectado ao stream");
 
   // Configurar headers CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -18,6 +20,13 @@ router.get("/stream", (req: Request, res: Response) => {
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Transfer-Encoding", "chunked");
   res.setHeader("Connection", "keep-alive");
+  res.setHeader("Keep-Alive", "timeout=30, max=100");
+
+  // Configurar socket do cliente para keep-alive
+  if (res.socket) {
+    res.socket.setKeepAlive(true, 30000);
+    res.socket.setTimeout(0);
+  }
 
   // Fazer requisição ao servidor de stream com opções de SSL
   const options = {
@@ -26,6 +35,8 @@ router.get("/stream", (req: Request, res: Response) => {
   };
 
   const request = https.get(streamUrl, options, (streamRes) => {
+    console.log("✅ Conectado ao stream Icecast");
+    
     // Passar headers relevantes
     if (streamRes.headers["content-type"]) {
       res.setHeader("Content-Type", streamRes.headers["content-type"]);
@@ -34,21 +45,34 @@ router.get("/stream", (req: Request, res: Response) => {
       res.setHeader("icy-metaint", streamRes.headers["icy-metaint"]);
     }
 
-    // Configurar socket para não desligar
+    // Configurar socket do stream para não desligar
     if (streamRes.socket) {
       streamRes.socket.setKeepAlive(true, 30000);
-    }
-    if (res.socket) {
-      res.socket.setKeepAlive(true, 30000);
+      streamRes.socket.setTimeout(0);
     }
 
-    // Pipar o stream para o cliente
-    streamRes.pipe(res);
+    // Pipar o stream para o cliente com tratamento de erro
+    streamRes.pipe(res, { end: true });
 
     // Tratar desconexão do cliente
     res.on("close", () => {
-      console.log("Cliente desconectou do stream");
+      console.log("🔌 Cliente desconectou do stream");
       streamRes.destroy();
+    });
+
+    res.on("error", (error) => {
+      console.error("❌ Erro ao enviar stream para cliente:", error.message);
+      streamRes.destroy();
+    });
+
+    streamRes.on("error", (error) => {
+      console.error("❌ Erro ao receber stream:", error.message);
+      if (!res.headersSent) {
+        res.status(502).json({
+          error: "Erro ao conectar ao servidor de stream",
+          details: error.message,
+        });
+      }
     });
   });
 
@@ -56,7 +80,7 @@ router.get("/stream", (req: Request, res: Response) => {
   request.setTimeout(0); // Sem timeout
 
   request.on("error", (error) => {
-    console.error("Erro ao conectar ao stream:", error);
+    console.error("❌ Erro ao conectar ao stream:", error.message);
     if (!res.headersSent) {
       res.status(502).json({
         error: "Erro ao conectar ao servidor de stream",
@@ -67,7 +91,7 @@ router.get("/stream", (req: Request, res: Response) => {
 
   // Tratar timeout da requisição
   request.on("timeout", () => {
-    console.warn("Timeout na requisição de stream, reconectando...");
+    console.warn("⚠️ Timeout na requisição de stream");
     request.destroy();
   });
 });

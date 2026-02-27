@@ -28,16 +28,10 @@ export function CustomVideoPlayer({
 
     const initializePlayer = async () => {
       try {
-        // Se for URL pública do YouTube (MP4 ou similar)
-        if (youtubeUrl.includes('youtube.com') || youtubeUrl.includes('youtu.be') || youtubeUrl.includes('manifest') || youtubeUrl.includes('rn=')) {
-          console.log('📺 Usando URL pública do YouTube:', youtubeUrl);
-          if (videoRef.current) {
-            videoRef.current.src = youtubeUrl;
-            setIsLoading(false);
-            if (isPlaying) {
-              videoRef.current.play();
-            }
-          }
+        // Se for URL do YouTube, usar iframe
+        if (youtubeUrl.includes('youtube.com') || youtubeUrl.includes('youtu.be')) {
+          console.log('📺 Usando iframe do YouTube:', youtubeUrl);
+          setIsLoading(false);
           return;
         }
 
@@ -113,7 +107,43 @@ export function CustomVideoPlayer({
     }
   }, [isPlaying]);
 
+  // Se for YouTube, mostrar iframe
+  if (youtubeUrl?.includes('youtube.com') || youtubeUrl?.includes('youtu.be')) {
+    const videoId = youtubeUrl.includes('v=')
+      ? new URLSearchParams(new URL(youtubeUrl).search).get('v')
+      : youtubeUrl.split('/').pop();
 
+    return (
+      <div className="w-full h-64 flex flex-col">
+        <style>{`
+          .youtube-player-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 2px solid rgb(234, 179, 8);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+          }
+          
+          .youtube-player-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+          }
+        `}</style>
+
+        <div className="youtube-player-container">
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&mute=1&rel=0&modestbranding=1&controls=1&autoplay=${isPlaying ? 1 : 0}`}
+            title={title || 'YouTube Video'}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-64 flex flex-col">

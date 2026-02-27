@@ -256,8 +256,8 @@ export function RadioPlayerV2() {
         {/* Debug Info - Apenas em desenvolvimento */}
         {process.env.NODE_ENV === 'development' && (
           <div className="text-xs text-gray-500 mt-4 text-center">
-            <p>Polling: 1s | Metadados: {lastMetadataRef.current || 'Aguardando...'}</p>
-            <p>Fonte: {metadataResponse?.source || 'desconhecida'}</p>
+            <p>Vote agora: {lastMetadataRef.current || 'Aguardando...'}</p>
+            <p>Você faz a nossa programação</p>
           </div>
         )}
       </div>

@@ -230,3 +230,30 @@ export async function getRecentSongHistory(limit: number = 20) {
 }
 
 // TODO: add feature queries here as your schema grows.
+
+
+/**
+ * Get top voted songs for the current month
+ */
+export async function getTopVotedSongsThisMonth(voteType: 'like' | 'dislike' = 'like', limit: number = 10) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db.execute(`
+    SELECT 
+      s.id,
+      s.title,
+      s.artist,
+      s.albumCover,
+      COUNT(v.id) as voteCount
+    FROM songs s
+    LEFT JOIN votes v ON s.id = v.songId AND v.voteType = '${voteType}'
+    WHERE YEAR(v.createdAt) = YEAR(CURDATE())
+      AND MONTH(v.createdAt) = MONTH(CURDATE())
+    GROUP BY s.id
+    ORDER BY voteCount DESC
+    LIMIT ${limit}
+  `);
+
+  return Array.isArray(result) && result.length > 0 ? result[0] : [];
+}

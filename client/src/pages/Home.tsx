@@ -5,6 +5,7 @@ import { RadioPlayerV2 } from "@/components/RadioPlayerV2";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { VoteButtons } from "@/components/VoteButtons";
 import { SongHistory } from "@/components/SongHistory";
+import { TopVotedSongs } from "@/components/TopVotedSongs";
 import { useMetadata } from "@/contexts/MetadataContext";
 import { useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
@@ -88,10 +89,17 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Song History Section */}
+        {/* Song History and Top Voted Section */}
         <section className="py-20 px-4 bg-gray-800 mt-0">
           <div className="max-w-6xl mx-auto">
-            <SongHistory />
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <SongHistory />
+              </div>
+              <div>
+                <TopVotedSongs />
+              </div>
+            </div>
           </div>
         </section>
 

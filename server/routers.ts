@@ -2,7 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, addToHistory, getRecentSongHistory } from "./db";
+import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, addToHistory, getRecentSongHistory, getTopVotedSongsThisMonth } from "./db";
 import { eq } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
 import { getIcecastMetadata } from "./icecast-metadata";
@@ -188,6 +188,17 @@ export const appRouter = router({
           artist: input.artist,
           albumCover: input.albumCover,
         });
+      }),
+
+    topVotedThisMonth: publicProcedure
+      .input(
+        z.object({
+          voteType: z.enum(["like", "dislike"]).optional().default("like"),
+          limit: z.number().min(1).max(20).optional().default(10),
+        })
+      )
+      .query(async ({ input }) => {
+        return await getTopVotedSongsThisMonth(input.voteType, input.limit);
       }),
   }),
 });

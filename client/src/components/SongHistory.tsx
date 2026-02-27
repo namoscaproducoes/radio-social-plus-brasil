@@ -19,7 +19,7 @@ export function SongHistory() {
 
   // Buscar histórico de músicas
   const { data: historyData, isLoading: isHistoryLoading, refetch } = trpc.songs.history.useQuery(
-    { limit: 5 },
+    { limit: 3 },
     {
       refetchInterval: 5000, // Atualizar a cada 5 segundos
     }

@@ -257,11 +257,14 @@ export async function getTopVotedSongsThisMonth(voteType: 'like' | 'dislike' = '
       sh.albumCover,
       COUNT(DISTINCT v.id) as voteCount
     FROM songHistory sh
-    LEFT JOIN songs s ON sh.title = s.title AND sh.artist = s.artist
-    LEFT JOIN votes v ON s.id = v.songId AND v.voteType = '${voteType}'
+    INNER JOIN songs s ON sh.title = s.title AND sh.artist = s.artist
+    INNER JOIN votes v ON s.id = v.songId AND v.voteType = '${voteType}'
     WHERE YEAR(sh.playedAt) = YEAR(CURDATE())
       AND MONTH(sh.playedAt) = MONTH(CURDATE())
+      AND YEAR(v.createdAt) = YEAR(CURDATE())
+      AND MONTH(v.createdAt) = MONTH(CURDATE())
     GROUP BY sh.title, sh.artist, sh.albumCover
+    HAVING COUNT(DISTINCT v.id) > 0
     ORDER BY voteCount DESC
     LIMIT ${limit}
   `);

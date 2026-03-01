@@ -68,24 +68,26 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
 
   // Sincronizar reprodução do vídeo com o player de música
   useEffect(() => {
-    if (!iframeRef.current) return;
+    if (!iframeRef.current || !videoId) return;
 
-    if (isPlaying) {
-      // Enviar comando de play para o iframe do YouTube
-      iframeRef.current.contentWindow?.postMessage(
-        { event: 'command', func: 'playVideo' },
-        '*'
-      );
-      console.log('▶️ Iniciando vídeo YouTube');
-    } else {
-      // Enviar comando de pause para o iframe do YouTube
-      iframeRef.current.contentWindow?.postMessage(
-        { event: 'command', func: 'pauseVideo' },
-        '*'
-      );
-      console.log('⏸️ Pausando vídeo YouTube');
-    }
-  }, [isPlaying]);
+    const timer = setTimeout(() => {
+      if (isPlaying) {
+        iframeRef.current?.contentWindow?.postMessage(
+          { event: 'command', func: 'playVideo' },
+          '*'
+        );
+        console.log('▶️ Iniciando vídeo YouTube');
+      } else {
+        iframeRef.current?.contentWindow?.postMessage(
+          { event: 'command', func: 'pauseVideo' },
+          '*'
+        );
+        console.log('⏸️ Pausando vídeo YouTube');
+      }
+    }, 50);
+
+    return () => clearTimeout(timer);
+  }, [isPlaying, videoId]);
 
   const isLoading = youtubeQuery.isLoading;
 
@@ -131,7 +133,7 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
         <div className="youtube-player-container">
           <iframe
             ref={iframeRef}
-            src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&mute=1&rel=0&modestbranding=1&controls=0`}
+            src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&mute=1&rel=0&modestbranding=1&controls=0&autoplay=0`}
             title={`${artistName} - ${songTitle}`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen

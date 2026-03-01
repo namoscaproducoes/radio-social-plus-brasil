@@ -210,19 +210,30 @@ export async function addToHistory(song: InsertSongHistory) {
 }
 
 /**
- * Get last 20 songs from history
+ * Get last N songs from history (remove duplicates - keep most recent)
  */
 export async function getRecentSongHistory(limit: number = 20) {
   const db = await getDb();
   if (!db) return [];
 
   try {
-    const result = await db
-      .select()
-      .from(songHistory)
-      .orderBy(desc(songHistory.playedAt))
-      .limit(limit);
-    return result;
+    const result = await db.execute(`
+      SELECT 
+        id,
+        title,
+        artist,
+        albumCover,
+        MAX(playedAt) as playedAt
+      FROM songHistory
+      GROUP BY id, title, artist, albumCover
+      ORDER BY MAX(playedAt) DESC
+      LIMIT ${limit}
+    `) as any;
+
+    if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0])) {
+      return result[0];
+    }
+    return [];
   } catch (error) {
     console.error("[Database] Failed to get song history:", error);
     return [];
@@ -245,12 +256,19 @@ export async function getTopVotedSongsThisMonth(voteType: 'like' | 'dislike' = '
       s.title,
       s.artist,
       s.albumCover,
-      COUNT(v.id) as voteCount
+      COALESCE(COUNT(v.id), 0) as voteCount
     FROM songs s
-    LEFT JOIN votes v ON s.id = v.songId AND v.voteType = '${voteType}'
-    WHERE YEAR(v.createdAt) = YEAR(CURDATE())
+    LEFT JOIN votes v ON s.id = v.songId 
+      AND v.voteType = '${voteType}'
+      AND YEAR(v.createdAt) = YEAR(CURDATE())
       AND MONTH(v.createdAt) = MONTH(CURDATE())
-    GROUP BY s.id
+    WHERE s.id IN (
+      SELECT s2.id FROM songs s2
+      INNER JOIN songHistory sh ON s2.title = sh.title AND s2.artist = sh.artist
+      WHERE YEAR(sh.playedAt) = YEAR(CURDATE())
+        AND MONTH(sh.playedAt) = MONTH(CURDATE())
+    )
+    GROUP BY s.id, s.title, s.artist, s.albumCover
     ORDER BY voteCount DESC
     LIMIT ${limit}
   `);

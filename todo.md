@@ -171,3 +171,9 @@
 - [x] Identificar elementos que quebram no mobile
 - [x] Corrigir layout responsivo (padding, font-size, grid) - Home.tsx e RadioPlayerV2.tsx
 - [x] Testar em diferentes resoluções mobile (14 testes passando)
+
+
+## Fase 25: Correção de 3 Bugs Críticos
+- [ ] Sincronizar play do vídeo com player de música (som desligado)
+- [ ] Remover duplicatas no histórico de músicas
+- [ ] Investigar e corrigir reset das top músicas do mês

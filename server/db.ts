@@ -219,13 +219,13 @@ export async function getRecentSongHistory(limit: number = 20) {
   try {
     const result = await db.execute(`
       SELECT 
-        id,
+        MAX(id) as id,
         title,
         artist,
-        albumCover,
+        MAX(albumCover) as albumCover,
         MAX(playedAt) as playedAt
       FROM songHistory
-      GROUP BY id, title, artist, albumCover
+      GROUP BY title, artist
       ORDER BY MAX(playedAt) DESC
       LIMIT ${limit}
     `) as any;
@@ -252,23 +252,16 @@ export async function getTopVotedSongsThisMonth(voteType: 'like' | 'dislike' = '
 
   const result = await db.execute(`
     SELECT 
-      s.id,
-      s.title,
-      s.artist,
-      s.albumCover,
-      COALESCE(COUNT(v.id), 0) as voteCount
-    FROM songs s
-    LEFT JOIN votes v ON s.id = v.songId 
-      AND v.voteType = '${voteType}'
-      AND YEAR(v.createdAt) = YEAR(CURDATE())
-      AND MONTH(v.createdAt) = MONTH(CURDATE())
-    WHERE s.id IN (
-      SELECT s2.id FROM songs s2
-      INNER JOIN songHistory sh ON s2.title = sh.title AND s2.artist = sh.artist
-      WHERE YEAR(sh.playedAt) = YEAR(CURDATE())
-        AND MONTH(sh.playedAt) = MONTH(CURDATE())
-    )
-    GROUP BY s.id, s.title, s.artist, s.albumCover
+      sh.title,
+      sh.artist,
+      sh.albumCover,
+      COUNT(DISTINCT v.id) as voteCount
+    FROM songHistory sh
+    LEFT JOIN songs s ON sh.title = s.title AND sh.artist = s.artist
+    LEFT JOIN votes v ON s.id = v.songId AND v.voteType = '${voteType}'
+    WHERE YEAR(sh.playedAt) = YEAR(CURDATE())
+      AND MONTH(sh.playedAt) = MONTH(CURDATE())
+    GROUP BY sh.title, sh.artist, sh.albumCover
     ORDER BY voteCount DESC
     LIMIT ${limit}
   `);

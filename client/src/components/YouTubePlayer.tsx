@@ -71,20 +71,15 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
     if (!iframeRef.current || !videoId) return;
 
     const timer = setTimeout(() => {
-      if (isPlaying) {
-        iframeRef.current?.contentWindow?.postMessage(
-          { event: 'command', func: 'playVideo' },
+      if (iframeRef.current?.contentWindow) {
+        const command = isPlaying ? 'playVideo' : 'pauseVideo';
+        iframeRef.current.contentWindow.postMessage(
+          { event: 'command', func: command },
           '*'
         );
-        console.log('▶️ Iniciando vídeo YouTube');
-      } else {
-        iframeRef.current?.contentWindow?.postMessage(
-          { event: 'command', func: 'pauseVideo' },
-          '*'
-        );
-        console.log('⏸️ Pausando vídeo YouTube');
+        console.log(isPlaying ? '▶️ Iniciando vídeo YouTube' : '⏸️ Pausando vídeo YouTube');
       }
-    }, 50);
+    }, 100);
 
     return () => clearTimeout(timer);
   }, [isPlaying, videoId]);

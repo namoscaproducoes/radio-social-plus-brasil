@@ -87,13 +87,21 @@ export default function Home() {
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
 
-            {/* Desktop Button */}
-            <Button 
-              className="hidden md:flex bg-red-600 hover:bg-red-700 text-white font-bold rounded-full px-4 py-1 text-xs"
-              onClick={() => navigate('/dashboard')}
-            >
-              ENTRAR
-            </Button>
+            {/* Desktop Buttons */}
+            <div className="hidden md:flex gap-2">
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full px-4 py-1 text-xs"
+                onClick={() => navigate('/auth/register')}
+              >
+                REGISTRAR
+              </Button>
+              <Button 
+                className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-full px-4 py-1 text-xs"
+                onClick={() => navigate('/auth/login')}
+              >
+                ENTRAR
+              </Button>
+            </div>
           </div>
 
           {/* Mobile Menu */}
@@ -117,9 +125,18 @@ export default function Home() {
                 Dashboard mais votadas
               </button>
               <Button 
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full py-1 text-xs mb-2"
+                onClick={() => {
+                  navigate('/auth/register');
+                  setMobileMenuOpen(false);
+                }}
+              >
+                REGISTRAR
+              </Button>
+              <Button 
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-bold rounded-full py-1 text-xs"
                 onClick={() => {
-                  navigate('/dashboard');
+                  navigate('/auth/login');
                   setMobileMenuOpen(false);
                 }}
               >

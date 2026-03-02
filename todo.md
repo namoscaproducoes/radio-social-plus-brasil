@@ -184,3 +184,13 @@
 - [x] Corrigir lógica de reconexão para não chamar play() automaticamente
 - [x] Permitir apenas play manual após clique do usuário
 - [x] Testar reconexão sem erros de autoplay
+
+
+## Fase 27: Sistema de Autenticação e Dashboard Personalizado
+- [x] Adicionar botão REGISTRAR ao lado do botão ENTRAR na landing page
+- [x] Criar página de login/registro com formulários
+- [x] Implementar dashboard personalizado do usuário
+- [x] Adicionar histórico de votações do usuário (estrutura preparada)
+- [x] Criar seção de músicas favoritas (votadas com like) - estrutura preparada
+- [x] Preparar estrutura para recursos exclusivos futuros
+- [x] Testar fluxo completo de autenticação e dashboard - Registro e login funcionando perfeitamente

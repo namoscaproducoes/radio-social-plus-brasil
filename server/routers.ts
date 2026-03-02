@@ -6,14 +6,78 @@ import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, add
 import { eq } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
 import { getIcecastMetadata } from "./icecast-metadata";
-import { songs } from "../drizzle/schema";
+import { songs, users } from "../drizzle/schema";
 import { youtubeRouter } from "./youtube-router";
+import bcrypt from "bcryptjs";
 
 export const appRouter = router({
   system: systemRouter,
   youtube: youtubeRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
+    
+    register: publicProcedure
+      .input(
+        z.object({
+          name: z.string().min(2),
+          email: z.string().email(),
+          password: z.string().min(6),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const existingUser = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
+        if (existingUser && existingUser.length > 0) {
+          throw new Error("Email já cadastrado");
+        }
+
+        const passwordHash = await bcrypt.hash(input.password, 10);
+
+        const result = await db.insert(users).values({
+          name: input.name,
+          email: input.email,
+          passwordHash,
+          loginMethod: "email",
+          openId: null,
+        });
+
+        return { success: true, userId: (result as any).insertId || 0 };
+      }),
+    
+    login: publicProcedure
+      .input(
+        z.object({
+          email: z.string().email(),
+          password: z.string(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const userResult = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
+        if (!userResult || userResult.length === 0) {
+          throw new Error("Email ou senha incorretos");
+        }
+
+        const user = userResult[0];
+
+        if (!user.passwordHash) {
+          throw new Error("Usuário não configurado para login por email");
+        }
+
+        const isPasswordValid = await bcrypt.compare(input.password, user.passwordHash);
+        if (!isPasswordValid) {
+          throw new Error("Email ou senha incorretos");
+        }
+
+        await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, user.id));
+
+        return { success: true, user: { id: user.id, email: user.email, name: user.name } };
+      }),
+    
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });

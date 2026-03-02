@@ -36,6 +36,13 @@
       "when": 1772224572645,
       "tag": "0004_stale_deathstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1772472267453,
+      "tag": "0005_shallow_mysterio",
+      "breakpoints": true
     }
   ]
 }

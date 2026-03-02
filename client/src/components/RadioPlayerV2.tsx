@@ -375,8 +375,8 @@ export function RadioPlayerV2() {
 
           {/* Song Info */}
           <div className="text-center mb-4 sm:mb-6 md:mb-8">
-            <h2 className="text-lg sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 truncate">{metadata.title}</h2>
-            <p className="text-sm sm:text-base md:text-lg text-gray-300 truncate">{metadata.artist}</p>
+            <h2 className="text-xs sm:text-sm md:text-base font-bold text-white mb-1 sm:mb-2 line-clamp-2 break-words">{metadata.title}</h2>
+            <p className="text-xs sm:text-sm md:text-base text-gray-300 truncate">{metadata.artist}</p>
           </div>
 
           {/* Controls */}

@@ -91,12 +91,12 @@ export default function Home() {
           <div className="h-full max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-3 h-full">
               {/* Left: Player */}
-              <div className="lg:col-span-3 flex-shrink-0">
-                <div className="rounded-xl p-2 sm:p-3 shadow-2xl border-2 h-full" style={{backgroundColor: '#ffac37', borderColor: '#ff9500'}}>
-                  <div className="text-center mb-2">
+              <div className="lg:col-span-3 flex-shrink-0 flex flex-col">
+                <div className="rounded-xl shadow-2xl border h-full flex flex-col" style={{backgroundColor: '#ffac37', borderColor: '#ff9500', borderWidth: '2px'}}>
+                  <div className="text-center pt-1 pb-1 flex-shrink-0">
                     <p className="text-white text-xs font-bold opacity-90 tracking-wider">TOCANDO AGORA</p>
                   </div>
-                  <div className="scale-75 sm:scale-90 origin-top">
+                  <div className="flex-1 flex items-center justify-center px-1 pb-1">
                     <RadioPlayerV2 />
                   </div>
                 </div>

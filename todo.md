@@ -250,3 +250,10 @@
 - [x] Criar componente de notificações no frontend - NotificationCenter com dropdown, ícones, timestamps
 - [x] Integrar sistema de notificações na navegação - NotificationCenter exibido ao lado do avatar
 - [x] Testar sistema de notificações - Todos os fluxos testados e funcionando perfeitamente!
+
+
+## Fase 35: Correção de Erro de Formato de Mídia
+- [x] Analisar erro MEDIA_ELEMENT_ERROR no RadioPlayerV2 - Identificado problema com Content-Type
+- [x] Verificar URL do stream de rádio - Icecast retornando audio/aac
+- [x] Corrigir configuração de codec/formato - Servidor agora detecta Content-Type correto
+- [x] Testar player com diferentes formatos - Player tocando perfeitamente sem erros!

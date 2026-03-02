@@ -231,8 +231,29 @@ export function RadioPlayerV2() {
 
     const handleError = (e: Event) => {
       const audio = audioRef.current;
-      if (audio) {
-        console.error('❌ Erro no stream:', audio.error?.code, audio.error?.message);
+      if (audio && audio.error) {
+        const errorCode = audio.error.code;
+        const errorMessage = audio.error.message;
+        console.error('❌ Erro no stream:', errorCode, errorMessage);
+        
+        let errorDescription = '';
+        switch (errorCode) {
+          case 1:
+            errorDescription = 'MEDIA_ERR_ABORTED';
+            break;
+          case 2:
+            errorDescription = 'MEDIA_ERR_NETWORK';
+            break;
+          case 3:
+            errorDescription = 'MEDIA_ERR_DECODE (formato nao suportado)';
+            break;
+          case 4:
+            errorDescription = 'MEDIA_ERR_SRC_NOT_SUPPORTED';
+            break;
+          default:
+            errorDescription = 'Erro desconhecido';
+        }
+        console.error('Detalhes:', errorDescription);
       }
       if (!userPausedRef.current) {
         reconnectToStream('audio error');

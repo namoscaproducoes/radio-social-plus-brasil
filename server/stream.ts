@@ -48,11 +48,14 @@ router.get("/stream", (req: Request, res: Response) => {
     streamRes = response;
     console.log("✅ Conectado ao stream Icecast");
     
-    // Passar headers relevantes - mas manter Content-Type como audio/mpeg
-    // Não sobrescrever Content-Type pois o Icecast pode retornar audio/aac
-    // e o navegador não suporta bem
-    console.log("📡 Content-Type do Icecast:", response.headers["content-type"]);
-    console.log("📡 Mantendo Content-Type como audio/mpeg para compatibilidade");
+    // Detectar Content-Type real do Icecast
+    const icecastContentType = response.headers["content-type"] || "audio/mpeg";
+    console.log("📡 Content-Type do Icecast:", icecastContentType);
+    
+    // Usar o Content-Type real do Icecast para melhor compatibilidade
+    res.setHeader("Content-Type", icecastContentType);
+    console.log("📡 Enviando com Content-Type:", icecastContentType);
+    
     if (response.headers["icy-metaint"]) {
       res.setHeader("icy-metaint", response.headers["icy-metaint"]);
     }

@@ -75,26 +75,26 @@ export function TopVotedSongs() {
                   <img
                     src={song.albumCover}
                     alt={song.title}
-                    className="w-20 h-20 rounded object-cover border border-gray-600 hover:border-yellow-500 transition-colors"
+                    className="w-16 h-16 rounded object-cover border border-gray-600 hover:border-yellow-500 transition-colors"
                   />
                 ) : (
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-purple-900 rounded flex items-center justify-center border border-gray-600 hover:border-yellow-500 transition-colors">
-                    <Music size={24} className="text-gray-400" />
+                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-900 rounded flex items-center justify-center border border-gray-600 hover:border-yellow-500 transition-colors">
+                    <Music size={18} className="text-gray-400" />
                   </div>
                 )}
 
                 {/* Tooltip ao passar mouse */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-95 rounded-b p-1 opacity-0 group-hover:opacity-100 transition-opacity text-xs z-20 pointer-events-none">
-                  <p className="font-semibold text-white truncate">{song.title}</p>
-                  <p className="text-gray-400 truncate">{song.artist}</p>
+                <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-95 rounded-b p-0.5 opacity-0 group-hover:opacity-100 transition-opacity text-xs z-20 pointer-events-none">
+                  <p className="font-semibold text-white truncate text-xs">{song.title}</p>
+                  <p className="text-gray-400 truncate text-xs">{song.artist}</p>
                   <div className="flex gap-1 mt-0.5">
                     <div className="flex items-center gap-0.5">
-                      <ThumbsUp size={10} className="text-green-500" />
-                      <span className="text-green-500">{song.likes || 0}</span>
+                      <ThumbsUp size={8} className="text-green-500" />
+                      <span className="text-green-500 text-xs">{song.likes || 0}</span>
                     </div>
                     <div className="flex items-center gap-0.5">
-                      <ThumbsDown size={10} className="text-red-500" />
-                      <span className="text-red-500">{song.dislikes || 0}</span>
+                      <ThumbsDown size={8} className="text-red-500" />
+                      <span className="text-red-500 text-xs">{song.dislikes || 0}</span>
                     </div>
                   </div>
                 </div>

@@ -130,11 +130,10 @@ export function UserProfile() {
             {/* Profile Button */}
             <button
               onClick={() => {
-                // Placeholder para edição de perfil
+                navigate('/user/profile');
                 setIsDropdownOpen(false);
               }}
               className="w-full px-4 py-2 text-left text-gray-300 hover:bg-gray-800 hover:text-white transition flex items-center gap-2 text-sm"
-              title="Recurso em breve"
             >
               <User size={16} />
               Meu Perfil

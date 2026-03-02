@@ -450,3 +450,43 @@ export async function getUnreadNotificationCount(userId: number) {
     return 0;
   }
 }
+
+
+/**
+ * Update user profile (name, email, avatarUrl)
+ */
+export async function updateUserProfile(userId: number, updates: { name?: string; email?: string; avatarUrl?: string }) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const updateData: Record<string, unknown> = {};
+    if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.email !== undefined) updateData.email = updates.email;
+    if (updates.avatarUrl !== undefined) updateData.avatarUrl = updates.avatarUrl;
+
+    if (Object.keys(updateData).length === 0) return null;
+
+    const result = await db.update(users).set(updateData).where(eq(users.id, userId));
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to update user profile:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get user by ID
+ */
+export async function getUserById(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const result = await db.select().from(users).where(eq(users.id, userId));
+    return result.length > 0 ? result[0] : null;
+  } catch (error) {
+    console.error("[Database] Failed to get user:", error);
+    return null;
+  }
+}

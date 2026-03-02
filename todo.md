@@ -257,3 +257,13 @@
 - [x] Verificar URL do stream de rádio - Icecast retornando audio/aac
 - [x] Corrigir configuração de codec/formato - Servidor agora detecta Content-Type correto
 - [x] Testar player com diferentes formatos - Player tocando perfeitamente sem erros!
+
+
+## Fase 36: Página de Edição de Perfil com Upload de Foto
+- [x] Adicionar coluna de avatar no banco de dados (users table) - Migration executada com sucesso
+- [x] Criar procedure tRPC para atualizar perfil (nome, email) - updateProfile implementada
+- [x] Criar procedure tRPC para upload de foto de perfil - uploadAvatar implementada
+- [x] Criar página /user/profile com formulário de edição - Página completa com campos de nome, email e upload
+- [x] Implementar upload de imagem com preview - Botão "Escolher Foto" funcional com preview de avatar
+- [x] Integrar link "Meu Perfil" no menu dropdown - Link funcional na navegação
+- [x] Testar edição de dados e upload de foto - Todos os fluxos testados e funcionando perfeitamente!

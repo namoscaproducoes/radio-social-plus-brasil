@@ -2,7 +2,7 @@
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, addToHistory, getRecentSongHistory, getTopVotedSongsThisMonth, getVoteCountsForSong, addFavorite, removeFavorite, getUserFavorites, createNotification, getUserNotifications, markNotificationAsRead, getUnreadNotificationCount } from "./db";
+import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, addToHistory, getRecentSongHistory, getTopVotedSongsThisMonth, getVoteCountsForSong, addFavorite, removeFavorite, getUserFavorites, createNotification, getUserNotifications, markNotificationAsRead, getUnreadNotificationCount, updateUserProfile, getUserById } from "./db";
 import { eq } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
 import { getIcecastMetadata } from "./icecast-metadata";
@@ -536,6 +536,36 @@ export const appRouter = router({
       if (!ctx.user) throw new Error("User not authenticated");
       return await getUnreadNotificationCount(ctx.user.id);
     }),
+  }),
+  user: router({
+    getProfile: protectedProcedure.query(async ({ ctx }) => {
+      if (!ctx.user) throw new Error("User not authenticated");
+      return await getUserById(ctx.user.id);
+    }),
+    updateProfile: protectedProcedure
+      .input(
+        z.object({
+          name: z.string().optional(),
+          email: z.string().email().optional(),
+          avatarUrl: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("User not authenticated");
+        await updateUserProfile(ctx.user.id, input);
+        return { success: true };
+      }),
+    uploadAvatar: protectedProcedure
+      .input(
+        z.object({
+          imageUrl: z.string().url(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("User not authenticated");
+        await updateUserProfile(ctx.user.id, { avatarUrl: input.imageUrl });
+        return { success: true, avatarUrl: input.imageUrl };
+      }),
   }),
 });
 

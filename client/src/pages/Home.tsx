@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { Maximize2, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export default function Home() {
   const [, navigate] = useLocation();
@@ -17,6 +18,7 @@ export default function Home() {
   const { albumCover, songTitle, songArtist } = useMetadata();
   const lastSongRef = useRef<string>("");
   const addToHistoryMutation = trpc.songs.addToHistory.useMutation();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (songTitle && songArtist && songTitle !== "Carregando...") {
@@ -90,19 +92,24 @@ export default function Home() {
 
             {/* Desktop Buttons */}
             <div className="hidden md:flex gap-2 items-center">
-              <UserProfile />
-              <Button 
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full px-4 py-1 text-xs"
-                onClick={() => navigate('/auth/register')}
-              >
-                REGISTRAR
-              </Button>
-              <Button 
-                className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-full px-4 py-1 text-xs"
-                onClick={() => navigate('/auth/login')}
-              >
-                ENTRAR
-              </Button>
+              {isAuthenticated ? (
+                <UserProfile />
+              ) : (
+                <>
+                  <Button 
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full px-4 py-1 text-xs"
+                    onClick={() => navigate('/auth/register')}
+                  >
+                    REGISTRAR
+                  </Button>
+                  <Button 
+                    className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-full px-4 py-1 text-xs"
+                    onClick={() => navigate('/auth/login')}
+                  >
+                    ENTRAR
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 
@@ -129,24 +136,28 @@ export default function Home() {
               >
                 Dashboard mais votadas
               </button>
-              <Button 
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full py-1 text-xs mb-2"
-                onClick={() => {
-                  navigate('/auth/register');
-                  setMobileMenuOpen(false);
-                }}
-              >
-                REGISTRAR
-              </Button>
-              <Button 
-                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold rounded-full py-1 text-xs"
-                onClick={() => {
-                  navigate('/auth/login');
-                  setMobileMenuOpen(false);
-                }}
-              >
-                ENTRAR
-              </Button>
+              {!isAuthenticated && (
+                <>
+                  <Button 
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full py-1 text-xs mb-2"
+                    onClick={() => {
+                      navigate('/auth/register');
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    REGISTRAR
+                  </Button>
+                  <Button 
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold rounded-full py-1 text-xs"
+                    onClick={() => {
+                      navigate('/auth/login');
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    ENTRAR
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </nav>

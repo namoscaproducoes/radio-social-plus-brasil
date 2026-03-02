@@ -234,3 +234,10 @@
 - [x] Integrar componente na barra de navegação
 - [x] Adicionar menu dropdown com opções (Dashboard, Logout)
 - [x] Testar indicador visual com usuário logado - Avatar com iniciais, menu dropdown, logout funcionando perfeitamente
+
+
+## Fase 33: Correção de Navegação - Ocultar Botões Quando Logado
+- [x] Ocultar botão ENTRAR quando usuário está logado
+- [x] Ocultar botão REGISTRAR quando usuário está logado
+- [x] Manter apenas avatar com menu dropdown visível
+- [x] Testar em desktop e mobile - Todos os testes passando! Botões desaparecem quando logado e reaparecem após logout

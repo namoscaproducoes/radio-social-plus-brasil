@@ -2,7 +2,7 @@
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, addToHistory, getRecentSongHistory, getTopVotedSongsThisMonth, getVoteCountsForSong } from "./db";
+import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, addToHistory, getRecentSongHistory, getTopVotedSongsThisMonth, getVoteCountsForSong, addFavorite, removeFavorite, getUserFavorites, createNotification, getUserNotifications, markNotificationAsRead, getUnreadNotificationCount } from "./db";
 import { eq } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
 import { getIcecastMetadata } from "./icecast-metadata";
@@ -477,6 +477,65 @@ export const appRouter = router({
       .query(async ({ input }) => {
         return await getVoteCountsForSong(input.songId);
       }),
+  }),
+
+  notifications: router({
+    addFavorite: protectedProcedure
+      .input(
+        z.object({
+          songId: z.number(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("User not authenticated");
+        await addFavorite(ctx.user.id, input.songId);
+        return { success: true };
+      }),
+
+    removeFavorite: protectedProcedure
+      .input(
+        z.object({
+          songId: z.number(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("User not authenticated");
+        await removeFavorite(ctx.user.id, input.songId);
+        return { success: true };
+      }),
+
+    getFavorites: protectedProcedure.query(async ({ ctx }) => {
+      if (!ctx.user) throw new Error("User not authenticated");
+      return await getUserFavorites(ctx.user.id);
+    }),
+
+    getNotifications: protectedProcedure
+      .input(
+        z.object({
+          limit: z.number().optional().default(20),
+        })
+      )
+      .query(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("User not authenticated");
+        return await getUserNotifications(ctx.user.id, input.limit);
+      }),
+
+    markAsRead: protectedProcedure
+      .input(
+        z.object({
+          notificationId: z.number(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error("User not authenticated");
+        await markNotificationAsRead(input.notificationId);
+        return { success: true };
+      }),
+
+    getUnreadCount: protectedProcedure.query(async ({ ctx }) => {
+      if (!ctx.user) throw new Error("User not authenticated");
+      return await getUnreadNotificationCount(ctx.user.id);
+    }),
   }),
 });
 

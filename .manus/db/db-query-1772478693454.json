@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `favorites` (\n\t`id` bigint AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`songId` int NOT NULL,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `favorites_id` PRIMARY KEY(`id`)\n);\n\nCREATE TABLE `notifications` (\n\t`id` bigint AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`songId` int NOT NULL,\n\t`type` enum('new_votes','favorite_played','trending','comment') NOT NULL,\n\t`title` varchar(255) NOT NULL,\n\t`message` text NOT NULL,\n\t`isRead` enum('true','false') NOT NULL DEFAULT 'false',\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`readAt` timestamp,\n\tCONSTRAINT `notifications_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute CREATE TABLE `favorites` (\n\t`id` bigint AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`songId` int NOT NULL,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `favorites_id` PRIMARY KEY(`id`)\n);\n\nCREATE TABLE `notifications` (\n\t`id` bigint AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`songId` int NOT NULL,\n\t`type` enum('new_votes','favorite_played','trending','comment') NOT NULL,\n\t`title` varchar(255) NOT NULL,\n\t`message` text NOT NULL,\n\t`isRead` enum('true','false') NOT NULL DEFAULT 'false',\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`readAt` timestamp,\n\tCONSTRAINT `notifications_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 310
+}

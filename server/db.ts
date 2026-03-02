@@ -293,3 +293,160 @@ export async function getVoteCountsForSong(songId: number) {
   }
   return { likes: 0, dislikes: 0 };
 }
+
+
+/**
+ * Add a favorite song for a user
+ */
+export async function addFavorite(userId: number, songId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const result = await db.execute(`
+      INSERT INTO favorites (userId, songId) 
+      VALUES (${userId}, ${songId})
+      ON DUPLICATE KEY UPDATE createdAt = NOW()
+    `);
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to add favorite:", error);
+    throw error;
+  }
+}
+
+/**
+ * Remove a favorite song for a user
+ */
+export async function removeFavorite(userId: number, songId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const result = await db.execute(`
+      DELETE FROM favorites 
+      WHERE userId = ${userId} AND songId = ${songId}
+    `);
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to remove favorite:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get user's favorite songs
+ */
+export async function getUserFavorites(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const result = await db.execute(`
+      SELECT f.id, f.userId, f.songId, s.title, s.artist, s.albumCover, f.createdAt
+      FROM favorites f
+      JOIN songs s ON f.songId = s.id
+      WHERE f.userId = ${userId}
+      ORDER BY f.createdAt DESC
+    `) as any;
+
+    if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0])) {
+      return result[0];
+    }
+    return [];
+  } catch (error) {
+    console.error("[Database] Failed to get user favorites:", error);
+    return [];
+  }
+}
+
+/**
+ * Create a notification for a user
+ */
+export async function createNotification(userId: number, songId: number, type: string, title: string, message: string) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const result = await db.execute(`
+      INSERT INTO notifications (userId, songId, type, title, message, isRead, createdAt)
+      VALUES (${userId}, ${songId}, '${type}', '${title}', '${message}', 'false', NOW())
+    `);
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to create notification:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get user's notifications
+ */
+export async function getUserNotifications(userId: number, limit: number = 20) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const result = await db.execute(`
+      SELECT n.id, n.userId, n.songId, n.type, n.title, n.message, n.isRead, n.createdAt, n.readAt,
+             s.title as songTitle, s.artist as songArtist, s.albumCover
+      FROM notifications n
+      JOIN songs s ON n.songId = s.id
+      WHERE n.userId = ${userId}
+      ORDER BY n.createdAt DESC
+      LIMIT ${limit}
+    `) as any;
+
+    if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0])) {
+      return result[0];
+    }
+    return [];
+  } catch (error) {
+    console.error("[Database] Failed to get user notifications:", error);
+    return [];
+  }
+}
+
+/**
+ * Mark notification as read
+ */
+export async function markNotificationAsRead(notificationId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const result = await db.execute(`
+      UPDATE notifications 
+      SET isRead = 'true', readAt = NOW()
+      WHERE id = ${notificationId}
+    `);
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to mark notification as read:", error);
+    throw error;
+  }
+}
+
+/**
+ * Get unread notification count for a user
+ */
+export async function getUnreadNotificationCount(userId: number) {
+  const db = await getDb();
+  if (!db) return 0;
+
+  try {
+    const result = await db.execute(`
+      SELECT COUNT(*) as count
+      FROM notifications
+      WHERE userId = ${userId} AND isRead = 'false'
+    `) as any;
+
+    if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) && result[0].length > 0) {
+      return result[0][0].count || 0;
+    }
+    return 0;
+  } catch (error) {
+    console.error("[Database] Failed to get unread notification count:", error);
+    return 0;
+  }
+}

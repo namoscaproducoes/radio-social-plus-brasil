@@ -5,6 +5,7 @@ import { VoteButtons } from "@/components/VoteButtons";
 import { SongHistory } from "@/components/SongHistory";
 import { TopVotedSongs } from "@/components/TopVotedSongs";
 import { UserProfile } from "@/components/UserProfile";
+import { NotificationCenter } from "@/components/NotificationCenter";
 import { useMetadata } from "@/contexts/MetadataContext";
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
@@ -93,7 +94,10 @@ export default function Home() {
             {/* Desktop Buttons */}
             <div className="hidden md:flex gap-2 items-center">
               {isAuthenticated ? (
-                <UserProfile />
+                <>
+                  <NotificationCenter />
+                  <UserProfile />
+                </>
               ) : (
                 <>
                   <Button 

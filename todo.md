@@ -241,3 +241,12 @@
 - [x] Ocultar botão REGISTRAR quando usuário está logado
 - [x] Manter apenas avatar com menu dropdown visível
 - [x] Testar em desktop e mobile - Todos os testes passando! Botões desaparecem quando logado e reaparecem após logout
+
+
+## Fase 34: Sistema de Notificações para Atividades em Músicas Favoritas
+- [x] Analisar estrutura do banco de dados e planejar notificações
+- [x] Criar tabelas de notificações no banco de dados - favorites e notifications criadas
+- [x] Implementar procedures tRPC para notificações - 6 procedures implementadas (addFavorite, removeFavorite, getFavorites, getNotifications, markAsRead, getUnreadCount)
+- [x] Criar componente de notificações no frontend - NotificationCenter com dropdown, ícones, timestamps
+- [x] Integrar sistema de notificações na navegação - NotificationCenter exibido ao lado do avatar
+- [x] Testar sistema de notificações - Todos os fluxos testados e funcionando perfeitamente!

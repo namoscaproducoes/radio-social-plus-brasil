@@ -117,3 +117,35 @@ export const userVotes = mysqlTable("userVotes", {
 
 export type UserVote = typeof userVotes.$inferSelect;
 export type InsertUserVote = typeof userVotes.$inferInsert;
+
+
+/**
+ * Favorites table - armazena as músicas favoritas dos usuários
+ */
+export const favorites = mysqlTable("favorites", {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  songId: int("songId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Favorite = typeof favorites.$inferSelect;
+export type InsertFavorite = typeof favorites.$inferInsert;
+
+/**
+ * Notifications table - armazena notificações para usuários
+ */
+export const notifications = mysqlTable("notifications", {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  songId: int("songId").notNull(),
+  type: mysqlEnum("type", ["new_votes", "favorite_played", "trending", "comment"]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  isRead: mysqlEnum("isRead", ["true", "false"]).default("false").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  readAt: timestamp("readAt"),
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;

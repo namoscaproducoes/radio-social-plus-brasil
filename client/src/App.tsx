@@ -13,6 +13,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { MetadataProvider } from "./contexts/MetadataContext";
 import { TimezoneProvider } from "./contexts/TimezoneContext";
+import { PlaybackProvider } from "./contexts/PlaybackContext";
 import Home from "./pages/Home";
 
 function Router() {
@@ -44,15 +45,17 @@ function App() {
     <ErrorBoundary>
       <TimezoneProvider>
         <MetadataProvider>
-          <ThemeProvider
-            defaultTheme="light"
-            // switchable
-          >
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
-          </ThemeProvider>
+          <PlaybackProvider>
+            <ThemeProvider
+              defaultTheme="light"
+              // switchable
+            >
+              <TooltipProvider>
+                <Toaster />
+                <Router />
+              </TooltipProvider>
+            </ThemeProvider>
+          </PlaybackProvider>
         </MetadataProvider>
       </TimezoneProvider>
     </ErrorBoundary>

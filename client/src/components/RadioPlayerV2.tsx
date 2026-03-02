@@ -4,6 +4,7 @@ import { ThumbsUp, ThumbsDown, Play, Pause, Volume2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { trpc } from '@/lib/trpc';
 import { useMetadata } from '@/contexts/MetadataContext';
+import { usePlayback } from '@/contexts/PlaybackContext';
 import { useAuth } from '@/_core/hooks/useAuth';
 
 interface SongMetadata {
@@ -19,9 +20,10 @@ export interface RadioPlayerV2Ref {
 }
 
 export function RadioPlayerV2() {
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const { audioRef, isPlaying: contextIsPlaying, setIsPlaying: setPlaybackIsPlaying, volume: contextVolume, setVolume: setContextVolume } = usePlayback();
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(100);
+  const localAudioRef = useRef<HTMLAudioElement>(null);
   const [metadata, setMetadata] = useState<SongMetadata>({
     title: 'Carregando...',
     artist: 'Artista Desconhecido',
@@ -48,7 +50,7 @@ export function RadioPlayerV2() {
     handleTimeUpdate?: () => void;
   }>({});
   
-  const { setAlbumCover, setSongTitle, setSongArtist, setIsPlaying: setContextIsPlaying } = useMetadata();
+  const { setAlbumCover, setSongTitle, setSongArtist, setIsPlaying: setMetadataIsPlaying } = useMetadata();
 
   // Buscar metadados via tRPC com polling automático
   const { data: metadataResponse, isLoading: isLoadingMetadataQuery } = trpc.songs.metadata.useQuery(
@@ -116,7 +118,7 @@ export function RadioPlayerV2() {
     if (reconnectAttemptsRef.current >= maxReconnectAttemptsRef.current) {
       console.warn('⚠️ Máximo de tentativas de reconexão atingido. Aguardando próxima ação do usuário.');
       setIsPlaying(false);
-      setContextIsPlaying(false);
+      setPlaybackIsPlaying(false);
       // Sem toast de erro
       return;
     }
@@ -156,7 +158,7 @@ export function RadioPlayerV2() {
         }
       }
     }, delayMs);
-  }, [setContextIsPlaying]);
+    }, [setPlaybackIsPlaying]);
 
   // Heartbeat para monitorar se o player está tocando
   useEffect(() => {
@@ -351,7 +353,7 @@ export function RadioPlayerV2() {
         audioRef.current.pause();
         userPausedRef.current = true;
         setIsPlaying(false);
-        setContextIsPlaying(false);
+        setPlaybackIsPlaying(false);
       } else {
         if (!audioRef.current.src || audioRef.current.src === '') {
           audioRef.current.src = '/api/stream';
@@ -365,12 +367,12 @@ export function RadioPlayerV2() {
         console.log('▶️ Tentando reproduzir...');
         await audioRef.current.play();
         setIsPlaying(true);
-        setContextIsPlaying(true);
+        setPlaybackIsPlaying(true);
       }
     } catch (error) {
       console.error('❌ Erro ao reproduzir áudio:', error);
       setIsPlaying(false);
-      setContextIsPlaying(false);
+      setPlaybackIsPlaying(false);
       toast.error('Erro ao reproduzir áudio');
     }
   };

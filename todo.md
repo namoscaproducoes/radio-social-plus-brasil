@@ -313,3 +313,9 @@
 - [ ] Garantir que votos anônimos apareçam no dashboard público "Dashboard mais votadas"
 - [ ] Corrigir dashboard do usuário para exibir apenas seus votos (quando logado)
 - [ ] Implementar player contínuo ao navegar entre páginas/menus
+
+
+## Fase 37: Correção Final - Player Contínuo e Histórico
+
+- [x] Implementar player contínuo ao navegar entre páginas (usar contexto global)
+- [x] Adicionar nome do artista e música ao histórico de votações

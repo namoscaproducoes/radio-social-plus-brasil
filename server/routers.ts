@@ -3,7 +3,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, addToHistory, getRecentSongHistory, getTopVotedSongsThisMonth, getVoteCountsForSong, addFavorite, removeFavorite, getUserFavorites, createNotification, getUserNotifications, markNotificationAsRead, getUnreadNotificationCount, updateUserProfile, getUserById } from "./db";
-import { eq, and, gt } from "drizzle-orm";
+import { eq, and, gt, desc } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
 import { getIcecastMetadata } from "./icecast-metadata";
 import { songs, users, passwordResetTokens, userVotes } from "../drizzle/schema";
@@ -71,9 +71,19 @@ export const appRouter = router({
       if (!ctx.user) throw new Error("User not authenticated");
 
       const votes = await db
-        .select()
+        .select({
+          id: userVotes.id,
+          userId: userVotes.userId,
+          songId: userVotes.songId,
+          voteType: userVotes.voteType,
+          createdAt: userVotes.createdAt,
+          songTitle: songs.title,
+          songArtist: songs.artist,
+        })
         .from(userVotes)
-        .where(eq(userVotes.userId, ctx.user.id));
+        .leftJoin(songs, eq(userVotes.songId, songs.id))
+        .where(eq(userVotes.userId, ctx.user.id))
+        .orderBy(userVotes.createdAt);
 
       return votes;
     }),

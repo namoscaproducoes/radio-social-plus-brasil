@@ -163,8 +163,9 @@ export default function UserDashboard() {
               {userVotes.map((vote, index) => (
                 <div key={index} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
                   <div className="flex-1">
-                    <p className="text-white text-sm">Música ID: {vote.songId}</p>
-                    <p className="text-gray-400 text-xs">
+                    <p className="text-white text-sm font-semibold">{vote.songTitle || 'Música desconhecida'}</p>
+                    <p className="text-gray-400 text-xs">{vote.songArtist || 'Artista desconhecido'}</p>
+                    <p className="text-gray-500 text-xs">
                       {new Date(vote.createdAt).toLocaleDateString('pt-BR')} às {new Date(vote.createdAt).toLocaleTimeString('pt-BR')}
                     </p>
                   </div>

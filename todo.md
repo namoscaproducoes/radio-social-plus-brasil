@@ -305,3 +305,11 @@
 - [ ] Atualizar Home para mostrar ranking global com votos de todos os usuários
 - [ ] Atualizar Dashboard para mostrar apenas votos do usuário logado
 - [ ] Testar Home e Dashboard com múltiplos usuários
+
+
+## Fase 36: Correção de Votação e Player Contínuo
+- [ ] Corrigir erro "Não foi possível encontrar a música atual" ao votar
+- [ ] Permitir votação livre (anônima) na home para usuários não registrados
+- [ ] Garantir que votos anônimos apareçam no dashboard público "Dashboard mais votadas"
+- [ ] Corrigir dashboard do usuário para exibir apenas seus votos (quando logado)
+- [ ] Implementar player contínuo ao navegar entre páginas/menus

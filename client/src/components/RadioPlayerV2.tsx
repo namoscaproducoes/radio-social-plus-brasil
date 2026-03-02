@@ -68,8 +68,8 @@ export function RadioPlayerV2() {
     onSuccess: () => {
       toast.success('Voto registrado com sucesso!');
       // Invalidar cache de votos do usuário
-      trpc.useUtils().votes.getUserVotes.invalidate();
-      trpc.useUtils().votes.getVoteStats.invalidate();
+      utils.votes.getUserVotes.invalidate();
+      utils.votes.getVoteStats.invalidate();
     },
     onError: (error) => {
       toast.error(error.message || 'Erro ao registrar voto');
@@ -393,10 +393,7 @@ export function RadioPlayerV2() {
 
     setUserVote(vote);
 
-    console.log('handleVote chamado com:', { user, vote, metadata });
-
     if (user) {
-      console.log('Usuario autenticado, tentando voto autenticado');
       // Voto de usuário autenticado
       // Se temos songId, usar ele; senão, buscar pela música atual
       let songId = currentSong?.songId;
@@ -412,7 +409,6 @@ export function RadioPlayerV2() {
           console.error('Erro ao buscar songId:', error);
         }
       }
-
       if (songId) {
         try {
           await addUserVoteMutation.mutateAsync({
@@ -424,9 +420,17 @@ export function RadioPlayerV2() {
           toast.error('Erro ao registrar voto');
         }
       } else {
-        // Se não conseguir encontrar o songId, mostrar erro
-        toast.error('Não foi possível identificar a música atual');
-        setUserVote(null);
+        // Se não conseguir encontrar o songId, fazer voto anônimo como fallback
+        try {
+          await addAnonymousVoteMutation.mutateAsync({
+            songTitle: metadata.title,
+            songArtist: metadata.artist,
+            voteType: vote,
+          });
+        } catch (error) {
+          console.error('Erro ao registrar voto anônimo:', error);
+          toast.error('Erro ao registrar voto');
+        }
       }
     } else {
       // Voto anônimo

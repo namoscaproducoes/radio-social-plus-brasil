@@ -316,7 +316,35 @@ export const appRouter = router({
           )
           .limit(1);
 
-        return result.length > 0 ? result[0] : null;
+        if (result.length > 0) {
+          return result[0];
+        }
+
+        // Se a música não existir, criar automaticamente
+        try {
+          await db.insert(songs).values({
+            title: input.title,
+            artist: input.artist,
+            albumCover: '',
+          });
+
+          // Buscar a música criada
+          const newResult = await db
+            .select()
+            .from(songs)
+            .where(
+              and(
+                eq(songs.title, input.title),
+                eq(songs.artist, input.artist)
+              )
+            )
+            .limit(1);
+
+          return newResult.length > 0 ? newResult[0] : null;
+        } catch (error) {
+          console.error('Erro ao criar música:', error);
+          return null;
+        }
       }),
 
     metadata: publicProcedure.query(async () => {
@@ -357,7 +385,7 @@ export const appRouter = router({
       return await getSongsWithVotes();
     }),
 
-    vote: protectedProcedure
+    vote: publicProcedure
       .input(
         z.object({
           songTitle: z.string(),
@@ -396,7 +424,7 @@ export const appRouter = router({
         return await addVote({
           songId: songId,
           voteType: input.voteType,
-          userId: String(ctx.user.id),
+          userId: ctx.user ? String(ctx.user.id) : null,
         });
       }),
 

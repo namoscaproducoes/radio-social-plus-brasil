@@ -142,12 +142,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Google Adsense Banner Area */}
-        <section className="bg-gray-950 border-t border-gray-800 px-3 sm:px-4 py-1 flex-shrink-0">
-          <div className="max-w-7xl mx-auto text-center">
-            <p className="text-gray-400 text-xs">Área para banner Google Adsense</p>
-          </div>
-        </section>
 
       </div>
     </div>

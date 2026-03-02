@@ -128,7 +128,7 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
         <div className="youtube-player-container">
           <iframe
             ref={iframeRef}
-            src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&mute=1&rel=0&modestbranding=1&controls=0&autoplay=0`}
+            src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&mute=1&rel=0&modestbranding=1&controls=0&autoplay=1`}
             title={`${artistName} - ${songTitle}`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen

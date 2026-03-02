@@ -203,3 +203,10 @@
 - [x] Criar página de reset de senha (/auth/reset-password)
 - [x] Adicionar link "Esqueci a Senha" na página de login
 - [x] Testar fluxo completo de recuperação de senha - Todos os fluxos testados e funcionando
+
+
+## Fase 29: Integração de Envio de Emails
+- [x] Criar função de envio de email com Manus API
+- [x] Integrar envio de email na procedure forgotPassword
+- [x] Criar template de email HTML com link de reset
+- [x] Testar envio de email - Fluxo completo funcionando

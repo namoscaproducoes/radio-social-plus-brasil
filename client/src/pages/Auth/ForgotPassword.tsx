@@ -21,7 +21,8 @@ export default function ForgotPassword() {
     setIsLoading(true);
 
     try {
-      const result = await forgotPasswordMutation.mutateAsync({ email });
+      const frontendUrl = window.location.origin;
+      const result = await forgotPasswordMutation.mutateAsync({ email, frontendUrl });
       setMessage(result.message);
       setSubmitted(true);
       setEmail('');

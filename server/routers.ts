@@ -11,6 +11,7 @@ import crypto from "crypto";
 import { youtubeRouter } from "./youtube-router";
 import bcrypt from "bcryptjs";
 import { and, gt } from "drizzle-orm";
+import { sendPasswordResetEmail } from "./email";
 
 export const appRouter = router({
   system: systemRouter,
@@ -91,6 +92,7 @@ export const appRouter = router({
       .input(
         z.object({
           email: z.string().email(),
+          frontendUrl: z.string().url().optional(),
         })
       )
       .mutation(async ({ input }) => {

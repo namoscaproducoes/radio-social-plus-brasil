@@ -267,3 +267,10 @@
 - [x] Implementar upload de imagem com preview - Botão "Escolher Foto" funcional com preview de avatar
 - [x] Integrar link "Meu Perfil" no menu dropdown - Link funcional na navegação
 - [x] Testar edição de dados e upload de foto - Todos os fluxos testados e funcionando perfeitamente!
+
+
+## Fase 37: Investigação de Problema de Publicação
+- [ ] Verificar status do site publicado
+- [ ] Analisar cache e diferenças entre dev e produção
+- [ ] Limpar cache e forçar rebuild
+- [ ] Testar mudanças no site publicado

@@ -130,6 +130,12 @@ export default function Home() {
                   <div className="space-y-1 overflow-y-auto pr-1 flex-1 text-xs">
                     <SongHistory />
                   </div>
+                  {/* Google Ads Banner */}
+                  <div className="mt-2 pt-2 border-t border-gray-700 flex-shrink-0">
+                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2249929574270161" crossOrigin="anonymous"></script>
+                    <ins className="adsbygoogle" style={{display: 'block'}} data-ad-client="ca-pub-2249929574270161" data-ad-slot="2671039837" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    <script>{`(adsbygoogle = window.adsbygoogle || []).push({});`}</script>
+                  </div>
                 </div>
               </div>
             </div>

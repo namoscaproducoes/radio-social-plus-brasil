@@ -103,22 +103,22 @@ export default function Home() {
               </div>
 
               {/* Center: Video and TOP 5 */}
-              <div className="lg:col-span-5 flex flex-col gap-2 overflow-hidden">
-                <div className="flex-1 flex flex-col">
-                  <h3 className="text-white text-xs sm:text-sm font-bold mb-1">video clip</h3>
-                  <div className="bg-gray-900 rounded-lg p-2 border border-gray-700 relative group flex-1 flex items-center justify-center">
-                    <button className="absolute top-2 right-2 text-white hover:text-yellow-500 transition z-20 opacity-0 group-hover:opacity-100">
+              <div className="lg:col-span-5 flex flex-col overflow-hidden">
+                <div className="bg-gray-900 rounded-lg border border-gray-700 flex flex-col h-full overflow-hidden">
+                  <h3 className="text-white text-xs sm:text-sm font-bold mb-1 p-2 pb-0">video clip</h3>
+                  <div className="p-2 pt-1 flex-1 flex items-center justify-center relative group">
+                    <button className="absolute top-3 right-3 text-white hover:text-yellow-500 transition z-20 opacity-0 group-hover:opacity-100">
                       <Maximize2 size={14} />
                     </button>
                     <div className="w-full h-full">
                       <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
                     </div>
                   </div>
-                </div>
-                <div className="bg-gray-900 rounded-lg p-2 border border-gray-700 flex-shrink-0">
-                  <h4 className="text-white text-xs font-bold mb-1">TOP 5</h4>
-                  <div className="max-h-20 overflow-y-auto text-xs">
-                    <TopVotedSongs />
+                  <div className="border-t border-gray-700 p-2 flex-shrink-0">
+                    <h4 className="text-white text-xs font-bold mb-1">TOP 5</h4>
+                    <div className="text-xs">
+                      <TopVotedSongs />
+                    </div>
                   </div>
                 </div>
               </div>

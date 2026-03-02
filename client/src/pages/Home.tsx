@@ -143,45 +143,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="bg-gray-950 border-t border-yellow-500 py-8 px-4 sm:px-6 lg:px-8 mt-auto">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex justify-center mb-6">
-              <img 
-                src="/logo-radio.png" 
-                alt="Rádio Social Plus Brasil" 
-                className="w-12 h-12 rounded-lg"
-              />
-            </div>
-            <div className="text-center text-gray-400 mb-6">
-              <p className="text-xs sm:text-sm mb-2">© 2026 Rádio Social Plus Brasil. Todos os direitos reservados.</p>
-              <p className="text-xs sm:text-sm">Transmitindo música e emoção 24/7</p>
-            </div>
-            <div className="flex justify-center gap-4 flex-wrap">
-              <Button 
-                variant="outline" 
-                className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-gray-900 text-xs sm:text-sm"
-                onClick={() => navigate('/dashboard')}
-              >
-                Dashboard de Votos
-              </Button>
-              <Button 
-                variant="outline" 
-                className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-gray-900 text-xs sm:text-sm"
-                onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
-              >
-                WhatsApp
-              </Button>
-              <Button 
-                variant="outline"
-                className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-gray-900 text-xs sm:text-sm"
-                onClick={() => window.open('https://instagram.com', '_blank')}
-              >
-                Instagram
-              </Button>
-            </div>
-          </div>
-        </footer>
+
       </div>
     </div>
   );

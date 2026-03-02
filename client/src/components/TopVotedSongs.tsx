@@ -1,7 +1,6 @@
 import { Card } from '@/components/ui/card';
-import { Music } from 'lucide-react';
+import { Music, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
-import { useState } from 'react';
 
 export function TopVotedSongs() {
   // Buscar músicas mais votadas com like
@@ -10,8 +9,47 @@ export function TopVotedSongs() {
     limit: 5,
   });
 
-  const isLoading = likeQuery.isLoading;
-  const data = (likeQuery.data) as any[] | undefined;
+  // Buscar músicas mais votadas com dislike
+  const dislikeQuery = trpc.songs.topVotedThisMonth.useQuery({
+    voteType: 'dislike',
+    limit: 5,
+  });
+
+  const isLoading = likeQuery.isLoading || dislikeQuery.isLoading;
+  const likeData = (likeQuery.data) as any[] | undefined;
+  const dislikeData = (dislikeQuery.data) as any[] | undefined;
+
+  // Combinar dados de like e dislike em um mapa para fácil acesso
+  const voteMap = new Map<string, { likes: number; dislikes: number }>();
+  
+  likeData?.forEach((song: any) => {
+    const key = `${song.title}-${song.artist}`;
+    voteMap.set(key, { likes: song.voteCount || 0, dislikes: 0 });
+  });
+
+  dislikeData?.forEach((song: any) => {
+    const key = `${song.title}-${song.artist}`;
+    const existing = voteMap.get(key) || { likes: 0, dislikes: 0 };
+    voteMap.set(key, { likes: existing.likes, dislikes: song.voteCount || 0 });
+  });
+
+  // Combinar e ordenar músicas por total de votos
+  const combinedData = Array.from(voteMap.entries())
+    .map(([key, votes]) => {
+      const [title, artist] = key.split('-');
+      const songData = likeData?.find((s: any) => s.title === title && s.artist === artist) ||
+                       dislikeData?.find((s: any) => s.title === title && s.artist === artist);
+      return {
+        ...songData,
+        title,
+        artist,
+        likes: votes.likes,
+        dislikes: votes.dislikes,
+        total: votes.likes + votes.dislikes,
+      };
+    })
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5);
 
   return (
     <div className="w-full">
@@ -21,10 +59,10 @@ export function TopVotedSongs() {
           <div className="flex items-center justify-center py-4">
             <p className="text-gray-400 text-sm">Carregando...</p>
           </div>
-        ) : data && Array.isArray(data) && data.length > 0 ? (
-          data.map((song: any, index: number) => (
+        ) : combinedData && combinedData.length > 0 ? (
+          combinedData.map((song: any, index: number) => (
             <div
-              key={`${song.id}-${index}`}
+              key={`${song.title}-${song.artist}-${index}`}
               className="flex items-center gap-2 p-2 hover:bg-gray-800 rounded transition-colors"
             >
               {/* Posição */}
@@ -47,9 +85,16 @@ export function TopVotedSongs() {
                 <p className="text-xs text-gray-400 truncate">{song.artist}</p>
               </div>
 
-              {/* Votos */}
-              <div className="flex-shrink-0 text-right">
-                <p className="text-sm font-bold text-yellow-500">{song.voteCount}</p>
+              {/* Votos com ícones */}
+              <div className="flex-shrink-0 flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <ThumbsUp size={14} className="text-green-500" />
+                  <span className="text-xs font-semibold text-green-500">{song.likes || 0}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <ThumbsDown size={14} className="text-red-500" />
+                  <span className="text-xs font-semibold text-red-500">{song.dislikes || 0}</span>
+                </div>
               </div>
             </div>
           ))

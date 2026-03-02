@@ -53,58 +53,61 @@ export function TopVotedSongs() {
 
   return (
     <div className="w-full">
-      {/* Lista de músicas compacta */}
-      <div className="space-y-2">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-4">
-            <p className="text-gray-400 text-sm">Carregando...</p>
-          </div>
-        ) : combinedData && combinedData.length > 0 ? (
-          combinedData.map((song: any, index: number) => (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-2">
+          <p className="text-gray-400 text-xs">Carregando...</p>
+        </div>
+      ) : combinedData && combinedData.length > 0 ? (
+        <div className="flex gap-1 overflow-x-auto pb-1">
+          {combinedData.map((song: any, index: number) => (
             <div
               key={`${song.title}-${song.artist}-${index}`}
-              className="flex items-center gap-2 p-2 hover:bg-gray-800 rounded transition-colors"
+              className="flex-shrink-0 relative group"
             >
-              {/* Posição */}
-              <div className="flex-shrink-0 w-6 h-6 flex items-center justify-center bg-yellow-500 text-gray-900 font-bold rounded-full text-xs">
-                {index + 1}
+              {/* Número da posição */}
+              <div className="absolute -top-2 -left-2 w-6 h-6 flex items-center justify-center bg-yellow-500 text-gray-900 font-bold rounded-full text-xs z-10">
+                #{index + 1}
               </div>
 
               {/* Capa do álbum */}
-              {song.albumCover && (
-                <img
-                  src={song.albumCover}
-                  alt={song.title}
-                  className="w-10 h-10 rounded object-cover flex-shrink-0"
-                />
-              )}
+              <div className="relative">
+                {song.albumCover ? (
+                  <img
+                    src={song.albumCover}
+                    alt={song.title}
+                    className="w-20 h-20 rounded object-cover border border-gray-600 hover:border-yellow-500 transition-colors"
+                  />
+                ) : (
+                  <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-purple-900 rounded flex items-center justify-center border border-gray-600 hover:border-yellow-500 transition-colors">
+                    <Music size={24} className="text-gray-400" />
+                  </div>
+                )}
 
-              {/* Informações da música */}
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-white text-sm truncate">{song.title}</p>
-                <p className="text-xs text-gray-400 truncate">{song.artist}</p>
-              </div>
-
-              {/* Votos com ícones */}
-              <div className="flex-shrink-0 flex items-center gap-2">
-                <div className="flex items-center gap-1">
-                  <ThumbsUp size={14} className="text-green-500" />
-                  <span className="text-xs font-semibold text-green-500">{song.likes || 0}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <ThumbsDown size={14} className="text-red-500" />
-                  <span className="text-xs font-semibold text-red-500">{song.dislikes || 0}</span>
+                {/* Tooltip ao passar mouse */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-95 rounded-b p-1 opacity-0 group-hover:opacity-100 transition-opacity text-xs z-20 pointer-events-none">
+                  <p className="font-semibold text-white truncate">{song.title}</p>
+                  <p className="text-gray-400 truncate">{song.artist}</p>
+                  <div className="flex gap-1 mt-0.5">
+                    <div className="flex items-center gap-0.5">
+                      <ThumbsUp size={10} className="text-green-500" />
+                      <span className="text-green-500">{song.likes || 0}</span>
+                    </div>
+                    <div className="flex items-center gap-0.5">
+                      <ThumbsDown size={10} className="text-red-500" />
+                      <span className="text-red-500">{song.dislikes || 0}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          ))
-        ) : (
-          <div className="flex flex-col items-center justify-center py-4 text-gray-400">
-            <Music className="w-8 h-8 mb-1 opacity-50" />
-            <p className="text-xs">Nenhuma música votada</p>
-          </div>
-        )}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-2 text-gray-400">
+          <Music className="w-6 h-6 mb-1 opacity-50" />
+          <p className="text-xs">Nenhuma música votada</p>
+        </div>
+      )}
     </div>
   );
 }

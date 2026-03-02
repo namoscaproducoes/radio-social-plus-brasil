@@ -1,4 +1,4 @@
-import { COOKIE_NAME } from "@shared/const";
+
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
@@ -6,15 +6,96 @@ import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, add
 import { eq } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
 import { getIcecastMetadata } from "./icecast-metadata";
-import { songs, users, passwordResetTokens } from "../drizzle/schema";
+import { songs, users, passwordResetTokens, userVotes } from "../drizzle/schema";
 import crypto from "crypto";
 import { youtubeRouter } from "./youtube-router";
 import bcrypt from "bcryptjs";
 import { and, gt } from "drizzle-orm";
 import { sendPasswordResetEmail } from "./email";
+import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+
+import { sdk } from "./_core/sdk";
 
 export const appRouter = router({
   system: systemRouter,
+  votes: router({
+    addVote: protectedProcedure
+      .input(
+        z.object({
+          songId: z.number(),
+          voteType: z.enum(["like", "dislike"]),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        if (!ctx.user) throw new Error("User not authenticated");
+
+        // Verificar se o usuário já votou nesta música
+        const existingVote = await db
+          .select()
+          .from(userVotes)
+          .where(
+            and(
+              eq(userVotes.userId, ctx.user.id),
+              eq(userVotes.songId, input.songId)
+            )
+          )
+          .limit(1);
+
+        if (existingVote && existingVote.length > 0) {
+          // Atualizar voto existente
+          await db
+            .update(userVotes)
+            .set({ voteType: input.voteType })
+            .where(
+              and(
+                eq(userVotes.userId, ctx.user.id),
+                eq(userVotes.songId, input.songId)
+              )
+            );
+        } else {
+          // Criar novo voto
+          await db.insert(userVotes).values({
+            userId: ctx.user.id,
+            songId: input.songId,
+            voteType: input.voteType,
+          });
+        }
+
+        return { success: true };
+      }),
+
+    getUserVotes: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      if (!ctx.user) throw new Error("User not authenticated");
+
+      const votes = await db
+        .select()
+        .from(userVotes)
+        .where(eq(userVotes.userId, ctx.user.id));
+
+      return votes;
+    }),
+
+    getVoteStats: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      if (!ctx.user) throw new Error("User not authenticated");
+
+      const votes = await db
+        .select()
+        .from(userVotes)
+        .where(eq(userVotes.userId, ctx.user.id));
+
+      const likes = votes.filter(v => v.voteType === "like").length;
+      const dislikes = votes.filter(v => v.voteType === "dislike").length;
+
+      return { total: votes.length, likes, dislikes };
+    }),
+  }),
+
   youtube: youtubeRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
@@ -37,13 +118,15 @@ export const appRouter = router({
         }
 
         const passwordHash = await bcrypt.hash(input.password, 10);
+        // Gerar openId único para usuários de email/senha
+        const openId = `email_${crypto.randomBytes(16).toString('hex')}`;
 
         const result = await db.insert(users).values({
           name: input.name,
           email: input.email,
           passwordHash,
           loginMethod: "email",
-          openId: null,
+          openId,
         });
 
         return { success: true, userId: (result as any).insertId || 0 };
@@ -56,7 +139,7 @@ export const appRouter = router({
           password: z.string(),
         })
       )
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const db = await getDb();
         if (!db) throw new Error("Database not available");
 
@@ -77,6 +160,15 @@ export const appRouter = router({
         }
 
         await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, user.id));
+
+        // Criar sessão JWT e cookie usando openId
+        const sessionToken = await sdk.createSessionToken(user.openId || user.id.toString(), {
+          name: user.name || "",
+          expiresInMs: ONE_YEAR_MS,
+        });
+
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
 
         return { success: true, user: { id: user.id, email: user.email, name: user.name } };
       }),

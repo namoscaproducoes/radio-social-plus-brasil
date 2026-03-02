@@ -4,6 +4,7 @@ import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { VoteButtons } from "@/components/VoteButtons";
 import { SongHistory } from "@/components/SongHistory";
 import { TopVotedSongs } from "@/components/TopVotedSongs";
+import { UserProfile } from "@/components/UserProfile";
 import { useMetadata } from "@/contexts/MetadataContext";
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
@@ -88,7 +89,8 @@ export default function Home() {
             </button>
 
             {/* Desktop Buttons */}
-            <div className="hidden md:flex gap-2">
+            <div className="hidden md:flex gap-2 items-center">
+              <UserProfile />
               <Button 
                 className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full px-4 py-1 text-xs"
                 onClick={() => navigate('/auth/register')}
@@ -107,6 +109,9 @@ export default function Home() {
           {/* Mobile Menu */}
           {mobileMenuOpen && (
             <div className="md:hidden mt-2 pb-2 border-t border-gray-700 pt-2 space-y-2">
+              <div className="px-2 py-2 border-b border-gray-700">
+                <UserProfile />
+              </div>
               <a 
                 href="https://radiosocialplusbrasil.com.br/quem-somos/" 
                 target="_blank" 

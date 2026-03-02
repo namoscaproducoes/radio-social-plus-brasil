@@ -50,6 +50,13 @@
       "when": 1772472974047,
       "tag": "0006_cynical_kylun",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1772474884120,
+      "tag": "0007_bumpy_morlun",
+      "breakpoints": true
     }
   ]
 }

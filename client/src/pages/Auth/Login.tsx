@@ -13,6 +13,7 @@ export default function Login() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const utils = trpc.useUtils();
   const loginMutation = trpc.auth.login.useMutation();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -29,9 +30,13 @@ export default function Login() {
 
     try {
       await loginMutation.mutateAsync({ email, password });
+      // Invalidar cache para refletir novo usuário logado
+      await utils.auth.me.invalidate();
+      await utils.votes.getUserVotes.invalidate();
+      await utils.votes.getVoteStats.invalidate();
       setSuccess('Login realizado com sucesso! Redirecionando...');
       setTimeout(() => {
-        navigate('/user/dashboard');
+        navigate('/');
       }, 1500);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Erro ao fazer login';

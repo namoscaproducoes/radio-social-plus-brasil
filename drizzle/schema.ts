@@ -102,3 +102,18 @@ export const passwordResetTokens = mysqlTable("passwordResetTokens", {
 
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
+
+/**
+ * UserVotes table - armazena votos (likes e dislikes) de usuários autenticados
+ */
+export const userVotes = mysqlTable("userVotes", {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  songId: int("songId").notNull(),
+  voteType: mysqlEnum("voteType", ["like", "dislike"]).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type UserVote = typeof userVotes.$inferSelect;
+export type InsertUserVote = typeof userVotes.$inferInsert;

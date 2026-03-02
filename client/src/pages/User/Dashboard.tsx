@@ -2,7 +2,7 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { trpc } from '@/lib/trpc';
 import { useEffect, useState } from 'react';
-import { Heart, LogOut, Home, Music, TrendingUp } from 'lucide-react';
+import { Heart, LogOut, Home, Music, TrendingUp, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 export default function UserDashboard() {
   const [, navigate] = useLocation();
@@ -11,6 +11,8 @@ export default function UserDashboard() {
 
   const meQuery = trpc.auth.me.useQuery();
   const logoutMutation = trpc.auth.logout.useMutation();
+  const voteStatsQuery = trpc.votes.getVoteStats.useQuery();
+  const userVotesQuery = trpc.votes.getUserVotes.useQuery();
 
   useEffect(() => {
     if (meQuery.data) {
@@ -51,6 +53,11 @@ export default function UserDashboard() {
       </div>
     );
   }
+
+  const stats = voteStatsQuery.data || { total: 0, likes: 0, dislikes: 0 };
+  const userVotes = userVotesQuery.data || [];
+  const likes = userVotes.filter(v => v.voteType === 'like').length;
+  const dislikes = userVotes.filter(v => v.voteType === 'dislike').length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-900 to-gray-950">
@@ -109,10 +116,20 @@ export default function UserDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
             <div className="flex items-center gap-3">
-              <Heart className="text-red-500" size={24} />
+              <ThumbsUp className="text-green-500" size={24} />
               <div>
-                <p className="text-gray-400 text-sm">Músicas Curtidas</p>
-                <p className="text-white text-2xl font-bold">0</p>
+                <p className="text-gray-400 text-sm">Curtidas</p>
+                <p className="text-white text-2xl font-bold">{likes}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <div className="flex items-center gap-3">
+              <ThumbsDown className="text-red-500" size={24} />
+              <div>
+                <p className="text-gray-400 text-sm">Não Curtidas</p>
+                <p className="text-white text-2xl font-bold">{dislikes}</p>
               </div>
             </div>
           </div>
@@ -122,17 +139,7 @@ export default function UserDashboard() {
               <Music className="text-yellow-500" size={24} />
               <div>
                 <p className="text-gray-400 text-sm">Total de Votos</p>
-                <p className="text-white text-2xl font-bold">0</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <div className="flex items-center gap-3">
-              <TrendingUp className="text-green-500" size={24} />
-              <div>
-                <p className="text-gray-400 text-sm">Engajamento</p>
-                <p className="text-white text-2xl font-bold">0%</p>
+                <p className="text-white text-2xl font-bold">{stats.total}</p>
               </div>
             </div>
           </div>
@@ -142,9 +149,38 @@ export default function UserDashboard() {
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8">
           <h3 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
             <Heart className="text-red-500" size={24} />
-            Minhas Músicas Curtidas
+            Histórico de Votações
           </h3>
-          <p className="text-gray-400">Você ainda não curtiu nenhuma música. Volte para a página inicial e comece a votar!</p>
+          
+          {userVotes.length === 0 ? (
+            <p className="text-gray-400">Você ainda não votou em nenhuma música. Volte para a página inicial e comece a votar!</p>
+          ) : (
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {userVotes.map((vote, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
+                  <div className="flex-1">
+                    <p className="text-white text-sm">Música ID: {vote.songId}</p>
+                    <p className="text-gray-400 text-xs">
+                      {new Date(vote.createdAt).toLocaleDateString('pt-BR')} às {new Date(vote.createdAt).toLocaleTimeString('pt-BR')}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {vote.voteType === 'like' ? (
+                      <>
+                        <ThumbsUp className="text-green-500" size={18} />
+                        <span className="text-green-500 font-semibold text-sm">Curtida</span>
+                      </>
+                    ) : (
+                      <>
+                        <ThumbsDown className="text-red-500" size={18} />
+                        <span className="text-red-500 font-semibold text-sm">Não Curtida</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Coming Soon Features */}

@@ -218,3 +218,19 @@
 - [x] Testar envio de email diretamente - Implementado com fallback para console logging
 - [x] Corrigir problema identificado - Reescrever email.ts com suporte a SendGrid/AWS SES
 - [x] Testar fluxo completo novamente - Email sendo processado com sucesso, link de reset gerado
+
+
+## Fase 31: Rastreamento de Votações do Usuário
+- [x] Criar tabela de votações (userVotes) no banco de dados
+- [x] Adicionar procedures para registrar/atualizar votações
+- [x] Redirecionar para home após login
+- [x] Implementar botões de votação na home com rastreamento
+- [x] Exibir histórico de votações no dashboard do usuário
+- [x] Testar fluxo completo de votação e dashboard
+
+
+## Fase 32: Indicador Visual de Usuário Logado
+- [x] Criar componente de perfil do usuário com avatar e nome
+- [x] Integrar componente na barra de navegação
+- [x] Adicionar menu dropdown com opções (Dashboard, Logout)
+- [x] Testar indicador visual com usuário logado - Avatar com iniciais, menu dropdown, logout funcionando perfeitamente

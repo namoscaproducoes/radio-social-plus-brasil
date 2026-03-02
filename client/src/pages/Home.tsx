@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { useLocation } from "wouter";
 import { RadioPlayerV2 } from "@/components/RadioPlayerV2";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
@@ -9,6 +8,7 @@ import { TopVotedSongs } from "@/components/TopVotedSongs";
 import { useMetadata } from "@/contexts/MetadataContext";
 import { useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
+import { Maximize2 } from "lucide-react";
 
 export default function Home() {
   const [, navigate] = useLocation();
@@ -33,7 +33,7 @@ export default function Home() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col relative"
+      className="min-h-screen flex flex-col relative bg-gray-950"
       style={{
         backgroundImage: albumCover ? `url(${albumCover})` : 'linear-gradient(to bottom right, rgb(147, 51, 234), rgb(88, 28, 135), rgb(75, 0, 130))',
         backgroundSize: 'cover',
@@ -45,105 +45,144 @@ export default function Home() {
       <div 
         className="absolute inset-0 backdrop-blur-sm"
         style={{
-          background: 'rgba(75, 0, 130, 0.4)',
+          background: 'rgba(0, 0, 0, 0.6)',
         }}
       />
-      
+
       {/* Content */}
       <div className="relative z-10 flex flex-col min-h-screen">
-        {/* Hero Section */}
-        <section className="py-20 px-4 flex-1">
-          <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-yellow-500 font-bold text-xs sm:text-sm mb-4">OUÇA AO VIVO</p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-4">
+        {/* Top Navigation */}
+        <nav className="bg-gray-950 border-b border-gray-800 px-4 sm:px-6 lg:px-8 py-4">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-8">
               <img 
                 src="/logo-radio.png" 
                 alt="Rádio Social Plus Brasil" 
-                className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl shadow-lg border-4 border-yellow-500"
+                className="w-10 h-10 rounded-lg"
               />
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white text-center sm:text-left">
-                É só apertar o Play.<br />É grátis!
-              </h1>
+              <div className="hidden md:flex gap-6">
+                <button className="text-white hover:text-yellow-500 transition text-sm font-medium">
+                  Sobre a rádio
+                </button>
+                <button 
+                  onClick={() => navigate('/dashboard')}
+                  className="text-white hover:text-yellow-500 transition text-sm font-medium"
+                >
+                  Dashboard mais votadas
+                </button>
+              </div>
             </div>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-200 px-2">
-              Sinta, ouça e compartilhe. Sua rádio online onde e quando você quiser.
-            </p>
+            <Button 
+              className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-full px-6"
+              onClick={() => navigate('/dashboard')}
+            >
+              ENTRAR
+            </Button>
           </div>
+        </nav>
 
-          {/* Player and Video Container */}
-          <Card className="bg-gray-900 border-4 border-yellow-500 p-4 sm:p-6 md:p-8 shadow-2xl max-w-5xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-              {/* Left: Radio Player */}
-              <div className="flex justify-center">
-                <div className="w-full max-w-sm">
-                  <RadioPlayerV2 />
+        {/* Main Content Grid */}
+        <div className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+              {/* Left: Player */}
+              <div className="lg:col-span-3">
+                <div className="bg-red-600 rounded-2xl p-4 sm:p-6 shadow-2xl border-2 border-red-700">
+                  <div className="text-center mb-4">
+                    <p className="text-white text-xs sm:text-sm font-bold opacity-90 tracking-wider">TOCANDO AGORA</p>
+                  </div>
+                  <div className="scale-90 sm:scale-100 origin-top">
+                    <RadioPlayerV2 />
+                  </div>
                 </div>
               </div>
 
-              {/* Right: YouTube Video */}
-              <div className="flex flex-col gap-4">
-                <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
-                <VoteButtons />
+              {/* Center: Video */}
+              <div className="lg:col-span-5">
+                <div className="space-y-3">
+                  <div>
+                    <h3 className="text-white text-base sm:text-lg font-bold mb-3">video clip</h3>
+                    <div className="bg-gray-900 rounded-xl p-3 sm:p-4 border border-gray-700 relative group">
+                      <button className="absolute top-3 right-3 text-white hover:text-yellow-500 transition z-20 opacity-0 group-hover:opacity-100">
+                        <Maximize2 size={18} />
+                      </button>
+                      <div className="h-48 sm:h-64">
+                        <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
+                      </div>
+                    </div>
+                  </div>
+                  <VoteButtons />
+                </div>
+              </div>
+
+              {/* Right: Recent Songs */}
+              <div className="lg:col-span-4">
+                <div className="bg-gray-900 rounded-2xl p-4 sm:p-6 border-2 border-gray-700 h-full">
+                  <h3 className="text-white text-base sm:text-lg font-bold mb-4">As últimas tocadas</h3>
+                  <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+                    <SongHistory />
+                  </div>
+                </div>
               </div>
             </div>
-          </Card>
+          </div>
+        </div>
+
+        {/* TOP 5 Section */}
+        <section className="bg-gray-950 border-t border-gray-800 px-4 sm:px-6 lg:px-8 py-12">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center gap-4 mb-8">
+              <h2 className="text-white text-2xl font-bold">TOP 5</h2>
+              <div className="text-yellow-500 text-3xl font-bold">00:16:09</div>
+            </div>
+            <TopVotedSongs />
           </div>
         </section>
 
-        {/* Song History and Top Voted Section */}
-        <section className="py-12 sm:py-16 md:py-20 px-4 bg-gray-800 mt-0">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-              <div className="overflow-hidden">
-                <SongHistory />
-              </div>
-              <div className="overflow-hidden">
-                <TopVotedSongs />
-              </div>
-            </div>
+        {/* Google Adsense Banner Area */}
+        <section className="bg-gray-950 border-t border-gray-800 px-4 sm:px-6 lg:px-8 py-12">
+          <div className="max-w-7xl mx-auto text-center">
+            <p className="text-gray-400 text-sm">Área para banner Google Adsense</p>
           </div>
         </section>
-
-
 
         {/* Footer */}
-        <footer className="bg-gray-950 border-t-4 border-yellow-500 py-8 sm:py-10 md:py-12 px-4 mt-auto">
-          <div className="max-w-6xl mx-auto">
-          <div className="flex justify-center mb-6 sm:mb-8">
-            <img 
-              src="/logo-radio.png" 
-              alt="Rádio Social Plus Brasil" 
-              className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg"
-            />
-          </div>
-          <div className="text-center text-gray-400 mb-4 sm:mb-6">
-            <p className="text-xs sm:text-sm md:text-base mb-2">© 2026 Rádio Social Plus Brasil. Todos os direitos reservados.</p>
-            <p className="text-xs sm:text-sm">Transmitindo música e emoção 24/7</p>
-          </div>
-          <div className="flex justify-center gap-6">
-            <Button 
-              variant="outline" 
-              className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-gray-900"
-              onClick={() => navigate('/dashboard')}
-            >
-              Dashboard de Votos
-            </Button>
-            <Button 
-              variant="outline" 
-              className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-gray-900"
-              onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
-            >
-              WhatsApp
-            </Button>
-            <Button 
-              variant="outline"
-              className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-gray-900"
-              onClick={() => window.open('https://instagram.com', '_blank')}
-            >
-              Instagram
-            </Button>
-          </div>
+        <footer className="bg-gray-950 border-t border-yellow-500 py-8 px-4 sm:px-6 lg:px-8 mt-auto">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex justify-center mb-6">
+              <img 
+                src="/logo-radio.png" 
+                alt="Rádio Social Plus Brasil" 
+                className="w-12 h-12 rounded-lg"
+              />
+            </div>
+            <div className="text-center text-gray-400 mb-6">
+              <p className="text-xs sm:text-sm mb-2">© 2026 Rádio Social Plus Brasil. Todos os direitos reservados.</p>
+              <p className="text-xs sm:text-sm">Transmitindo música e emoção 24/7</p>
+            </div>
+            <div className="flex justify-center gap-4 flex-wrap">
+              <Button 
+                variant="outline" 
+                className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-gray-900 text-xs sm:text-sm"
+                onClick={() => navigate('/dashboard')}
+              >
+                Dashboard de Votos
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-gray-900 text-xs sm:text-sm"
+                onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
+              >
+                WhatsApp
+              </Button>
+              <Button 
+                variant="outline"
+                className="border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-gray-900 text-xs sm:text-sm"
+                onClick={() => window.open('https://instagram.com', '_blank')}
+              >
+                Instagram
+              </Button>
+            </div>
           </div>
         </footer>
       </div>

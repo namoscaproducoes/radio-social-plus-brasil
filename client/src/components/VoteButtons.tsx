@@ -51,6 +51,7 @@ export function VoteButtons() {
       toast.success('Voto registrado com sucesso!');
       // Invalidar cache de votos do usuário
       trpc.useUtils().votes.getUserVotes.invalidate();
+      trpc.useUtils().votes.getVoteStats.invalidate();
     },
     onError: (error) => {
       toast.error(error.message || 'Erro ao registrar voto');

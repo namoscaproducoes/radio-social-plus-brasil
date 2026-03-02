@@ -11,8 +11,12 @@ export default function UserDashboard() {
 
   const meQuery = trpc.auth.me.useQuery();
   const logoutMutation = trpc.auth.logout.useMutation();
-  const voteStatsQuery = trpc.votes.getVoteStats.useQuery();
-  const userVotesQuery = trpc.votes.getUserVotes.useQuery();
+  const voteStatsQuery = trpc.votes.getVoteStats.useQuery(undefined, {
+    refetchInterval: 5000, // Refetch a cada 5 segundos
+  });
+  const userVotesQuery = trpc.votes.getUserVotes.useQuery(undefined, {
+    refetchInterval: 5000, // Refetch a cada 5 segundos
+  });
 
   useEffect(() => {
     if (meQuery.data) {

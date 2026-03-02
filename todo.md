@@ -289,3 +289,11 @@
 - [ ] Limpar cache e forçar rebuild completo
 - [ ] Criar novo checkpoint com rebuild forçado
 - [ ] Testar mudanças no domínio público
+
+
+## Fase 40: Correção de Dashboard - Votos Não Sendo Computados
+- [x] Analisar estrutura de votos no banco de dados - userVotes table identificada
+- [x] Verificar procedures tRPC de votação (vote, unvote) - addVote, getUserVotes, getVoteStats encontradas
+- [x] Corrigir lógica de contagem de votos no dashboard - Adicionada invalidação de getVoteStats
+- [x] Atualizar componente de dashboard para refletir votos - Adicionado refetchInterval de 5 segundos
+- [x] Testar votação e verificar se dashboard atualiza - Dashboard computando votos corretamente!

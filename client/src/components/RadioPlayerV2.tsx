@@ -94,10 +94,10 @@ export function RadioPlayerV2() {
     }
 
     if (reconnectAttemptsRef.current >= maxReconnectAttemptsRef.current) {
-      console.error('❌ Máximo de tentativas de reconexão atingido');
+      console.warn('⚠️ Máximo de tentativas de reconexão atingido. Aguardando próxima ação do usuário.');
       setIsPlaying(false);
       setContextIsPlaying(false);
-      toast.error('Falha ao conectar ao stream. Tente novamente.');
+      // Sem toast de erro
       return;
     }
 
@@ -114,7 +114,7 @@ export function RadioPlayerV2() {
       try {
         if (!audioRef.current || userPausedRef.current) return;
 
-        console.log('🔄 Iniciando reconexão...');
+        console.log('🔄 Preparando reconexão...');
         
         // Apenas pausar se não está pausado
         if (!audioRef.current.paused) {
@@ -125,18 +125,9 @@ export function RadioPlayerV2() {
         audioRef.current.src = newSrc;
         console.log('📡 Novo src definido:', newSrc);
         
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Apenas tentar reproduzir se o usuário não pausou
-        if (!userPausedRef.current) {
-          const playPromise = audioRef.current.play();
-          if (playPromise) {
-            await playPromise;
-            console.log('✅ Reconectado ao stream com sucesso');
-            reconnectAttemptsRef.current = 0;
-            lastPlayTimeRef.current = Date.now();
-          }
-        }
+        // NÃO tentar reproduzir automaticamente - navegador bloqueia autoplay sem interação
+        console.log('✅ Stream pronto para reproduzir (aguardando clique do usuário)');
+        reconnectAttemptsRef.current = 0;
       } catch (error) {
         console.error('❌ Erro ao reconectar:', error);
         // Não reconectar se o usuário pausou

@@ -177,3 +177,10 @@
 - [x] Sincronizar play do vídeo com player de música (som desligado)
 - [x] Remover duplicatas no histórico de músicas
 - [x] Corrigir duplicação de som ao clicar play - Problema era loop de reconexão infinito, corrigido com verificação de userPausedRef
+
+
+## Fase 26: Correção de Erros de Autoplay
+- [x] Remover tentativas de autoplay automático (bloqueado pelo navegador)
+- [x] Corrigir lógica de reconexão para não chamar play() automaticamente
+- [x] Permitir apenas play manual após clique do usuário
+- [x] Testar reconexão sem erros de autoplay

@@ -1,0 +1,18 @@
+{
+  "query": "SELECT * FROM userVotes WHERE userId = (SELECT id FROM users ORDER BY id DESC LIMIT 1) LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT * FROM userVotes WHERE userId = (SELECT id FROM users ORDER BY id DESC LIMIT 1) LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "userId": "807487",
+      "songId": "210019",
+      "voteType": "like",
+      "createdAt": "2026-03-02 21:33:05",
+      "updatedAt": "2026-03-02 21:33:05"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tsongId\tvoteType\tcreatedAt\tupdatedAt\n1\t807487\t210019\tlike\t2026-03-02 21:33:05\t2026-03-02 21:33:05\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

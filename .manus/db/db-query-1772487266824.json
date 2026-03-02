@@ -1,0 +1,14 @@
+{
+  "query": "SELECT id, name FROM users ORDER BY id DESC LIMIT 1;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT id, name FROM users ORDER BY id DESC LIMIT 1;",
+  "rows": [
+    {
+      "id": "807487",
+      "name": "João Silva"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\n807487\tJoão Silva\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

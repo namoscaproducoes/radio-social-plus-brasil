@@ -3,14 +3,13 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, addToHistory, getRecentSongHistory, getTopVotedSongsThisMonth, getVoteCountsForSong, addFavorite, removeFavorite, getUserFavorites, createNotification, getUserNotifications, markNotificationAsRead, getUnreadNotificationCount, updateUserProfile, getUserById } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and, gt } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
 import { getIcecastMetadata } from "./icecast-metadata";
 import { songs, users, passwordResetTokens, userVotes } from "../drizzle/schema";
 import crypto from "crypto";
 import { youtubeRouter } from "./youtube-router";
 import bcrypt from "bcryptjs";
-import { and, gt } from "drizzle-orm";
 import { sendPasswordResetEmail } from "./email";
 import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
@@ -294,6 +293,31 @@ export const appRouter = router({
     current: publicProcedure.query(async () => {
       return await getCurrentSong();
     }),
+
+    getSongIdByMetadata: publicProcedure
+      .input(
+        z.object({
+          title: z.string(),
+          artist: z.string(),
+        })
+      )
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return null;
+
+        const result = await db
+          .select()
+          .from(songs)
+          .where(
+            and(
+              eq(songs.title, input.title),
+              eq(songs.artist, input.artist)
+            )
+          )
+          .limit(1);
+
+        return result.length > 0 ? result[0] : null;
+      }),
 
     metadata: publicProcedure.query(async () => {
       try {

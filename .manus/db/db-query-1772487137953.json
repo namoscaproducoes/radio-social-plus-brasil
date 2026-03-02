@@ -1,0 +1,20 @@
+{
+  "query": "SELECT * FROM songs WHERE title = 'There Is a Party (Greatest Hits Version)' AND artist = 'DJ BoBo';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT * FROM songs WHERE title = 'There Is a Party (Greatest Hits Version)' AND artist = 'DJ BoBo';",
+  "rows": [
+    {
+      "id": "210019",
+      "title": "There Is a Party (Greatest Hits Version)",
+      "artist": "DJ BoBo",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "externalId": "thereisapartygreatesthitsversiondjbobo",
+      "createdAt": "2026-03-02 21:31:36",
+      "updatedAt": "2026-03-02 21:31:36"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tartist\talbumCover\tduration\texternalId\tcreatedAt\tupdatedAt\n210019\tThere Is a Party (Greatest Hits Version)\tDJ BoBo\tNULL\tNULL\tthereisapartygreatesthitsversiondjbobo\t2026-03-02 21:31:36\t2026-03-02 21:31:36\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

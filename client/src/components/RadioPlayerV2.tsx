@@ -4,6 +4,7 @@ import { ThumbsUp, ThumbsDown, Play, Pause, Volume2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { trpc } from '@/lib/trpc';
 import { useMetadata } from '@/contexts/MetadataContext';
+import { useAuth } from '@/_core/hooks/useAuth';
 
 interface SongMetadata {
   title: string;
@@ -57,7 +58,26 @@ export function RadioPlayerV2() {
     }
   );
 
-  const addVoteMutation = trpc.songs.vote.useMutation({
+  // Verificar autenticação
+  const { user } = useAuth();
+  const { data: currentSong } = trpc.songs.current.useQuery();
+  const utils = trpc.useUtils();
+
+  // Mutation para votos de usuários autenticados
+  const addUserVoteMutation = trpc.votes.addVote.useMutation({
+    onSuccess: () => {
+      toast.success('Voto registrado com sucesso!');
+      // Invalidar cache de votos do usuário
+      trpc.useUtils().votes.getUserVotes.invalidate();
+      trpc.useUtils().votes.getVoteStats.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Erro ao registrar voto');
+    },
+  });
+
+  // Mutation para votos anônimos
+  const addAnonymousVoteMutation = trpc.songs.vote.useMutation({
     onSuccess: () => {
       toast.success('Voto registrado com sucesso!');
     },
@@ -365,18 +385,61 @@ export function RadioPlayerV2() {
   };
 
   // Registrar voto
-  const handleVote = (vote: 'like' | 'dislike') => {
+  const handleVote = async (vote: 'like' | 'dislike') => {
     if (!metadata.title || metadata.title === 'Carregando...') {
       toast.error('Aguarde a música carregar');
       return;
     }
 
     setUserVote(vote);
-    addVoteMutation.mutate({
-      songTitle: metadata.title,
-      songArtist: metadata.artist,
-      voteType: vote,
-    });
+
+    console.log('handleVote chamado com:', { user, vote, metadata });
+
+    if (user) {
+      console.log('Usuario autenticado, tentando voto autenticado');
+      // Voto de usuário autenticado
+      // Se temos songId, usar ele; senão, buscar pela música atual
+      let songId = currentSong?.songId;
+      
+      if (!songId) {
+        try {
+          const songData = await utils.songs.getSongIdByMetadata.fetch({
+            title: metadata.title,
+            artist: metadata.artist,
+          });
+          songId = songData?.id;
+        } catch (error) {
+          console.error('Erro ao buscar songId:', error);
+        }
+      }
+
+      if (songId) {
+        try {
+          await addUserVoteMutation.mutateAsync({
+            songId,
+            voteType: vote,
+          });
+        } catch (error) {
+          console.error('Erro ao registrar voto autenticado:', error);
+          toast.error('Erro ao registrar voto');
+        }
+      } else {
+        // Se não conseguir encontrar o songId, mostrar erro
+        toast.error('Não foi possível identificar a música atual');
+        setUserVote(null);
+      }
+    } else {
+      // Voto anônimo
+      try {
+        await addAnonymousVoteMutation.mutateAsync({
+          songTitle: metadata.title,
+          songArtist: metadata.artist,
+          voteType: vote,
+        });
+      } catch (error) {
+        console.error('Erro ao registrar voto anônimo:', error);
+      }
+    }
   };
 
   return (
@@ -463,6 +526,7 @@ export function RadioPlayerV2() {
           <div className="flex items-center justify-center gap-2">
             <Button
               onClick={() => handleVote('like')}
+              disabled={addUserVoteMutation.isPending || addAnonymousVoteMutation.isPending}
               variant={userVote === 'like' ? 'default' : 'outline'}
               className={`flex items-center gap-1 text-xs h-8 px-2 ${
                 userVote === 'like'
@@ -476,6 +540,7 @@ export function RadioPlayerV2() {
 
             <Button
               onClick={() => handleVote('dislike')}
+              disabled={addUserVoteMutation.isPending || addAnonymousVoteMutation.isPending}
               variant={userVote === 'dislike' ? 'default' : 'outline'}
               className={`flex items-center gap-1 text-xs h-8 px-2 ${
                 userVote === 'dislike'

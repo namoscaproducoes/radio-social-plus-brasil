@@ -1,0 +1,26 @@
+{
+  "query": "SELECT id, name FROM users WHERE name LIKE '%João%' LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT id, name FROM users WHERE name LIKE '%João%' LIMIT 10;",
+  "rows": [
+    {
+      "id": "793753",
+      "name": "João Silva"
+    },
+    {
+      "id": "794537",
+      "name": "João Silva"
+    },
+    {
+      "id": "794920",
+      "name": "João Silva"
+    },
+    {
+      "id": "807487",
+      "name": "João Silva"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\n793753\tJoão Silva\n794537\tJoão Silva\n794920\tJoão Silva\n807487\tJoão Silva\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

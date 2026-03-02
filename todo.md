@@ -297,3 +297,11 @@
 - [x] Corrigir lógica de contagem de votos no dashboard - Adicionada invalidação de getVoteStats
 - [x] Atualizar componente de dashboard para refletir votos - Adicionado refetchInterval de 5 segundos
 - [x] Testar votação e verificar se dashboard atualiza - Dashboard computando votos corretamente!
+
+
+## Fase 41: Correção de Ranking - Home vs Dashboard
+- [ ] Analisar estrutura atual de ranking na Home e Dashboard
+- [ ] Criar procedures tRPC para ranking global (todos os usuários) e votos do usuário
+- [ ] Atualizar Home para mostrar ranking global com votos de todos os usuários
+- [ ] Atualizar Dashboard para mostrar apenas votos do usuário logado
+- [ ] Testar Home e Dashboard com múltiplos usuários

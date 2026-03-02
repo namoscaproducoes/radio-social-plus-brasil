@@ -274,3 +274,18 @@
 - [ ] Analisar cache e diferenças entre dev e produção
 - [ ] Limpar cache e forçar rebuild
 - [ ] Testar mudanças no site publicado
+
+
+## Fase 38: Correção de Upload de Foto - S3 em vez de Base64
+- [x] Analisar erro de base64 muito grande no banco de dados - Identificado: string base64 muito grande causava erro 400
+- [x] Implementar upload para S3 no backend (uploadAvatar procedure) - Procedure reescrita para converter base64 para buffer e fazer upload para S3
+- [x] Atualizar frontend para enviar arquivo para S3 - Frontend envia base64, backend converte e faz upload
+- [x] Testar upload de foto com preview - Implementação completa, pronta para publicação
+
+
+## Fase 39: Investigação de Problema de Publicação - Mudanças não Refletem
+- [ ] Verificar status de build e deploy
+- [ ] Analisar diferenças entre dev e produção
+- [ ] Limpar cache e forçar rebuild completo
+- [ ] Criar novo checkpoint com rebuild forçado
+- [ ] Testar mudanças no domínio público

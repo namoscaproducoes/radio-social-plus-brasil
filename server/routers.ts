@@ -558,13 +558,35 @@ export const appRouter = router({
     uploadAvatar: protectedProcedure
       .input(
         z.object({
-          imageUrl: z.string().url(),
+          imageUrl: z.string(),
         })
       )
       .mutation(async ({ input, ctx }) => {
         if (!ctx.user) throw new Error("User not authenticated");
-        await updateUserProfile(ctx.user.id, { avatarUrl: input.imageUrl });
-        return { success: true, avatarUrl: input.imageUrl };
+        
+        try {
+          // Converter base64 para buffer
+          const base64Data = input.imageUrl.replace(/^data:image\/[a-z]+;base64,/, '');
+          const buffer = Buffer.from(base64Data, 'base64');
+          
+          // Importar storagePut dinamicamente
+          const { storagePut } = await import('./storage');
+          
+          // Upload para S3
+          const { url } = await storagePut(
+            `avatars/${ctx.user.id}-${Date.now()}.jpg`,
+            buffer,
+            'image/jpeg'
+          );
+          
+          // Salvar URL S3 no banco de dados
+          await updateUserProfile(ctx.user.id, { avatarUrl: url });
+          
+          return { success: true, avatarUrl: url };
+        } catch (error) {
+          console.error('Avatar upload error:', error);
+          throw new Error(`Falha ao fazer upload da foto: ${error instanceof Error ? error.message : 'erro desconhecido'}`);
+        }
       }),
   }),
 });

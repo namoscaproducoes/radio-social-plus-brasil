@@ -88,3 +88,17 @@ export const songHistory = mysqlTable("songHistory", {
 
 export type SongHistory = typeof songHistory.$inferSelect;
 export type InsertSongHistory = typeof songHistory.$inferInsert;
+
+/**
+ * PasswordResetToken table - armazena tokens para recuperação de senha
+ */
+export const passwordResetTokens = mysqlTable("passwordResetTokens", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  token: varchar("token", { length: 255 }).notNull().unique(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;

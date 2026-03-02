@@ -194,3 +194,12 @@
 - [x] Criar seção de músicas favoritas (votadas com like) - estrutura preparada
 - [x] Preparar estrutura para recursos exclusivos futuros
 - [x] Testar fluxo completo de autenticação e dashboard - Registro e login funcionando perfeitamente
+
+
+## Fase 28: Sistema de Recuperação de Senha
+- [x] Atualizar schema com tabela de reset tokens
+- [x] Implementar procedures de forgot password e reset password
+- [x] Criar página de recuperação de senha (/auth/forgot-password)
+- [x] Criar página de reset de senha (/auth/reset-password)
+- [x] Adicionar link "Esqueci a Senha" na página de login
+- [x] Testar fluxo completo de recuperação de senha - Todos os fluxos testados e funcionando

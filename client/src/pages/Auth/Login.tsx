@@ -116,6 +116,16 @@ export default function Login() {
           </Button>
         </form>
 
+        {/* Forgot Password Link */}
+        <div className="text-center mt-4">
+          <button
+            onClick={() => navigate('/auth/forgot-password')}
+            className="text-yellow-500 hover:text-yellow-400 text-sm font-medium transition"
+          >
+            Esqueci minha senha
+          </button>
+        </div>
+
         {/* Register Link */}
         <div className="text-center mt-6">
           <p className="text-gray-400">

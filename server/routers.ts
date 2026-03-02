@@ -6,9 +6,11 @@ import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, add
 import { eq } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
 import { getIcecastMetadata } from "./icecast-metadata";
-import { songs, users } from "../drizzle/schema";
+import { songs, users, passwordResetTokens } from "../drizzle/schema";
+import crypto from "crypto";
 import { youtubeRouter } from "./youtube-router";
 import bcrypt from "bcryptjs";
+import { and, gt } from "drizzle-orm";
 
 export const appRouter = router({
   system: systemRouter,
@@ -85,6 +87,100 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    forgotPassword: publicProcedure
+      .input(
+        z.object({
+          email: z.string().email(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const userResult = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
+        if (!userResult || userResult.length === 0) {
+          return { success: true, message: "Se o email existir, um link de recuperação será enviado" };
+        }
+
+        const user = userResult[0];
+
+        const token = crypto.randomBytes(32).toString("hex");
+        const expiresAt = new Date(Date.now() + 1000 * 60 * 60);
+
+        await db.delete(passwordResetTokens).where(eq(passwordResetTokens.userId, user.id));
+
+        await db.insert(passwordResetTokens).values({
+          userId: user.id,
+          token,
+          expiresAt,
+        });
+
+        return { success: true, message: "Se o email existir, um link de recuperação será enviado", token };
+      }),
+
+    resetPassword: publicProcedure
+      .input(
+        z.object({
+          token: z.string(),
+          newPassword: z.string().min(6),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const tokenResult = await db
+          .select()
+          .from(passwordResetTokens)
+          .where(
+            and(
+              eq(passwordResetTokens.token, input.token),
+              gt(passwordResetTokens.expiresAt, new Date())
+            )
+          )
+          .limit(1);
+
+        if (!tokenResult || tokenResult.length === 0) {
+          throw new Error("Token inválido ou expirado");
+        }
+
+        const resetToken = tokenResult[0];
+
+        const passwordHash = await bcrypt.hash(input.newPassword, 10);
+
+        await db
+          .update(users)
+          .set({ passwordHash })
+          .where(eq(users.id, resetToken.userId));
+
+        await db.delete(passwordResetTokens).where(eq(passwordResetTokens.id, resetToken.id));
+
+        return { success: true, message: "Senha redefinida com sucesso" };
+      }),
+
+    verifyResetToken: publicProcedure
+      .input(
+        z.object({
+          token: z.string(),
+        })
+      )
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+
+        const tokenResult = await db
+          .select()
+          .from(passwordResetTokens)
+          .where(
+            and(
+              eq(passwordResetTokens.token, input.token),
+              gt(passwordResetTokens.expiresAt, new Date())
+            )
+          )
+          .limit(1);
+
+        return { valid: tokenResult && tokenResult.length > 0 };
+      }),
   }),
 
   songs: router({

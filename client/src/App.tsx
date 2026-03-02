@@ -4,6 +4,8 @@ import NotFound from "@/pages/NotFound";
 import Dashboard from "@/pages/Dashboard";
 import Login from "@/pages/Auth/Login";
 import Register from "@/pages/Auth/Register";
+import ForgotPassword from "@/pages/Auth/ForgotPassword";
+import ResetPassword from "@/pages/Auth/ResetPassword";
 import UserDashboard from "@/pages/User/Dashboard";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -20,6 +22,8 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/auth/login" component={Login} />
       <Route path="/auth/register" component={Register} />
+      <Route path="/auth/forgot-password" component={ForgotPassword} />
+      <Route path="/auth/reset-password" component={ResetPassword} />
       <Route path="/user/dashboard" component={UserDashboard} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}

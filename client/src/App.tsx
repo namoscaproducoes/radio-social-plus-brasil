@@ -6,6 +6,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { MetadataProvider } from "./contexts/MetadataContext";
+import { TimezoneProvider } from "./contexts/TimezoneContext";
 import Home from "./pages/Home";
 
 function Router() {
@@ -29,17 +30,19 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <MetadataProvider>
-        <ThemeProvider
-          defaultTheme="light"
-          // switchable
-        >
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </ThemeProvider>
-      </MetadataProvider>
+      <TimezoneProvider>
+        <MetadataProvider>
+          <ThemeProvider
+            defaultTheme="light"
+            // switchable
+          >
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </ThemeProvider>
+        </MetadataProvider>
+      </TimezoneProvider>
     </ErrorBoundary>
   );
 }

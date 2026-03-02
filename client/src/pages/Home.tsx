@@ -61,9 +61,14 @@ export default function Home() {
                 className="w-10 h-10 rounded-lg"
               />
               <div className="hidden md:flex gap-6">
-                <button className="text-white hover:text-yellow-500 transition text-sm font-medium">
+                <a 
+                  href="https://radiosocialplusbrasil.com.br/quem-somos/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-white hover:text-yellow-500 transition text-sm font-medium"
+                >
                   Sobre a rádio
-                </button>
+                </a>
                 <button 
                   onClick={() => navigate('/dashboard')}
                   className="text-white hover:text-yellow-500 transition text-sm font-medium"
@@ -87,7 +92,7 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
               {/* Left: Player */}
               <div className="lg:col-span-3">
-                <div className="bg-red-600 rounded-2xl p-4 sm:p-6 shadow-2xl border-2 border-red-700">
+                <div className="rounded-2xl p-4 sm:p-6 shadow-2xl border-2" style={{backgroundColor: '#ffac37', borderColor: '#ff9500'}}>
                   <div className="text-center mb-4">
                     <p className="text-white text-xs sm:text-sm font-bold opacity-90 tracking-wider">TOCANDO AGORA</p>
                   </div>
@@ -97,7 +102,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Center: Video */}
+              {/* Center: Video and TOP 5 */}
               <div className="lg:col-span-5">
                 <div className="space-y-3">
                   <div>
@@ -111,7 +116,10 @@ export default function Home() {
                       </div>
                     </div>
                   </div>
-                  <VoteButtons />
+                  <div className="bg-gray-900 rounded-xl p-3 sm:p-4 border border-gray-700">
+                    <h4 className="text-white text-sm font-bold mb-3">TOP 5</h4>
+                    <TopVotedSongs />
+                  </div>
                 </div>
               </div>
 

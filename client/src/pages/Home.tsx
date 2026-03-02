@@ -136,17 +136,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* TOP 5 Section */}
-        <section className="bg-gray-950 border-t border-gray-800 px-4 sm:px-6 lg:px-8 py-12">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-center gap-4 mb-8">
-              <h2 className="text-white text-2xl font-bold">TOP 5</h2>
-              <div className="text-yellow-500 text-3xl font-bold">00:16:09</div>
-            </div>
-            <TopVotedSongs />
-          </div>
-        </section>
-
         {/* Google Adsense Banner Area */}
         <section className="bg-gray-950 border-t border-gray-800 px-4 sm:px-6 lg:px-8 py-12">
           <div className="max-w-7xl mx-auto text-center">

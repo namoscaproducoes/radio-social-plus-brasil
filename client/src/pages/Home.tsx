@@ -33,7 +33,7 @@ export default function Home() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col relative bg-gray-950"
+      className="h-screen flex flex-col relative bg-gray-950 overflow-hidden"
       style={{
         backgroundImage: albumCover ? `url(${albumCover})` : 'linear-gradient(to bottom right, rgb(147, 51, 234), rgb(88, 28, 135), rgb(75, 0, 130))',
         backgroundSize: 'cover',
@@ -50,35 +50,35 @@ export default function Home() {
       />
 
       {/* Content */}
-      <div className="relative z-10 flex flex-col min-h-screen">
+      <div className="relative z-10 flex flex-col h-screen">
         {/* Top Navigation */}
-        <nav className="bg-gray-950 border-b border-gray-800 px-4 sm:px-6 lg:px-8 py-4">
+        <nav className="bg-gray-950 border-b border-gray-800 px-3 sm:px-4 py-2 flex-shrink-0">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-4 sm:gap-6">
               <img 
                 src="/logo-radio.png" 
                 alt="Rádio Social Plus Brasil" 
-                className="w-10 h-10 rounded-lg"
+                className="w-8 h-8 rounded-lg"
               />
-              <div className="hidden md:flex gap-6">
+              <div className="hidden md:flex gap-4 text-xs">
                 <a 
                   href="https://radiosocialplusbrasil.com.br/quem-somos/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-white hover:text-yellow-500 transition text-sm font-medium"
+                  className="text-white hover:text-yellow-500 transition font-medium"
                 >
                   Sobre a rádio
                 </a>
                 <button 
                   onClick={() => navigate('/dashboard')}
-                  className="text-white hover:text-yellow-500 transition text-sm font-medium"
+                  className="text-white hover:text-yellow-500 transition font-medium"
                 >
                   Dashboard mais votadas
                 </button>
               </div>
             </div>
             <Button 
-              className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-full px-6"
+              className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-full px-4 py-1 text-xs"
               onClick={() => navigate('/dashboard')}
             >
               ENTRAR
@@ -87,47 +87,47 @@ export default function Home() {
         </nav>
 
         {/* Main Content Grid */}
-        <div className="flex-1 px-4 sm:px-6 lg:px-8 py-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
+        <div className="flex-1 px-2 sm:px-3 py-2 overflow-hidden">
+          <div className="h-full max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 lg:gap-3 h-full">
               {/* Left: Player */}
-              <div className="lg:col-span-3">
-                <div className="rounded-2xl p-4 sm:p-6 shadow-2xl border-2" style={{backgroundColor: '#ffac37', borderColor: '#ff9500'}}>
-                  <div className="text-center mb-4">
-                    <p className="text-white text-xs sm:text-sm font-bold opacity-90 tracking-wider">TOCANDO AGORA</p>
+              <div className="lg:col-span-3 flex-shrink-0">
+                <div className="rounded-xl p-2 sm:p-3 shadow-2xl border-2 h-full" style={{backgroundColor: '#ffac37', borderColor: '#ff9500'}}>
+                  <div className="text-center mb-2">
+                    <p className="text-white text-xs font-bold opacity-90 tracking-wider">TOCANDO AGORA</p>
                   </div>
-                  <div className="scale-90 sm:scale-100 origin-top">
+                  <div className="scale-75 sm:scale-90 origin-top">
                     <RadioPlayerV2 />
                   </div>
                 </div>
               </div>
 
               {/* Center: Video and TOP 5 */}
-              <div className="lg:col-span-5">
-                <div className="space-y-3">
-                  <div>
-                    <h3 className="text-white text-base sm:text-lg font-bold mb-3">video clip</h3>
-                    <div className="bg-gray-900 rounded-xl p-3 sm:p-4 border border-gray-700 relative group">
-                      <button className="absolute top-3 right-3 text-white hover:text-yellow-500 transition z-20 opacity-0 group-hover:opacity-100">
-                        <Maximize2 size={18} />
-                      </button>
-                      <div className="h-48 sm:h-64">
-                        <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
-                      </div>
+              <div className="lg:col-span-5 flex flex-col gap-2 overflow-hidden">
+                <div className="flex-1 flex flex-col">
+                  <h3 className="text-white text-xs sm:text-sm font-bold mb-1">video clip</h3>
+                  <div className="bg-gray-900 rounded-lg p-2 border border-gray-700 relative group flex-1 flex items-center justify-center">
+                    <button className="absolute top-2 right-2 text-white hover:text-yellow-500 transition z-20 opacity-0 group-hover:opacity-100">
+                      <Maximize2 size={14} />
+                    </button>
+                    <div className="w-full h-full">
+                      <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
                     </div>
                   </div>
-                  <div className="bg-gray-900 rounded-xl p-3 sm:p-4 border border-gray-700">
-                    <h4 className="text-white text-sm font-bold mb-3">TOP 5</h4>
+                </div>
+                <div className="bg-gray-900 rounded-lg p-2 border border-gray-700 flex-shrink-0">
+                  <h4 className="text-white text-xs font-bold mb-1">TOP 5</h4>
+                  <div className="max-h-20 overflow-y-auto text-xs">
                     <TopVotedSongs />
                   </div>
                 </div>
               </div>
 
               {/* Right: Recent Songs */}
-              <div className="lg:col-span-4">
-                <div className="bg-gray-900 rounded-2xl p-4 sm:p-6 border-2 border-gray-700 h-full">
-                  <h3 className="text-white text-base sm:text-lg font-bold mb-4">As últimas tocadas</h3>
-                  <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+              <div className="lg:col-span-4 flex-shrink-0">
+                <div className="bg-gray-900 rounded-lg p-2 sm:p-3 border-2 border-gray-700 h-full flex flex-col">
+                  <h3 className="text-white text-xs sm:text-sm font-bold mb-2 flex-shrink-0">As últimas tocadas</h3>
+                  <div className="space-y-1 overflow-y-auto pr-1 flex-1 text-xs">
                     <SongHistory />
                   </div>
                 </div>
@@ -137,12 +137,11 @@ export default function Home() {
         </div>
 
         {/* Google Adsense Banner Area */}
-        <section className="bg-gray-950 border-t border-gray-800 px-4 sm:px-6 lg:px-8 py-12">
+        <section className="bg-gray-950 border-t border-gray-800 px-3 sm:px-4 py-1 flex-shrink-0">
           <div className="max-w-7xl mx-auto text-center">
-            <p className="text-gray-400 text-sm">Área para banner Google Adsense</p>
+            <p className="text-gray-400 text-xs">Área para banner Google Adsense</p>
           </div>
         </section>
-
 
       </div>
     </div>

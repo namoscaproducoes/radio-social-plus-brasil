@@ -95,7 +95,7 @@ export const appRouter = router({
           frontendUrl: z.string().url().optional(),
         })
       )
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const db = await getDb();
         if (!db) throw new Error("Database not available");
 
@@ -117,7 +117,20 @@ export const appRouter = router({
           expiresAt,
         });
 
-        return { success: true, message: "Se o email existir, um link de recuperação será enviado", token };
+        // Enviar email de recuperação
+        const frontendUrl = input.frontendUrl || `${ctx.req.protocol}://${ctx.req.get('host')}`;
+        const emailSent = await sendPasswordResetEmail(
+          user.email || "",
+          user.name || "Usuário",
+          token,
+          frontendUrl
+        );
+
+        if (!emailSent) {
+          console.warn(`[Auth] Failed to send password reset email to ${user.email}`);
+        }
+
+        return { success: true, message: "Se o email existir, um link de recuperação será enviado" };
       }),
 
     resetPassword: publicProcedure

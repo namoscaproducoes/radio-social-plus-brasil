@@ -174,6 +174,6 @@
 
 
 ## Fase 25: Correção de 3 Bugs Críticos
-- [ ] Sincronizar play do vídeo com player de música (som desligado)
-- [ ] Remover duplicatas no histórico de músicas
-- [ ] Investigar e corrigir reset das top músicas do mês
+- [x] Sincronizar play do vídeo com player de música (som desligado)
+- [x] Remover duplicatas no histórico de músicas
+- [x] Corrigir duplicação de som ao clicar play - Problema era loop de reconexão infinito, corrigido com verificação de userPausedRef

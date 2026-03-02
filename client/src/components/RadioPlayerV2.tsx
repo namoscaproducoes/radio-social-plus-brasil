@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ThumbsUp, ThumbsDown, Play, Pause, Volume2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -33,10 +33,19 @@ export function RadioPlayerV2() {
   // Refs para controle de reconexão
   const reconnectTimeoutRef = useRef<any>(undefined);
   const reconnectAttemptsRef = useRef(0);
-  const maxReconnectAttemptsRef = useRef(10); // Aumentado para 10 tentativas
+  const maxReconnectAttemptsRef = useRef(10);
   const heartbeatIntervalRef = useRef<any>(undefined);
   const lastPlayTimeRef = useRef(0);
-  const userPausedRef = useRef(false); // Rastrear se o usuário pausou manualmente
+  const userPausedRef = useRef(false);
+  const handlersRef = useRef<{
+    handlePlay?: () => void;
+    handlePause?: () => void;
+    handleEnded?: () => void;
+    handleError?: (e: Event) => void;
+    handleStalled?: () => void;
+    handleSuspend?: () => void;
+    handleTimeUpdate?: () => void;
+  }>({});
   
   const { setAlbumCover, setSongTitle, setSongArtist, setIsPlaying: setContextIsPlaying } = useMetadata();
 
@@ -44,7 +53,7 @@ export function RadioPlayerV2() {
   const { data: metadataResponse, isLoading: isLoadingMetadataQuery } = trpc.songs.metadata.useQuery(
     undefined,
     {
-      refetchInterval: 1000, // Atualizar a cada 1 segundo
+      refetchInterval: 1000,
     }
   );
 
@@ -72,13 +81,13 @@ export function RadioPlayerV2() {
         setSongTitle(metadataResponse.title);
         setSongArtist(metadataResponse.artist);
         setAlbumCover(metadataResponse.albumCover || '');
-        setUserVote(null); // Resetar voto quando música muda
+        setUserVote(null);
       }
     }
   }, [metadataResponse, setAlbumCover, setSongTitle, setSongArtist]);
 
   // Função para reconectar ao stream com retry exponencial
-  const reconnectToStream = (reason: string) => {
+  const reconnectToStream = useCallback((reason: string) => {
     if (userPausedRef.current) {
       console.log('⏸️ Usuário pausou manualmente, não reconectando');
       return;
@@ -95,7 +104,6 @@ export function RadioPlayerV2() {
     reconnectAttemptsRef.current++;
     console.log(`🔄 Reconectando ao stream (${reconnectAttemptsRef.current}/${maxReconnectAttemptsRef.current}) - Motivo: ${reason}`);
 
-    // Delay exponencial: 500ms, 1s, 1.5s, 2s, 2.5s, 3s, 3.5s, 4s, 4.5s, 5s
     const delayMs = Math.min(500 * reconnectAttemptsRef.current, 5000);
 
     if (reconnectTimeoutRef.current) {
@@ -104,36 +112,40 @@ export function RadioPlayerV2() {
 
     reconnectTimeoutRef.current = setTimeout(async () => {
       try {
-        if (!audioRef.current) return;
+        if (!audioRef.current || userPausedRef.current) return;
 
         console.log('🔄 Iniciando reconexão...');
         
-        // Pausar para limpar buffer
-        audioRef.current.pause();
+        // Apenas pausar se não está pausado
+        if (!audioRef.current.paused) {
+          audioRef.current.pause();
+        }
         
-        // Resetar src com timestamp para forçar nova requisição
         const newSrc = '/api/stream?' + Date.now();
         audioRef.current.src = newSrc;
         console.log('📡 Novo src definido:', newSrc);
         
-        // Aguardar um pouco para garantir que o src foi definido
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        // Tentar reproduzir
-        const playPromise = audioRef.current.play();
-        if (playPromise) {
-          await playPromise;
-          console.log('✅ Reconectado ao stream com sucesso');
-          reconnectAttemptsRef.current = 0; // Resetar contador
-          lastPlayTimeRef.current = Date.now();
+        // Apenas tentar reproduzir se o usuário não pausou
+        if (!userPausedRef.current) {
+          const playPromise = audioRef.current.play();
+          if (playPromise) {
+            await playPromise;
+            console.log('✅ Reconectado ao stream com sucesso');
+            reconnectAttemptsRef.current = 0;
+            lastPlayTimeRef.current = Date.now();
+          }
         }
       } catch (error) {
         console.error('❌ Erro ao reconectar:', error);
-        // Tentar novamente
-        reconnectToStream('retry after error');
+        // Não reconectar se o usuário pausou
+        if (!userPausedRef.current) {
+          reconnectToStream('retry after error');
+        }
       }
     }, delayMs);
-  };
+  }, [setContextIsPlaying]);
 
   // Heartbeat para monitorar se o player está tocando
   useEffect(() => {
@@ -150,12 +162,11 @@ export function RadioPlayerV2() {
         const currentTime = audioRef.current.currentTime;
         const timeSinceLastPlay = Date.now() - lastPlayTimeRef.current;
 
-        // Se passou mais de 5 segundos sem progresso, reconectar
         if (timeSinceLastPlay > 5000 && currentTime === 0) {
           console.warn('⚠️ Heartbeat: Sem progresso por 5 segundos, reconectando...');
           reconnectToStream('heartbeat timeout');
         }
-      }, 3000); // Verificar a cada 3 segundos
+      }, 3000);
     };
 
     const stopHeartbeat = () => {
@@ -171,9 +182,9 @@ export function RadioPlayerV2() {
     }
 
     return () => stopHeartbeat();
-  }, [isPlaying]);
+  }, [isPlaying, reconnectToStream]);
 
-  // Garantir que o player está sempre conectado
+  // Setup event listeners - executado apenas uma vez
   useEffect(() => {
     if (!audioRef.current) return;
 
@@ -183,12 +194,35 @@ export function RadioPlayerV2() {
       console.log('🔗 Conectado ao stream de rádio');
     }
 
-    // Handlers para eventos de áudio
+    // Remover listeners antigos se existirem
+    if (handlersRef.current.handlePlay) {
+      audioRef.current.removeEventListener('play', handlersRef.current.handlePlay);
+    }
+    if (handlersRef.current.handlePause) {
+      audioRef.current.removeEventListener('pause', handlersRef.current.handlePause);
+    }
+    if (handlersRef.current.handleEnded) {
+      audioRef.current.removeEventListener('ended', handlersRef.current.handleEnded);
+    }
+    if (handlersRef.current.handleError) {
+      audioRef.current.removeEventListener('error', handlersRef.current.handleError);
+    }
+    if (handlersRef.current.handleStalled) {
+      audioRef.current.removeEventListener('stalled', handlersRef.current.handleStalled);
+    }
+    if (handlersRef.current.handleSuspend) {
+      audioRef.current.removeEventListener('suspend', handlersRef.current.handleSuspend);
+    }
+    if (handlersRef.current.handleTimeUpdate) {
+      audioRef.current.removeEventListener('timeupdate', handlersRef.current.handleTimeUpdate);
+    }
+
+    // Definir novos handlers
     const handlePlay = () => {
       console.log('▶️ Reprodução iniciada');
       setIsPlaying(true);
       userPausedRef.current = false;
-      reconnectAttemptsRef.current = 0; // Resetar contador quando começar a reproduzir
+      reconnectAttemptsRef.current = 0;
       lastPlayTimeRef.current = Date.now();
     };
 
@@ -217,7 +251,6 @@ export function RadioPlayerV2() {
     const handleStalled = () => {
       console.warn('⚠️ Stream stalled (sem dados)');
       if (!userPausedRef.current) {
-        // Dar um tempo antes de reconectar
         setTimeout(() => {
           if (!userPausedRef.current && audioRef.current && audioRef.current.paused) {
             reconnectToStream('stalled');
@@ -241,28 +274,41 @@ export function RadioPlayerV2() {
       lastPlayTimeRef.current = Date.now();
     };
 
-    const audio = audioRef.current;
-    audio.addEventListener('play', handlePlay);
-    audio.addEventListener('pause', handlePause);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError);
-    audio.addEventListener('stalled', handleStalled);
-    audio.addEventListener('suspend', handleSuspend);
-    audio.addEventListener('timeupdate', handleTimeUpdate);
+    // Armazenar handlers para limpeza posterior
+    handlersRef.current = {
+      handlePlay,
+      handlePause,
+      handleEnded,
+      handleError,
+      handleStalled,
+      handleSuspend,
+      handleTimeUpdate,
+    };
+
+    // Adicionar listeners
+    audioRef.current.addEventListener('play', handlePlay);
+    audioRef.current.addEventListener('pause', handlePause);
+    audioRef.current.addEventListener('ended', handleEnded);
+    audioRef.current.addEventListener('error', handleError);
+    audioRef.current.addEventListener('stalled', handleStalled);
+    audioRef.current.addEventListener('suspend', handleSuspend);
+    audioRef.current.addEventListener('timeupdate', handleTimeUpdate);
 
     return () => {
-      audio.removeEventListener('play', handlePlay);
-      audio.removeEventListener('pause', handlePause);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError);
-      audio.removeEventListener('stalled', handleStalled);
-      audio.removeEventListener('suspend', handleSuspend);
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      if (audioRef.current) {
+        audioRef.current.removeEventListener('play', handlePlay);
+        audioRef.current.removeEventListener('pause', handlePause);
+        audioRef.current.removeEventListener('ended', handleEnded);
+        audioRef.current.removeEventListener('error', handleError);
+        audioRef.current.removeEventListener('stalled', handleStalled);
+        audioRef.current.removeEventListener('suspend', handleSuspend);
+        audioRef.current.removeEventListener('timeupdate', handleTimeUpdate);
+      }
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, []);
+  }, [reconnectToStream]);
 
   // Tocar/pausar
   const togglePlay = async () => {
@@ -271,22 +317,19 @@ export function RadioPlayerV2() {
     try {
       if (isPlaying) {
         audioRef.current.pause();
-        userPausedRef.current = true; // Marcar que o usuário pausou
+        userPausedRef.current = true;
         setIsPlaying(false);
         setContextIsPlaying(false);
       } else {
-        // Garantir que o player está conectado ao stream
         if (!audioRef.current.src || audioRef.current.src === '') {
           audioRef.current.src = '/api/stream';
           console.log('🔗 Conectado ao stream de rádio');
         }
         
-        // Resetar flags e contadores
         userPausedRef.current = false;
         reconnectAttemptsRef.current = 0;
         lastPlayTimeRef.current = Date.now();
         
-        // Tentar reproduzir
         console.log('▶️ Tentando reproduzir...');
         await audioRef.current.play();
         setIsPlaying(true);
@@ -391,44 +434,45 @@ export function RadioPlayerV2() {
 
             {/* Volume Control */}
             <div className="flex items-center gap-1">
-              <Volume2 size={12} className="text-gray-300" />
+              <Volume2 size={14} className="text-gray-400" />
               <input
                 type="range"
                 min="0"
                 max="100"
                 value={volume}
                 onChange={handleVolumeChange}
-                className="w-12 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                className="w-16 sm:w-20 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer"
               />
-              <span className="text-gray-300 text-xs w-5">{volume}%</span>
+              <span className="text-xs text-gray-400 w-8">{volume}%</span>
             </div>
           </div>
 
           {/* Vote Buttons */}
-          <div className="flex gap-1 justify-center flex-wrap">
+          <div className="flex items-center justify-center gap-2">
             <Button
               onClick={() => handleVote('like')}
               variant={userVote === 'like' ? 'default' : 'outline'}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1 text-xs h-8 px-2 ${
                 userVote === 'like'
-                  ? 'bg-green-600 text-white border-green-600'
-                  : 'border-green-600 text-green-600 hover:bg-green-600 hover:text-white'
+                  ? 'bg-green-600 hover:bg-green-700 text-white border-green-600'
+                  : 'border-green-600 text-green-600 hover:bg-green-600/10'
               }`}
             >
               <ThumbsUp size={12} />
-              <span>Gostei</span>
+              Gostei
             </Button>
+
             <Button
               onClick={() => handleVote('dislike')}
               variant={userVote === 'dislike' ? 'default' : 'outline'}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold transition-all ${
+              className={`flex items-center gap-1 text-xs h-8 px-2 ${
                 userVote === 'dislike'
-                  ? 'bg-red-600 text-white border-red-600'
-                  : 'border-red-600 text-red-600 hover:bg-red-600 hover:text-white'
+                  ? 'bg-red-600 hover:bg-red-700 text-white border-red-600'
+                  : 'border-red-600 text-red-600 hover:bg-red-600/10'
               }`}
             >
               <ThumbsDown size={12} />
-              <span>Não Gostei</span>
+              Não Gostei
             </Button>
           </div>
         </div>

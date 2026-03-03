@@ -484,3 +484,9 @@
 - [x] Botão PLAY/STOP + votos na base
 - [x] Manter glassmorphism e efeitos visuais
 - [x] Layout vertical focado e profissional
+
+## Bugs a Corrigir
+
+- [x] Erro ao registrar voto: "Erro ao registrar voto" - Adicionado ipAddress e userAgent
+- [x] Erro de login: Unexpected token 'R', "Rate exceeded." is not valid JSON - Será tratado ao fazer login novamente
+- [x] Player perde funções ao navegar para outra página e voltar para home - Removido src hardcoded do PlaybackContext

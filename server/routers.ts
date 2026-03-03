@@ -430,11 +430,13 @@ export const appRouter = router({
 
         const songId = songResult[0].id;
 
-        // Registrar o voto
+        // Registrar o voto com ipAddress e userAgent
         return await addVote({
           songId: songId,
           voteType: input.voteType,
           userId: ctx.user ? String(ctx.user.id) : null,
+          ipAddress: ctx.req.ip || null,
+          userAgent: ctx.req.get('user-agent') || null,
         });
       }),
 

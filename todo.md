@@ -499,3 +499,7 @@
 - [x] Aplicar em versão desktop
 - [x] Aplicar em versão mobile
 - [x] Testar visual
+
+## Bugs a Corrigir - Fase 58
+
+- [x] TOP 5 não está mostrando as 5 músicas mais votadas publicamente - Corrigida query para buscar todas as músicas votadas

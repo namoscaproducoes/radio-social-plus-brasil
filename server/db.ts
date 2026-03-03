@@ -252,18 +252,13 @@ export async function getTopVotedSongsThisMonth(voteType: 'like' | 'dislike' = '
 
   const result = await db.execute(`
     SELECT 
-      sh.title,
-      sh.artist,
-      sh.albumCover,
+      s.title,
+      s.artist,
+      s.albumCover,
       COUNT(DISTINCT v.id) as voteCount
-    FROM songHistory sh
-    INNER JOIN songs s ON sh.title = s.title AND sh.artist = s.artist
+    FROM songs s
     INNER JOIN votes v ON s.id = v.songId AND v.voteType = '${voteType}'
-    WHERE YEAR(sh.playedAt) = YEAR(CURDATE())
-      AND MONTH(sh.playedAt) = MONTH(CURDATE())
-      AND YEAR(v.createdAt) = YEAR(CURDATE())
-      AND MONTH(v.createdAt) = MONTH(CURDATE())
-    GROUP BY sh.title, sh.artist, sh.albumCover
+    GROUP BY s.id, s.title, s.artist, s.albumCover
     HAVING COUNT(DISTINCT v.id) > 0
     ORDER BY voteCount DESC
     LIMIT ${limit}

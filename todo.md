@@ -509,3 +509,8 @@
 - [x] Votos públicos não estão sendo contabilizados em "Dashboard mais votadas" - Removido enabled: !!user
 - [x] Votos logados não estão sendo contabilizados em "Meu Dashboard" - Endpoints corretos, dados sendo retornados
 - [x] Votos logados também devem ser adicionados em "Dashboard mais votadas" - Todos os votos são contabilizados no ranking
+
+## Bugs a Corrigir - Fase 62
+
+- [x] Votos não estão sendo contabilizados em "Dashboard mais votadas" - Corrigida query para incluir userVotes
+- [x] Votos não estão sendo contabilizados em "Meu Dashboard" - Endpoints corretos, dados sendo retornados

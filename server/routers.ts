@@ -482,17 +482,18 @@ export const appRouter = router({
             s.artist,
             s.albumCover,
             s.duration,
-            COUNT(CASE WHEN v.voteType = 'like' THEN 1 END) as likes,
-            COUNT(CASE WHEN v.voteType = 'dislike' THEN 1 END) as dislikes,
-            COUNT(v.id) as totalVotes
+            (COALESCE(SUM(CASE WHEN v.voteType = 'like' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'like' THEN 1 ELSE 0 END), 0)) as likes,
+            (COALESCE(SUM(CASE WHEN v.voteType = 'dislike' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'dislike' THEN 1 ELSE 0 END), 0)) as dislikes,
+            (COALESCE(COUNT(DISTINCT v.id), 0) + COALESCE(COUNT(DISTINCT uv.id), 0)) as totalVotes
           FROM songs s
           LEFT JOIN votes v ON s.id = v.songId AND v.createdAt >= '${startDate.toISOString()}'
+          LEFT JOIN userVotes uv ON s.id = uv.songId AND uv.createdAt >= '${startDate.toISOString()}'
           GROUP BY s.id
           HAVING totalVotes > 0
           ORDER BY totalVotes DESC
         `)
         
-        return Array.isArray(result) && result.length > 0 ? result[0] : [];
+        return Array.isArray(result) && result.length > 0 ? result : [];
       }),
 
     history: publicProcedure

@@ -412,3 +412,10 @@
 - [x] Iniciar musica em tempo real sem buffer anterior
 - [x] 38 testes passando
 - [x] Testar e salvar checkpoint
+
+## Fase 50: Corrigir Erros de MEDIA_ERR_SRC_NOT_SUPPORTED e Empty src
+- [x] Remover load() ao limpar src no STOP
+- [x] Melhorar handler de erro para ignorar src vazio quando usuário pausou
+- [x] Validar que erros de src vazio não disparam reconexão
+- [x] 39 testes passando (1 YouTube API quota - não relacionado)
+- [x] Servidor rodando sem erros de TypeScript

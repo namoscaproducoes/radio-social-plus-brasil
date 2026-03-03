@@ -317,6 +317,13 @@ export function RadioPlayerV2() {
       if (audio && audio.error) {
         const errorCode = audio.error.code;
         const errorMessage = audio.error.message;
+        
+        // Ignorar erro de src vazio quando usuário pausou
+        if (userPausedRef.current && !audioRef.current?.src) {
+          console.log('✅ Erro de src vazio ignorado (usuário pausou)');
+          return;
+        }
+        
         console.error('❌ Erro no stream:', errorCode, errorMessage);
         
         let errorDescription = '';
@@ -445,8 +452,8 @@ export function RadioPlayerV2() {
         console.log('🛑 Parando fluxo e limpando buffer...');
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
+        // Não chamar load() com src vazio - apenas remover src
         audioRef.current.src = ''; // Limpar src para descarregar buffer
-        audioRef.current.load(); // Forçar limpeza de buffer
         userPausedRef.current = true;
         console.log('userPausedRef.current =', userPausedRef.current);
         setIsPlaying(false);
@@ -455,11 +462,11 @@ export function RadioPlayerV2() {
       } else {
         // PLAY: recarregar stream com buffer zerado
         const newSrc = '/api/stream?' + Date.now();
-        audioRef.current.src = ''; // Limpar src anterior
+        // Limpar src anterior sem chamar load() com src vazio
+        audioRef.current.src = '';
         audioRef.current.currentTime = 0;
-        audioRef.current.load(); // Limpar buffer anterior
         
-        // Agora setar novo src
+        // Agora setar novo src e carregar
         audioRef.current.src = newSrc;
         audioRef.current.currentTime = 0; // Começar do zero
         audioRef.current.load(); // Carregar novo stream

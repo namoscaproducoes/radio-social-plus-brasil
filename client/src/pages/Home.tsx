@@ -1,4 +1,5 @@
 import { useLocation } from "wouter";
+import { RadioPlayerV2 } from "@/components/RadioPlayerV2";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { VoteButtons } from "@/components/VoteButtons";
 import { SongHistory } from "@/components/SongHistory";
@@ -8,7 +9,7 @@ import { NotificationCenter } from "@/components/NotificationCenter";
 import { useMetadata } from "@/contexts/MetadataContext";
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
-import { Menu, X } from "lucide-react";
+import { Maximize2, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -165,36 +166,48 @@ export default function Home() {
           )}
         </nav>
 
-        {/* Main Content - Layout com player ao lado */}
+        {/* Main Content */}
         <div className="flex-1 px-2 sm:px-3 py-2 overflow-y-auto md:overflow-hidden">
           <div className="h-full max-w-7xl mx-auto">
-            {/* Desktop Layout - Player ao lado esquerdo, conteúdo à direita */}
-            <div className="hidden md:grid grid-cols-12 gap-3 h-full">
-              {/* Left: Espaço para player em iframe (360px) */}
-              <div className="col-span-3 flex-shrink-0">
-                {/* Player em iframe fixo - espaço reservado */}
-                <div className="text-gray-400 text-xs text-center py-4">
-                  Player em iframe fixo
+            {/* Desktop Layout */}
+            <div className="hidden md:grid grid-cols-12 gap-2 lg:gap-3 h-full">
+              {/* Left: Player */}
+              <div className="col-span-3 flex-shrink-0 flex flex-col">
+                <div className="rounded-xl shadow-2xl border h-full flex flex-col" style={{backgroundColor: '#ffac37', borderColor: '#ff9500', borderWidth: '2px'}}>
+                  <div className="text-center pt-2 pb-2 flex-shrink-0 flex items-center justify-center gap-2">
+                    {/* Bolinha pulsante */}
+                    <div className="relative w-3 h-3">
+                      <div className="absolute inset-0 bg-red-600 rounded-full animate-pulse"></div>
+                      <div className="absolute inset-0 bg-red-600 rounded-full opacity-75 animate-ping"></div>
+                    </div>
+                    {/* Botão AO VIVO */}
+                    <button className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded transition-colors duration-200">
+                      AO VIVO
+                    </button>
+                  </div>
+                  <div className="flex-1 flex items-center justify-center px-1 pb-1">
+                    <RadioPlayerV2 />
+                  </div>
                 </div>
               </div>
 
-              {/* Center: Video Clip e TOP 5 */}
-              <div className="col-span-5 flex flex-col gap-3 overflow-hidden">
-                {/* Video Clip */}
-                <div className="bg-gray-900 rounded-lg border border-gray-700 flex-1 flex flex-col overflow-hidden">
+              {/* Center: Video and TOP 5 */}
+              <div className="col-span-5 flex flex-col overflow-hidden">
+                <div className="bg-gray-900 rounded-lg border border-gray-700 flex flex-col h-full overflow-hidden">
                   <h3 className="text-white text-xs sm:text-sm font-bold mb-1 p-2 pb-0">video clip</h3>
                   <div className="p-2 pt-1 flex-1 flex items-center justify-center relative group">
+                    <button className="absolute top-3 right-3 text-white hover:text-yellow-500 transition z-20 opacity-0 group-hover:opacity-100">
+                      <Maximize2 size={14} />
+                    </button>
                     <div className="w-full h-full">
                       <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
                     </div>
                   </div>
-                </div>
-
-                {/* TOP 5 */}
-                <div className="bg-gray-900 rounded-lg border border-gray-700 flex-shrink-0 p-2">
-                  <h4 className="text-white text-xs font-bold mb-2">TOP 5 MAIS VOTADAS</h4>
-                  <div className="text-xs">
-                    <TopVotedSongs />
+                  <div className="border-t border-gray-700 p-2 flex-shrink-0">
+                    <h4 className="text-white text-xs font-bold mb-1">TOP 5</h4>
+                    <div className="text-xs">
+                      <TopVotedSongs />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -202,7 +215,7 @@ export default function Home() {
               {/* Right: Recent Songs */}
               <div className="col-span-4 flex-shrink-0">
                 <div className="bg-gray-900 rounded-lg p-2 sm:p-3 border-2 border-gray-700 h-full flex flex-col">
-                  <h3 className="text-white text-xs sm:text-sm font-bold mb-2 flex-shrink-0">AS ÚLTIMAS TOCADAS</h3>
+                  <h3 className="text-white text-xs sm:text-sm font-bold mb-2 flex-shrink-0">As últimas tocadas</h3>
                   <div className="space-y-1 overflow-y-auto pr-1 flex-1 text-xs">
                     <SongHistory />
                   </div>
@@ -216,36 +229,61 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Mobile Layout - Stacked (Player em iframe fixo) */}
-            <div className="md:hidden flex flex-col gap-2 h-full overflow-y-auto pb-20">
-              {/* Video Clip */}
+            {/* Mobile Layout - Stacked */}
+            <div className="md:hidden flex flex-col gap-2 h-full overflow-y-auto pb-2">
+              {/* Player */}
               <div className="flex-shrink-0">
-                <div className="bg-gray-900 rounded-lg border border-gray-700 flex flex-col overflow-hidden" style={{minHeight: '300px'}}>
-                  <h3 className="text-white text-xs font-bold mb-1 p-2 pb-0">video clip</h3>
-                  <div className="p-2 pt-1 flex-1 flex items-center justify-center relative group">
-                    <div className="w-full h-full">
-                      <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
+                <div className="rounded-xl shadow-2xl border flex flex-col" style={{backgroundColor: '#ffac37', borderColor: '#ff9500', borderWidth: '2px', minHeight: '280px'}}>
+                  <div className="text-center pt-2 pb-2 flex-shrink-0 flex items-center justify-center gap-2">
+                    {/* Bolinha pulsante */}
+                    <div className="relative w-3 h-3">
+                      <div className="absolute inset-0 bg-red-600 rounded-full animate-pulse"></div>
+                      <div className="absolute inset-0 bg-red-600 rounded-full opacity-75 animate-ping"></div>
                     </div>
+                    {/* Botão AO VIVO */}
+                    <button className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded transition-colors duration-200">
+                      AO VIVO
+                    </button>
+                  </div>
+                  <div className="flex-1 flex items-center justify-center px-1 pb-1 min-h-0">
+                    <RadioPlayerV2 />
                   </div>
                 </div>
               </div>
 
-              {/* TOP 5 */}
+              {/* Video and TOP 5 */}
               <div className="flex-shrink-0">
-                <div className="bg-gray-900 rounded-lg border border-gray-700 p-2">
-                  <h4 className="text-white text-xs font-bold mb-2">TOP 5 MAIS VOTADAS</h4>
-                  <div className="text-xs">
-                    <TopVotedSongs />
+                <div className="bg-gray-900 rounded-lg border border-gray-700 flex flex-col overflow-hidden" style={{minHeight: '300px'}}>
+                  <h3 className="text-white text-xs font-bold mb-1 p-2 pb-0">video clip</h3>
+                  <div className="p-2 pt-1 flex-1 flex items-center justify-center relative group min-h-0">
+                    <button className="absolute top-3 right-3 text-white hover:text-yellow-500 transition z-20">
+                      <Maximize2 size={14} />
+                    </button>
+                    <div className="w-full h-full">
+                      <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
+                    </div>
+                  </div>
+                  <div className="border-t border-gray-700 p-2 flex-shrink-0">
+                    <h4 className="text-white text-xs font-bold mb-1">TOP 5</h4>
+                    <div className="text-xs overflow-x-auto">
+                      <TopVotedSongs />
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Recent Songs */}
               <div className="flex-shrink-0">
-                <div className="bg-gray-900 rounded-lg p-2 border-2 border-gray-700 flex flex-col" style={{minHeight: '200px'}}>
-                  <h3 className="text-white text-xs font-bold mb-2 flex-shrink-0">AS ÚLTIMAS TOCADAS</h3>
+                <div className="bg-gray-900 rounded-lg p-2 border-2 border-gray-700 flex flex-col" style={{minHeight: '250px'}}>
+                  <h3 className="text-white text-xs font-bold mb-2 flex-shrink-0">As últimas tocadas</h3>
                   <div className="space-y-1 overflow-y-auto pr-1 flex-1 text-xs">
                     <SongHistory />
+                  </div>
+                  {/* Google Ads Banner */}
+                  <div className="mt-2 pt-2 border-t border-gray-700 flex-shrink-0">
+                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2249929574270161" crossOrigin="anonymous"></script>
+                    <ins className="adsbygoogle" style={{display: 'block'}} data-ad-client="ca-pub-2249929574270161" data-ad-slot="2671039837" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    <script>{`(adsbygoogle = window.adsbygoogle || []).push({});`}</script>
                   </div>
                 </div>
               </div>

@@ -52,22 +52,6 @@ function App() {
             >
               <TooltipProvider>
                 <Toaster />
-                {/* Player em iframe fixo - persiste durante navegação */}
-                <iframe
-                  src="/player.html"
-                  style={{
-                    position: 'fixed',
-                    bottom: 20,
-                    left: 20,
-                    width: '360px',
-                    height: '600px',
-                    border: 'none',
-                    borderRadius: '20px',
-                    zIndex: 9999,
-                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-                  }}
-                  title="Rádio Social Plus - Player"
-                />
                 <Router />
               </TooltipProvider>
             </ThemeProvider>

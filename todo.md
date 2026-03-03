@@ -362,3 +362,11 @@
 - [x] Adicionar verificacao de src vazio no heartbeat
 - [x] Testar pause/play sem erros de src vazio
 - [x] Todos os testes passando (18 stream-buffer + 20 outros)
+
+
+## Fase 39: Correcao Final de Src Vazio na Inicializacao
+- [x] Adicionar src inicial no PlaybackContext
+- [x] Corrigir togglePlay para nao limpar src ao pausar
+- [x] Remover reconexao automatica ao montar componente
+- [x] Testar pause/play sem erros
+- [x] Todos os testes passando (38 testes)

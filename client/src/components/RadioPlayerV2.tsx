@@ -256,11 +256,8 @@ export function RadioPlayerV2() {
   useEffect(() => {
     if (!audioRef.current) return;
 
-    // Se não tem src e usuário não pausou, conectar ao stream
-    if (!audioRef.current.src && !userPausedRef.current) {
-      audioRef.current.src = '/api/stream';
-      console.log('🔗 Conectado ao stream de rádio');
-    }
+    // Não fazer nada aqui - o src já é definido no contexto
+    // Não reconectar automaticamente ao montar o componente
 
     // Remover listeners antigos se existirem
     if (handlersRef.current.handlePlay) {
@@ -442,15 +439,14 @@ export function RadioPlayerV2() {
 
     try {
       if (isPlaying) {
-        // Pause: paração completo (stop) - limpar stream
+        // Pause: pausar a reprodução (não limpar src)
         console.log('🔗 Iniciando pause...');
         audioRef.current.pause();
-        audioRef.current.src = '';
         userPausedRef.current = true;
         console.log('userPausedRef.current =', userPausedRef.current);
         setIsPlaying(false);
         setPlaybackIsPlaying(false);
-        console.log('⏸️ Parado - stream limpado, userPausedRef = true');
+        console.log('⏸️ Parado - userPausedRef = true');
       } else {
         // Play: recarregar stream com cache-busting
         const newSrc = '/api/stream?' + Date.now();

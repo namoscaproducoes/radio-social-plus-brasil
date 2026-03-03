@@ -346,3 +346,11 @@
 - [x] Melhorar heartbeat para detectar desconexões automáticas
 - [x] Remover limite de tentativas de reconexão
 - [x] Aumentar delay máximo de reconexão para 10 segundos
+
+
+## Fase 37: Correcao de Pause nao Respeitado
+- [x] Corrigir handlePause para setar userPausedRef.current = true
+- [x] Corrigir setup de stream para respeitar userPausedRef
+- [x] Adicionar logs para debugging de pause
+- [x] Garantir que heartbeat respeita pause do usuario
+- [x] Testar pause/play com reconexao desabilitada

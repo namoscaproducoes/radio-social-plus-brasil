@@ -253,8 +253,8 @@ export function RadioPlayerV2() {
   useEffect(() => {
     if (!audioRef.current) return;
 
-    // Se não tem src, conectar ao stream
-    if (!audioRef.current.src) {
+    // Se não tem src e usuário não pausou, conectar ao stream
+    if (!audioRef.current.src && !userPausedRef.current) {
       audioRef.current.src = '/api/stream';
       console.log('🔗 Conectado ao stream de rádio');
     }
@@ -299,6 +299,7 @@ export function RadioPlayerV2() {
 
     const handlePause = () => {
       console.log('⏸️ Reprodução pausada');
+      userPausedRef.current = true; // Marcar que o usuário pausou
       setIsPlaying(false);
     };
 
@@ -437,12 +438,14 @@ export function RadioPlayerV2() {
     try {
       if (isPlaying) {
         // Pause: paração completo (stop) - limpar stream
+        console.log('🔗 Iniciando pause...');
         audioRef.current.pause();
-        audioRef.current.src = ''; // Limpar stream para forçar recarregamento
+        audioRef.current.src = '';
         userPausedRef.current = true;
+        console.log('userPausedRef.current =', userPausedRef.current);
         setIsPlaying(false);
         setPlaybackIsPlaying(false);
-        console.log('⏸️ Parado (stop) - stream limpado');
+        console.log('⏸️ Parado - stream limpado, userPausedRef = true');
       } else {
         // Play: recarregar stream com cache-busting
         const newSrc = '/api/stream?' + Date.now();

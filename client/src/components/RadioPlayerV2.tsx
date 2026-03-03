@@ -439,23 +439,28 @@ export function RadioPlayerV2() {
 
     try {
       if (isPlaying) {
-        // Pause: pausar a reprodução (não limpar src)
+        // Pause: pausar a reprodução
         console.log('🔗 Iniciando pause...');
         audioRef.current.pause();
+        audioRef.current.currentTime = 0; // Resetar para começar do zero ao play
         userPausedRef.current = true;
         console.log('userPausedRef.current =', userPausedRef.current);
         setIsPlaying(false);
         setPlaybackIsPlaying(false);
-        console.log('⏸️ Parado - userPausedRef = true');
+        console.log('⏸️ Parado - currentTime resetado para 0');
       } else {
         // Play: recarregar stream com cache-busting
         const newSrc = '/api/stream?' + Date.now();
         audioRef.current.src = newSrc;
+        audioRef.current.currentTime = 0; // Garantir que começa do zero
         console.log('🔗 Recarregando stream:', newSrc);
         
         userPausedRef.current = false;
         reconnectAttemptsRef.current = 0;
         lastPlayTimeRef.current = Date.now();
+        
+        // Aguardar um pouco para o buffer carregar
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         console.log('▶️ Tentando reproduzir...');
         await audioRef.current.play();

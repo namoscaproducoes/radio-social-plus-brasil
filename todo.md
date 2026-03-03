@@ -370,3 +370,12 @@
 - [x] Remover reconexao automatica ao montar componente
 - [x] Testar pause/play sem erros
 - [x] Todos os testes passando (38 testes)
+
+
+## Fase 40: Recarregamento de Buffer ao Play Apos Pause
+- [x] Resetar currentTime ao pausar
+- [x] Resetar currentTime ao recarregar stream
+- [x] Aguardar 500ms para buffer carregar
+- [x] Recarregar stream com cache-busting (timestamp)
+- [x] Testar pause/play com recarregamento de buffer
+- [x] Todos os testes passando (38 testes)

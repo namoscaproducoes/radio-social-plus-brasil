@@ -208,6 +208,9 @@ export function RadioPlayerV2() {
 
       heartbeatIntervalRef.current = setInterval(() => {
         if (!audioRef.current || userPausedRef.current) return;
+        
+        // Não fazer heartbeat se o src está vazio (pausado)
+        if (!audioRef.current.src) return;
 
         const currentTime = audioRef.current.currentTime;
         const timeSinceLastPlay = Date.now() - lastPlayTimeRef.current;
@@ -336,7 +339,8 @@ export function RadioPlayerV2() {
         }
         console.error('Detalhes:', errorDescription);
       }
-      if (!userPausedRef.current) {
+      // Não reconectar se o usuário pausou ou se o src está vazio (pausado)
+      if (!userPausedRef.current && audioRef.current?.src) {
         reconnectToStream('audio error');
       }
     };
@@ -382,7 +386,8 @@ export function RadioPlayerV2() {
     const handleCanPlay = () => {
       console.log('✅ Stream pode ser reproduzido');
       // Se estava tentando reconectar e agora pode reproduzir, tentar play
-      if (!userPausedRef.current && audioRef.current?.paused && isPlaying) {
+      // Verificar se tem src antes de tentar reproduzir
+      if (!userPausedRef.current && audioRef.current?.paused && isPlaying && audioRef.current?.src) {
         audioRef.current.play().catch((e) => {
           console.warn('⚠️ Erro ao reproduzir após canplay:', e);
         });

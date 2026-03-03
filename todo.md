@@ -354,3 +354,11 @@
 - [x] Adicionar logs para debugging de pause
 - [x] Garantir que heartbeat respeita pause do usuario
 - [x] Testar pause/play com reconexao desabilitada
+
+
+## Fase 38: Correcao de Erros MEDIA_ERR_SRC_NOT_SUPPORTED
+- [x] Corrigir handleCanPlay para verificar se tem src antes de reproduzir
+- [x] Corrigir handleError para nao reconectar com src vazio
+- [x] Adicionar verificacao de src vazio no heartbeat
+- [x] Testar pause/play sem erros de src vazio
+- [x] Todos os testes passando (18 stream-buffer + 20 outros)

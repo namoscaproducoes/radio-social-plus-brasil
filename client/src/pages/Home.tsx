@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-
+import { RadioPlayerV2 } from "@/components/RadioPlayerV2";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { VoteButtons } from "@/components/VoteButtons";
 import { SongHistory } from "@/components/SongHistory";
@@ -38,7 +38,7 @@ export default function Home() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col relative bg-gray-950 overflow-hidden pb-32"
+      className="h-screen flex flex-col relative bg-gray-950 overflow-hidden"
       style={{
         backgroundImage: albumCover ? `url(${albumCover})` : 'linear-gradient(to bottom right, rgb(147, 51, 234), rgb(88, 28, 135), rgb(75, 0, 130))',
         backgroundSize: 'cover',
@@ -178,7 +178,7 @@ export default function Home() {
                     <p className="text-white text-xs font-bold opacity-90 tracking-wider">TOCANDO AGORA</p>
                   </div>
                   <div className="flex-1 flex items-center justify-center px-1 pb-1">
-                    <p className="text-gray-600 text-sm">Player abaixo</p>
+                    <RadioPlayerV2 />
                   </div>
                 </div>
               </div>
@@ -230,7 +230,7 @@ export default function Home() {
                     <p className="text-white text-xs font-bold opacity-90 tracking-wider">TOCANDO AGORA</p>
                   </div>
                   <div className="flex-1 flex items-center justify-center px-1 pb-1 min-h-0">
-                    <p className="text-gray-600 text-sm">Player abaixo</p>
+                    <RadioPlayerV2 />
                   </div>
                 </div>
               </div>

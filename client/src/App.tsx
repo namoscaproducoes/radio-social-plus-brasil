@@ -14,7 +14,6 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { MetadataProvider } from "./contexts/MetadataContext";
 import { TimezoneProvider } from "./contexts/TimezoneContext";
 import { PlaybackProvider } from "./contexts/PlaybackContext";
-import { RadioPlayerV2 } from "./components/RadioPlayerV2";
 import Home from "./pages/Home";
 
 function Router() {
@@ -53,19 +52,7 @@ function App() {
             >
               <TooltipProvider>
                 <Toaster />
-                <div className="flex flex-col h-screen w-screen overflow-hidden">
-                  {/* Main content area - scrollable */}
-                  <div className="flex-1 overflow-y-auto overflow-x-hidden">
-                    <Router />
-                  </div>
-                  
-                  {/* Fixed player at bottom - always visible */}
-                  <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-800 bg-gray-950 p-4 shadow-2xl">
-                    <div className="max-w-7xl mx-auto">
-                      <RadioPlayerV2 />
-                    </div>
-                  </div>
-                </div>
+                <Router />
               </TooltipProvider>
             </ThemeProvider>
           </PlaybackProvider>

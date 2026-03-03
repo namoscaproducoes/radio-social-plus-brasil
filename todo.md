@@ -379,3 +379,14 @@
 - [x] Recarregar stream com cache-busting (timestamp)
 - [x] Testar pause/play com recarregamento de buffer
 - [x] Todos os testes passando (38 testes)
+
+
+## Fase 43: Seção do Player Fixa Sem Alterar Layout
+- [x] Criar componente FixedPlayerWrapper
+- [x] Adicionar posicionamento fixed apenas ao player
+- [x] Manter player dentro do Home.tsx
+- [x] Envolver player com FixedPlayerWrapper em desktop e mobile
+- [x] Garantir que player persista entre navegacoes
+- [x] Testar navegacao sem quebrar layout
+- [x] Todos os testes passando (37 testes)
+- [x] Salvar checkpoint

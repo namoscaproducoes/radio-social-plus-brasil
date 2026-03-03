@@ -155,81 +155,94 @@ export function RadioPlayerV2() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-6 p-6 bg-gradient-to-b from-orange-400 to-orange-500 rounded-3xl shadow-2xl max-w-sm mx-auto">
-      {/* Capa do álbum */}
-      <div className="relative w-48 h-48 rounded-2xl overflow-hidden border-4 border-yellow-300 shadow-lg">
-        {metadata.cover ? (
-          <img
-            src={metadata.cover}
-            alt={metadata.title}
-            className="w-full h-full object-cover"
+    <div 
+      className="relative w-full rounded-3xl overflow-hidden shadow-2xl"
+      style={{
+        backgroundImage: metadata.cover ? `url(${metadata.cover})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* Blur overlay de fundo */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-lg" />
+      
+      {/* Conteúdo do player */}
+      <div className="relative z-10 flex flex-col items-center justify-center gap-6 p-8 min-h-[600px]">
+        
+        {/* Capa do álbum - Destaque central */}
+        <div className="relative w-56 h-56 rounded-2xl overflow-hidden border-4 border-yellow-300 shadow-2xl transform hover:scale-105 transition-transform duration-300">
+          {metadata.cover ? (
+            <img
+              src={metadata.cover}
+              alt={metadata.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-800 flex items-center justify-center">
+              <span className="text-gray-500">Sem capa</span>
+            </div>
+          )}
+        </div>
+
+        {/* Informações da música */}
+        <div className="text-center max-w-sm">
+          <h2 className="text-3xl font-bold text-white truncate drop-shadow-lg">{metadata.title}</h2>
+          <p className="text-lg text-white/90 truncate drop-shadow-md mt-2">{metadata.artist}</p>
+        </div>
+
+        {/* Controle de volume */}
+        <div className="flex items-center gap-3 w-full max-w-sm px-4">
+          <Volume2 className="w-5 h-5 text-white flex-shrink-0 drop-shadow-md" />
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={volume}
+            onChange={handleVolumeChange}
+            className="flex-1 h-2 bg-white/30 rounded-lg appearance-none cursor-pointer accent-yellow-400"
           />
-        ) : (
-          <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-            <span className="text-gray-500">Sem capa</span>
-          </div>
-        )}
-      </div>
+          <span className="text-white text-sm w-12 text-right drop-shadow-md font-semibold">{volume}%</span>
+        </div>
 
-      {/* Informações da música */}
-      <div className="text-center">
-        <h2 className="text-xl font-bold text-white truncate w-48">{metadata.title}</h2>
-        <p className="text-sm text-white/80 truncate w-48">{metadata.artist}</p>
-      </div>
-
-      {/* Controles */}
-      <div className="flex items-center gap-4 w-full">
-        {/* Volume */}
-        <Volume2 className="w-5 h-5 text-white" />
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={volume}
-          onChange={handleVolumeChange}
-          className="flex-1 h-2 bg-white/30 rounded-lg appearance-none cursor-pointer"
-        />
-        <span className="text-white text-sm w-10 text-right">{volume}%</span>
-      </div>
-
-      {/* Botão Play/Stop */}
-      <Button
-        onClick={togglePlay}
-        className="w-20 h-20 rounded-full bg-yellow-400 hover:bg-yellow-500 text-black shadow-lg"
-      >
-        {isPlaying ? (
-          <Pause className="w-10 h-10" />
-        ) : (
-          <Play className="w-10 h-10 ml-1" />
-        )}
-      </Button>
-
-      {/* Botões de voto */}
-      <div className="flex gap-4">
+        {/* Botão Play/Stop - Destaque */}
         <Button
-          onClick={() => handleVote('like')}
-          variant={userVote === 'like' ? 'default' : 'outline'}
-          className={`${
-            userVote === 'like'
-              ? 'bg-green-500 text-white'
-              : 'border-green-500 text-green-500'
-          }`}
+          onClick={togglePlay}
+          className="w-24 h-24 rounded-full bg-yellow-400 hover:bg-yellow-500 text-black shadow-2xl transform hover:scale-110 transition-transform duration-200 flex items-center justify-center"
         >
-          <ThumbsUp className="w-4 h-4 mr-2" />
-          Gostei
+          {isPlaying ? (
+            <Pause className="w-12 h-12" />
+          ) : (
+            <Play className="w-12 h-12 ml-1" />
+          )}
         </Button>
-        <Button
-          onClick={() => handleVote('dislike')}
-          variant={userVote === 'dislike' ? 'default' : 'outline'}
-          className={`${
-            userVote === 'dislike'
-              ? 'bg-red-500 text-white'
-              : 'border-red-500 text-red-500'
-          }`}
-        >
-          <ThumbsDown className="w-4 h-4 mr-2" />
-          Não Gostei
-        </Button>
+
+        {/* Botões de voto */}
+        <div className="flex gap-4 mt-4">
+          <Button
+            onClick={() => handleVote('like')}
+            variant={userVote === 'like' ? 'default' : 'outline'}
+            className={`px-6 py-2 rounded-lg font-semibold transition-all duration-200 ${
+              userVote === 'like'
+                ? 'bg-green-500 hover:bg-green-600 text-white shadow-lg'
+                : 'border-2 border-green-500 text-green-300 hover:bg-green-500/20'
+            }`}
+          >
+            <ThumbsUp className="w-5 h-5 mr-2" />
+            Gostei
+          </Button>
+          <Button
+            onClick={() => handleVote('dislike')}
+            variant={userVote === 'dislike' ? 'default' : 'outline'}
+            className={`px-6 py-2 rounded-lg font-semibold transition-all duration-200 ${
+              userVote === 'dislike'
+                ? 'bg-red-500 hover:bg-red-600 text-white shadow-lg'
+                : 'border-2 border-red-500 text-red-300 hover:bg-red-500/20'
+            }`}
+          >
+            <ThumbsDown className="w-5 h-5 mr-2" />
+            Não Gostei
+          </Button>
+        </div>
       </div>
     </div>
   );

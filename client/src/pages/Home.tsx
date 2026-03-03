@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { RadioPlayerV2 } from "@/components/RadioPlayerV2";
+
 import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { VoteButtons } from "@/components/VoteButtons";
 import { SongHistory } from "@/components/SongHistory";
@@ -178,7 +178,7 @@ export default function Home() {
                     <p className="text-white text-xs font-bold opacity-90 tracking-wider">TOCANDO AGORA</p>
                   </div>
                   <div className="flex-1 flex items-center justify-center px-1 pb-1">
-                    <RadioPlayerV2 />
+                    <p className="text-gray-600 text-sm">Player abaixo</p>
                   </div>
                 </div>
               </div>
@@ -230,7 +230,7 @@ export default function Home() {
                     <p className="text-white text-xs font-bold opacity-90 tracking-wider">TOCANDO AGORA</p>
                   </div>
                   <div className="flex-1 flex items-center justify-center px-1 pb-1 min-h-0">
-                    <RadioPlayerV2 />
+                    <p className="text-gray-600 text-sm">Player abaixo</p>
                   </div>
                 </div>
               </div>

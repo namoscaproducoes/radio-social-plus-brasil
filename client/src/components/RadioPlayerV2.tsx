@@ -107,9 +107,29 @@ export function RadioPlayerV2() {
         setSongArtist(metadataResponse.artist);
         setAlbumCover(metadataResponse.albumCover || '');
         setUserVote(null);
+        
+        // SINCRONIZACAO: Se player esta tocando, resetar stream para sincronizar com metadados
+        if (isPlaying && audioRef.current) {
+          console.log('🔄 Musica mudou, resetando stream para sincronizar...');
+          // Pausar e limpar
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+          audioRef.current.src = '';
+          
+          // Aguardar um pouco e recarregar
+          setTimeout(() => {
+            if (!audioRef.current || userPausedRef.current) return;
+            const newSrc = '/api/stream?' + Date.now();
+            audioRef.current.src = newSrc;
+            audioRef.current.load();
+            audioRef.current.play().catch(() => {
+              console.log('⚠️ Autoplay bloqueado ao sincronizar musica');
+            });
+          }, 300);
+        }
       }
     }
-  }, [metadataResponse, setAlbumCover, setSongTitle, setSongArtist]);
+  }, [metadataResponse, setAlbumCover, setSongTitle, setSongArtist, isPlaying]);
 
   // Função para reconectar ao stream com retry exponencial
   const reconnectToStream = useCallback((reason: string) => {

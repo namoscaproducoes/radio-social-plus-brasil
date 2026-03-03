@@ -24,8 +24,8 @@ let streamCache: StreamCache = {
   activeClients: 0,
 };
 
-const MAX_BUFFER_SIZE = 2 * 1024 * 1024; // 2MB de buffer máximo
-const MIN_BUFFER_SIZE = 512 * 1024; // 512KB mínimo (8-10 segundos a 320kbps)
+const MAX_BUFFER_SIZE = 512 * 1024; // 512KB de buffer máximo (reduzido para sincronização)
+const MIN_BUFFER_SIZE = 256 * 1024; // 256KB mínimo (2-3 segundos a 320kbps)
 const CHUNK_SEND_INTERVAL = 50; // ms entre envios de chunks
 const RECONNECT_DELAY = 3000; // ms para reconectar
 

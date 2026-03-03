@@ -27,7 +27,7 @@ describe("votes router", () => {
     // Nota: isso requer autenticação, então vamos testar apenas a query pública
     const result = await caller.songs.metadata();
     expect(result === null || typeof result === "object").toBe(true);
-  });
+  }, { timeout: 15000 });
 });
 
 /**

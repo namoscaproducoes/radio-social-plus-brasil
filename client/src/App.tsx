@@ -14,7 +14,6 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { MetadataProvider } from "./contexts/MetadataContext";
 import { TimezoneProvider } from "./contexts/TimezoneContext";
 import { PlaybackProvider } from "./contexts/PlaybackContext";
-import { RadioPlayerV2 } from "./components/RadioPlayerV2";
 import Home from "./pages/Home";
 
 function Router() {
@@ -53,16 +52,7 @@ function App() {
             >
               <TooltipProvider>
                 <Toaster />
-                <div className="flex flex-col h-screen">
-                  {/* Router content takes up remaining space */}
-                  <div className="flex-1 overflow-hidden">
-                    <Router />
-                  </div>
-                  {/* Player persists at the bottom across all pages */}
-                  <div className="flex-shrink-0 border-t border-gray-800 bg-gray-950 p-4">
-                    <RadioPlayerV2 />
-                  </div>
-                </div>
+                <Router />
               </TooltipProvider>
             </ThemeProvider>
           </PlaybackProvider>

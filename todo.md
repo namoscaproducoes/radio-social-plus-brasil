@@ -490,3 +490,12 @@
 - [x] Erro ao registrar voto: "Erro ao registrar voto" - Adicionado ipAddress e userAgent
 - [x] Erro de login: Unexpected token 'R', "Rate exceeded." is not valid JSON - Será tratado ao fazer login novamente
 - [x] Player perde funções ao navegar para outra página e voltar para home - Removido src hardcoded do PlaybackContext
+
+## Fase 57: Substituir "TOCANDO AGORA" por Botão "AO VIVO" com Bolinha Pulsante
+- [x] Remover texto "TOCANDO AGORA"
+- [x] Criar botão vermelho com texto "AO VIVO"
+- [x] Adicionar bolinha vermelha com efeito pulsante
+- [x] Implementar efeito de ping (esmaecer) na bolinha
+- [x] Aplicar em versão desktop
+- [x] Aplicar em versão mobile
+- [x] Testar visual

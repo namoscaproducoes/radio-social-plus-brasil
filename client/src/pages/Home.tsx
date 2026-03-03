@@ -174,8 +174,16 @@ export default function Home() {
               {/* Left: Player */}
               <div className="col-span-3 flex-shrink-0 flex flex-col">
                 <div className="rounded-xl shadow-2xl border h-full flex flex-col" style={{backgroundColor: '#ffac37', borderColor: '#ff9500', borderWidth: '2px'}}>
-                  <div className="text-center pt-1 pb-1 flex-shrink-0">
-                    <p className="text-white text-xs font-bold opacity-90 tracking-wider">TOCANDO AGORA</p>
+                  <div className="text-center pt-2 pb-2 flex-shrink-0 flex items-center justify-center gap-2">
+                    {/* Bolinha pulsante */}
+                    <div className="relative w-3 h-3">
+                      <div className="absolute inset-0 bg-red-600 rounded-full animate-pulse"></div>
+                      <div className="absolute inset-0 bg-red-600 rounded-full opacity-75 animate-ping"></div>
+                    </div>
+                    {/* Botão AO VIVO */}
+                    <button className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded transition-colors duration-200">
+                      AO VIVO
+                    </button>
                   </div>
                   <div className="flex-1 flex items-center justify-center px-1 pb-1">
                     <RadioPlayerV2 />
@@ -226,8 +234,16 @@ export default function Home() {
               {/* Player */}
               <div className="flex-shrink-0">
                 <div className="rounded-xl shadow-2xl border flex flex-col" style={{backgroundColor: '#ffac37', borderColor: '#ff9500', borderWidth: '2px', minHeight: '280px'}}>
-                  <div className="text-center pt-1 pb-1 flex-shrink-0">
-                    <p className="text-white text-xs font-bold opacity-90 tracking-wider">TOCANDO AGORA</p>
+                  <div className="text-center pt-2 pb-2 flex-shrink-0 flex items-center justify-center gap-2">
+                    {/* Bolinha pulsante */}
+                    <div className="relative w-3 h-3">
+                      <div className="absolute inset-0 bg-red-600 rounded-full animate-pulse"></div>
+                      <div className="absolute inset-0 bg-red-600 rounded-full opacity-75 animate-ping"></div>
+                    </div>
+                    {/* Botão AO VIVO */}
+                    <button className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded transition-colors duration-200">
+                      AO VIVO
+                    </button>
                   </div>
                   <div className="flex-1 flex items-center justify-center px-1 pb-1 min-h-0">
                     <RadioPlayerV2 />

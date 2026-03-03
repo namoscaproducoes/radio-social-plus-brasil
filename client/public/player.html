@@ -317,14 +317,24 @@
     async function updateMetadata() {
       try {
         const response = await fetch(`${API_BASE}/api/songs/metadata`);
+        if (!response.ok) {
+          console.warn('Resposta de metadados não OK:', response.status);
+          return;
+        }
         const data = await response.json();
+        console.log('Metadados recebidos:', data);
 
         if (data && data.title) {
           songTitle.textContent = data.title;
           songArtist.textContent = data.artist || 'Artista desconhecido';
+          console.log('Título atualizado:', data.title);
 
           if (data.albumCover) {
             albumCover.src = data.albumCover;
+            console.log('Capa atualizada:', data.albumCover);
+          } else {
+            console.warn('Sem capa disponível');
+            albumCover.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect fill=%22%23333%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%22 y=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-size=%2240%22%3E♪%3C/text%3E%3C/svg%3E';
           }
 
           // Se música mudou, resetar votos
@@ -334,6 +344,8 @@
             likeBtn.classList.remove('liked');
             dislikeBtn.classList.remove('disliked');
           }
+        } else {
+          console.warn('Dados de metadados incompletos:', data);
         }
       } catch (error) {
         console.error('Erro ao buscar metadados:', error);

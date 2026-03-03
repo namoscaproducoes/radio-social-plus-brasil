@@ -516,3 +516,11 @@
 - [x] Remover player do componente Home
 - [x] Testar navegação e persistência do player
 - [x] Validar que player não bugueia ao navegar
+
+## Fase 61: Reorganizar Layout e Corrigir Metadados
+
+- [x] Investigar por que metadados e capa não estão carregando no player
+- [x] Corrigir endpoint de metadados no player.html - Adicionado logs de debug e fallback
+- [x] Reorganizar layout: player + video clip + TOP 5 + histórico lado a lado
+- [x] Testar carregamento de metadados e capa
+- [x] Validar layout visual aprimorado

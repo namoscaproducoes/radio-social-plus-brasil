@@ -509,3 +509,10 @@
 - [x] Votos públicos não estão sendo contabilizados em "Dashboard mais votadas" - Removido enabled: !!user
 - [x] Votos logados não estão sendo contabilizados em "Meu Dashboard" - Endpoints corretos, dados sendo retornados
 - [x] Votos logados também devem ser adicionados em "Dashboard mais votadas" - Todos os votos são contabilizados no ranking
+## Fase 60: Player em iframe Fixo
+
+- [x] Criar página HTML do player em iframe
+- [x] Implementar iframe fixo na layout principal
+- [x] Remover player do componente Home
+- [x] Testar navegação e persistência do player
+- [x] Validar que player não bugueia ao navegar

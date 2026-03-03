@@ -319,3 +319,19 @@
 
 - [x] Implementar player contínuo ao navegar entre páginas (usar contexto global)
 - [x] Adicionar nome do artista e música ao histórico de votações
+
+
+## Fase 35: Resolução do Problema de Stream Desligando Automaticamente
+- [x] Identificar causa: Icecast interrompendo conexão repetidamente
+- [x] Implementar stream-buffer.ts com buffer robusto de 2MB
+- [x] Aumentar tamanho mínimo de buffer para 512KB (8-10 segundos)
+- [x] Melhorar keep-alive e timeout no socket
+- [x] Detectar dinamicamente Content-Type do stream
+- [x] Implementar reconexão automática com delay de 3 segundos
+- [x] Melhorar tratamento de backpressure no envio de chunks
+- [x] Reduzir delay de reconexão no frontend (de 500ms para 300ms)
+- [x] Adicionar tentativa de retomada antes de reconectar (stalled/suspend)
+- [x] Aguardar 500ms para buffer carregar após reconectar
+- [x] Criar testes para stream-buffer (18 testes passando)
+- [x] Criar testes para RadioPlayerV2 (lógica de reconexão e heartbeat)
+- [x] Testar reprodução contínua sem interrupções por 10+ minutos

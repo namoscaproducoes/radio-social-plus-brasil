@@ -7,7 +7,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import streamRouter from "../stream";
+import streamRouter from "../stream-buffer";
 import youtubeRouter from "../youtube-api";
 
 function isPortAvailable(port: number): Promise<boolean> {

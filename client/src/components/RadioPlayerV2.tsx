@@ -154,38 +154,43 @@ export function RadioPlayerV2() {
         
         const newSrc = '/api/stream?' + Date.now();
         audioRef.current.src = newSrc;
+        audioRef.current.load();
         console.log('📡 Novo src definido:', newSrc);
         
         // Aguardar um pouco para o buffer carregar
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Tentar reproduzir automaticamente após reconectar
-        try {
-          const playPromise = audioRef.current.play();
-          if (playPromise !== undefined) {
-            playPromise
-              .then(() => {
-                console.log('▶️ Reprodução retomada após reconexão');
-                setIsPlaying(true);
-                setPlaybackIsPlaying(true);
-                reconnectAttemptsRef.current = 0;
-              })
-              .catch((error) => {
-                console.warn('⚠️ Autoplay bloqueado pelo navegador:', error);
-                console.log('✅ Stream pronto para reproduzir (aguardando clique do usuário)');
-              });
+        // Tentar reproduzir automaticamente apenas se estava tocando antes
+        if (isPlaying) {
+          try {
+            const playPromise = audioRef.current.play();
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  console.log('▶️ Reprodução retomada após reconexão');
+                  setIsPlaying(true);
+                  setPlaybackIsPlaying(true);
+                  reconnectAttemptsRef.current = 0;
+                  isReconnectingRef.current = false;
+                })
+                .catch((error) => {
+                  console.warn('⚠️ Autoplay bloqueado:', error);
+                  isReconnectingRef.current = false;
+                });
+            }
+          } catch (playError) {
+            console.warn('⚠️ Erro ao tentar reproduzir:', playError);
+            isReconnectingRef.current = false;
+            if (!userPausedRef.current) {
+              reconnectToStream('autoplay failed');
+            }
+            return;
           }
-        } catch (playError) {
-          console.warn('⚠️ Erro ao tentar reproduzir:', playError);
-          // Tentar reconectar novamente
+        } else {
+          console.log('✅ Stream reconectado (aguardando clique do usuário)');
+          reconnectAttemptsRef.current = 0;
           isReconnectingRef.current = false;
-          if (!userPausedRef.current) {
-            reconnectToStream('autoplay failed');
-          }
-          return;
         }
-        reconnectAttemptsRef.current = 0;
-        isReconnectingRef.current = false;
       } catch (error) {
         console.error('❌ Erro ao reconectar:', error);
         isReconnectingRef.current = false;
@@ -452,13 +457,25 @@ export function RadioPlayerV2() {
         console.log('🛑 Parando fluxo e limpando buffer...');
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
-        // Não chamar load() com src vazio - apenas remover src
         audioRef.current.src = ''; // Limpar src para descarregar buffer
+        
+        // Marcar como pausado pelo usuário - IMPEDE reconexão automática
         userPausedRef.current = true;
-        console.log('userPausedRef.current =', userPausedRef.current);
+        
+        // Parar heartbeat
+        if (heartbeatIntervalRef.current) {
+          clearInterval(heartbeatIntervalRef.current);
+        }
+        
+        // Cancelar qualquer reconexão pendente
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+          reconnectTimeoutRef.current = undefined;
+        }
+        
         setIsPlaying(false);
         setPlaybackIsPlaying(false);
-        console.log('🛑 Parado - buffer limpo');
+        console.log('🛑 Parado - buffer limpo, reconexão desativada');
       } else {
         // PLAY: recarregar stream com buffer zerado
         const newSrc = '/api/stream?' + Date.now();
@@ -472,6 +489,7 @@ export function RadioPlayerV2() {
         audioRef.current.load(); // Carregar novo stream
         console.log('🔗 Recarregando stream com buffer zerado:', newSrc);
         
+        // Permitir reconexão automática - ATIVA reconexão
         userPausedRef.current = false;
         reconnectAttemptsRef.current = 0;
         lastPlayTimeRef.current = Date.now();
@@ -480,7 +498,10 @@ export function RadioPlayerV2() {
         await new Promise(resolve => setTimeout(resolve, 500));
         
         console.log('▶️ Tentando reproduzir em tempo real...');
-        await audioRef.current.play();
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          await playPromise;
+        }
         setIsPlaying(true);
         setPlaybackIsPlaying(true);
       }

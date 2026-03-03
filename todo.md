@@ -419,3 +419,13 @@
 - [x] Validar que erros de src vazio não disparam reconexão
 - [x] 39 testes passando (1 YouTube API quota - não relacionado)
 - [x] Servidor rodando sem erros de TypeScript
+
+## Fase 51: Corrigir Comportamento de Play/Stop e Reconexão
+- [x] Remover autoplay automático em reconnectToStream
+- [x] Verificar isPlaying antes de tentar autoplay em reconexão
+- [x] Cancelar reconexão pendente ao clicar STOP
+- [x] Parar heartbeat ao clicar STOP
+- [x] Ativar userPausedRef ao STOP - impede reconexão
+- [x] Desativar userPausedRef ao PLAY - permite reconexão
+- [x] 39 testes passando (1 YouTube API quota - não relacionado)
+- [x] Servidor rodando sem erros de TypeScript

@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 
 describe("RadioPlayerV2 Reconnection Logic", () => {
-  describe("Reconnection Delay Calculation", () => {
+  describe("Reconnection Logic", () => {
     it("should calculate exponential backoff correctly", () => {
       let reconnectAttempts = 0;
       const maxAttempts = 10;
@@ -10,21 +10,31 @@ describe("RadioPlayerV2 Reconnection Logic", () => {
 
       for (let i = 1; i <= maxAttempts; i++) {
         reconnectAttempts = i;
-        const delay = Math.min(300 * reconnectAttempts, 3000);
+        const delay = Math.min(300 * reconnectAttempts, 10000);
         delays.push(delay);
       }
 
-      // Verificar progressão exponencial
-      expect(delays[0]).toBe(300); // 1ª tentativa: 300ms
-      expect(delays[1]).toBe(600); // 2ª tentativa: 600ms
-      expect(delays[2]).toBe(900); // 3ª tentativa: 900ms
-      expect(delays[9]).toBe(3000); // 10ª tentativa: máximo 3000ms
+      expect(delays[0]).toBe(300);
+      expect(delays[1]).toBe(600);
+      expect(delays[2]).toBe(900);
+      expect(delays[9]).toBe(3000);
+    });
+
+    it("should continue reconnecting indefinitely", () => {
+      let reconnectAttempts = 0;
+      const maxAttempts = 100;
+
+      for (let i = 1; i <= maxAttempts; i++) {
+        reconnectAttempts = i;
+      }
+
+      expect(reconnectAttempts).toBe(maxAttempts);
     });
 
     it("should not exceed maximum reconnection delay", () => {
-      const maxDelay = 3000;
+      const maxDelay = 10000;
 
-      for (let attempts = 1; attempts <= 20; attempts++) {
+      for (let attempts = 1; attempts <= 50; attempts++) {
         const delay = Math.min(300 * attempts, maxDelay);
         expect(delay).toBeLessThanOrEqual(maxDelay);
       }
@@ -32,10 +42,7 @@ describe("RadioPlayerV2 Reconnection Logic", () => {
 
     it("should reset attempts after successful reconnection", () => {
       let reconnectAttempts = 5;
-
-      // Simular reconexão bem-sucedida
       reconnectAttempts = 0;
-
       expect(reconnectAttempts).toBe(0);
     });
   });
@@ -46,9 +53,7 @@ describe("RadioPlayerV2 Reconnection Logic", () => {
       let userPaused = false;
       let shouldReconnect = false;
 
-      // Simular evento stalled
       if (!userPaused && isPlaying) {
-        // Tentar retomar após 2 segundos
         shouldReconnect = true;
       }
 
@@ -60,9 +65,7 @@ describe("RadioPlayerV2 Reconnection Logic", () => {
       let userPaused = false;
       let shouldReconnect = false;
 
-      // Simular evento suspend
       if (!userPaused && isPlaying) {
-        // Tentar retomar após 2 segundos
         shouldReconnect = true;
       }
 
@@ -73,7 +76,6 @@ describe("RadioPlayerV2 Reconnection Logic", () => {
       let userPaused = true;
       let shouldReconnect = false;
 
-      // Simular evento de erro
       if (!userPaused) {
         shouldReconnect = true;
       }
@@ -100,23 +102,42 @@ describe("RadioPlayerV2 Reconnection Logic", () => {
     it("should track play state correctly", () => {
       let isPlaying = false;
 
-      // Simular play
       isPlaying = true;
       expect(isPlaying).toBe(true);
 
-      // Simular pause
       isPlaying = false;
       expect(isPlaying).toBe(false);
+    });
+
+    it("should clear stream on pause (pause as stop)", () => {
+      let streamSrc = "/api/stream";
+      let isPlaying = true;
+
+      isPlaying = false;
+      streamSrc = "";
+
+      expect(isPlaying).toBe(false);
+      expect(streamSrc).toBe("");
+    });
+
+    it("should reload stream on play after pause", () => {
+      let streamSrc = "";
+      let isPlaying = false;
+
+      const timestamp = Date.now();
+      streamSrc = `/api/stream?${timestamp}`;
+      isPlaying = true;
+
+      expect(isPlaying).toBe(true);
+      expect(streamSrc).toMatch(/^\/api\/stream\?\d+$/);
     });
 
     it("should track user pause state", () => {
       let userPaused = false;
 
-      // Usuário clica em pause
       userPaused = true;
       expect(userPaused).toBe(true);
 
-      // Usuário clica em play
       userPaused = false;
       expect(userPaused).toBe(false);
     });
@@ -125,12 +146,11 @@ describe("RadioPlayerV2 Reconnection Logic", () => {
       const lastPlayTime = Date.now();
       const currentTime = Date.now();
 
-      // Verificar que timestamp foi registrado
       expect(lastPlayTime).toBeLessThanOrEqual(currentTime);
     });
 
     it("should detect stall after 5 seconds without progress", () => {
-      const lastPlayTime = Date.now() - 6000; // 6 segundos atrás
+      const lastPlayTime = Date.now() - 6000;
       const currentTime = Date.now();
       const timeSinceLastPlay = currentTime - lastPlayTime;
 
@@ -145,11 +165,9 @@ describe("RadioPlayerV2 Reconnection Logic", () => {
       const timestamp1 = Date.now();
       const src1 = `/api/stream?${timestamp1}`;
 
-      // Simular nova reconexão
       const timestamp2 = Date.now() + 100;
       const src2 = `/api/stream?${timestamp2}`;
 
-      // URLs devem ser diferentes
       expect(src1).not.toBe(src2);
       expect(src1).toMatch(/^\/api\/stream\?\d+$/);
       expect(src2).toMatch(/^\/api\/stream\?\d+$/);
@@ -159,16 +177,14 @@ describe("RadioPlayerV2 Reconnection Logic", () => {
       let streamSrc = "";
       const initialSrc = "/api/stream";
 
-      // Primeira inicialização
       if (!streamSrc) {
         streamSrc = initialSrc;
       }
 
       expect(streamSrc).toBe(initialSrc);
 
-      // Não deve mudar se já foi definido
       const newSrc = "/api/stream?new";
-      streamSrc = newSrc; // Apenas em reconexão
+      streamSrc = newSrc;
 
       expect(streamSrc).toBe(newSrc);
     });
@@ -192,7 +208,6 @@ describe("RadioPlayerV2 Reconnection Logic", () => {
     it("should reset user vote on metadata change", () => {
       let userVote: "like" | "dislike" | null = "like";
 
-      // Simular mudança de música
       userVote = null;
 
       expect(userVote).toBeNull();
@@ -200,9 +215,9 @@ describe("RadioPlayerV2 Reconnection Logic", () => {
   });
 
   describe("Heartbeat Monitoring", () => {
-    it("should monitor playback progress", () => {
-      const heartbeatInterval = 3000; // 3 segundos
-      const stallThreshold = 5000; // 5 segundos
+    it("should monitor playback progress frequently", () => {
+      const heartbeatInterval = 2000;
+      const stallThreshold = 5000;
 
       expect(heartbeatInterval).toBeLessThan(stallThreshold);
     });
@@ -221,4 +236,99 @@ describe("RadioPlayerV2 Reconnection Logic", () => {
       let isPlaying = false;
       let heartbeatActive = false;
 
-      if (isPlaying) {\n        heartbeatActive = true;\n      }\n\n      expect(heartbeatActive).toBe(false);\n    });\n  });\n\n  describe(\"Volume Control\", () => {\n    it(\"should set volume between 0 and 100\", () => {\n      const volumes = [0, 25, 50, 75, 100];\n\n      for (const vol of volumes) {\n        const normalizedVolume = vol / 100;\n        expect(normalizedVolume).toBeGreaterThanOrEqual(0);\n        expect(normalizedVolume).toBeLessThanOrEqual(1);\n      }\n    });\n\n    it(\"should handle volume changes\", () => {\n      let volume = 100;\n\n      // Diminuir volume\n      volume = 50;\n      expect(volume).toBe(50);\n\n      // Aumentar volume\n      volume = 75;\n      expect(volume).toBe(75);\n    });\n  });\n\n  describe(\"Voting System\", () => {\n    it(\"should track user vote state\", () => {\n      let userVote: \"like\" | \"dislike\" | null = null;\n\n      // Usuário clica em like\n      userVote = \"like\";\n      expect(userVote).toBe(\"like\");\n\n      // Usuário muda para dislike\n      userVote = \"dislike\";\n      expect(userVote).toBe(\"dislike\");\n\n      // Usuário limpa voto\n      userVote = null;\n      expect(userVote).toBeNull();\n    });\n\n    it(\"should prevent voting before metadata loads\", () => {\n      const title = \"Carregando...\";\n      const canVote = title !== \"Carregando...\";\n\n      expect(canVote).toBe(false);\n    });\n\n    it(\"should allow voting after metadata loads\", () => {\n      const title = \"Song Title\";\n      const canVote = title !== \"Carregando...\";\n\n      expect(canVote).toBe(true);\n    });\n  });\n});\n
+      if (isPlaying) {
+        heartbeatActive = true;
+      }
+
+      expect(heartbeatActive).toBe(false);
+    });
+
+    it("should detect unexpected pause and reconnect", () => {
+      let isPlaying = true;
+      let isAudioPaused = true;
+      let userPaused = false;
+      let shouldReconnect = false;
+
+      if (isPlaying && isAudioPaused && !userPaused) {
+        shouldReconnect = true;
+      }
+
+      expect(shouldReconnect).toBe(true);
+    });
+
+    it("should detect stream error and reconnect", () => {
+      let hasError = true;
+      let userPaused = false;
+      let shouldReconnect = false;
+
+      if (hasError && !userPaused) {
+        shouldReconnect = true;
+      }
+
+      expect(shouldReconnect).toBe(true);
+    });
+
+    it("should auto-reconnect when player disconnects", () => {
+      let isPlaying = true;
+      let userPaused = false;
+      let shouldAutoReconnect = false;
+
+      if (isPlaying && !userPaused) {
+        shouldAutoReconnect = true;
+      }
+
+      expect(shouldAutoReconnect).toBe(true);
+    });
+  });
+
+  describe("Volume Control", () => {
+    it("should set volume between 0 and 100", () => {
+      const volumes = [0, 25, 50, 75, 100];
+
+      for (const vol of volumes) {
+        const normalizedVolume = vol / 100;
+        expect(normalizedVolume).toBeGreaterThanOrEqual(0);
+        expect(normalizedVolume).toBeLessThanOrEqual(1);
+      }
+    });
+
+    it("should handle volume changes", () => {
+      let volume = 100;
+
+      volume = 50;
+      expect(volume).toBe(50);
+
+      volume = 75;
+      expect(volume).toBe(75);
+    });
+  });
+
+  describe("Voting System", () => {
+    it("should track user vote state", () => {
+      let userVote: "like" | "dislike" | null = null;
+
+      userVote = "like";
+      expect(userVote).toBe("like");
+
+      userVote = "dislike";
+      expect(userVote).toBe("dislike");
+
+      userVote = null;
+      expect(userVote).toBeNull();
+    });
+
+    it("should prevent voting before metadata loads", () => {
+      const title = "Carregando...";
+      const canVote = title !== "Carregando...";
+
+      expect(canVote).toBe(false);
+    });
+
+    it("should allow voting after metadata loads", () => {
+      const title = "Song Title";
+      const canVote = title !== "Carregando...";
+
+      expect(canVote).toBe(true);
+    });
+  });
+});

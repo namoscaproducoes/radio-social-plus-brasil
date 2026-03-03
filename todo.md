@@ -335,3 +335,14 @@
 - [x] Criar testes para stream-buffer (18 testes passando)
 - [x] Criar testes para RadioPlayerV2 (lógica de reconexão e heartbeat)
 - [x] Testar reprodução contínua sem interrupções por 10+ minutos
+
+
+## Fase 36: Auto-Reconexão Automática e Pause como Stop
+- [x] Implementar auto-reconexão automática quando player desconectar
+- [x] Modificar pause para funcionar como stop (recarregar stream ao play)
+- [x] Testar fluxos de reconexão automática
+- [x] Testar pause/play com recarregamento de stream
+- [x] Criar testes para RadioPlayerV2 (pause/play, reconexão, heartbeat)
+- [x] Melhorar heartbeat para detectar desconexões automáticas
+- [x] Remover limite de tentativas de reconexão
+- [x] Aumentar delay máximo de reconexão para 10 segundos

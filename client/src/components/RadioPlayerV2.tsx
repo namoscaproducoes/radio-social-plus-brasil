@@ -155,7 +155,7 @@ export function RadioPlayerV2() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-sm mx-auto">
       {/* Card do Player - Design Moderno */}
       <div className="relative group">
         {/* Fundo com gradiente e blur */}
@@ -168,96 +168,88 @@ export function RadioPlayerV2() {
           }}
         />
 
-        {/* Card Principal */}
-        <div className="relative bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-black/95 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-2xl">
+        {/* Card Principal - Layout Vertical */}
+        <div className="relative bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-black/95 backdrop-blur-xl rounded-2xl p-6 border border-white/10 shadow-2xl flex flex-col items-center gap-6">
           
-          {/* Layout em Flex - Capa + Informações + Controles */}
-          <div className="flex gap-6 items-center">
-            
-            {/* Capa do Álbum - Esquerda */}
-            <div className="flex-shrink-0">
-              <div className="relative w-40 h-40 rounded-xl overflow-hidden shadow-2xl group/cover">
-                {metadata.cover ? (
-                  <img
-                    src={metadata.cover}
-                    alt={metadata.title}
-                    className="w-full h-full object-cover group-hover/cover:scale-110 transition-transform duration-300"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
-                    <Music className="w-12 h-12 text-slate-500" />
-                  </div>
-                )}
-                {/* Overlay ao hover */}
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/cover:opacity-100 transition-opacity duration-300" />
-              </div>
-            </div>
-
-            {/* Informações + Controles - Centro e Direita */}
-            <div className="flex-1 flex flex-col gap-4">
-              
-              {/* Informações da Música */}
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-white truncate leading-tight">
-                  {metadata.title}
-                </h2>
-                <p className="text-sm text-slate-300 truncate">
-                  {metadata.artist}
-                </p>
-              </div>
-
-              {/* Controle de Volume */}
-              <div className="flex items-center gap-3">
-                <Volume2 className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={volume}
-                  onChange={handleVolumeChange}
-                  className="flex-1 h-1.5 bg-slate-700 rounded-full appearance-none cursor-pointer accent-orange-500"
+          {/* Capa do Álbum - Topo */}
+          <div className="w-full">
+            <div className="relative w-full aspect-square rounded-xl overflow-hidden shadow-2xl group/cover">
+              {metadata.cover ? (
+                <img
+                  src={metadata.cover}
+                  alt={metadata.title}
+                  className="w-full h-full object-cover group-hover/cover:scale-110 transition-transform duration-300"
                 />
-                <span className="text-xs text-slate-400 w-8 text-right">{volume}%</span>
-              </div>
-
-              {/* Controles de Reprodução e Votos */}
-              <div className="flex items-center gap-3">
-                {/* Botão Play/Stop */}
-                <button
-                  onClick={togglePlay}
-                  className="w-12 h-12 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-orange-500/50 transition-all duration-200 flex items-center justify-center group/play"
-                >
-                  {isPlaying ? (
-                    <Pause className="w-6 h-6 fill-current" />
-                  ) : (
-                    <Play className="w-6 h-6 fill-current ml-0.5" />
-                  )}
-                </button>
-
-                {/* Botões de Voto */}
-                <div className="flex gap-2 ml-2">
-                  <button
-                    onClick={() => handleVote('like')}
-                    className={`p-2 rounded-full transition-all duration-200 ${
-                      userVote === 'like'
-                        ? 'bg-green-500/30 text-green-400'
-                        : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 hover:text-slate-300'
-                    }`}
-                  >
-                    <ThumbsUp className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => handleVote('dislike')}
-                    className={`p-2 rounded-full transition-all duration-200 ${
-                      userVote === 'dislike'
-                        ? 'bg-red-500/30 text-red-400'
-                        : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 hover:text-slate-300'
-                    }`}
-                  >
-                    <ThumbsDown className="w-5 h-5" />
-                  </button>
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
+                  <Music className="w-16 h-16 text-slate-500" />
                 </div>
-              </div>
+              )}
+              {/* Overlay ao hover */}
+              <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/cover:opacity-100 transition-opacity duration-300" />
+            </div>
+          </div>
+
+          {/* Informações da Música */}
+          <div className="w-full text-center space-y-2">
+            <h2 className="text-2xl font-bold text-white truncate leading-tight">
+              {metadata.title}
+            </h2>
+            <p className="text-sm text-slate-300 truncate">
+              {metadata.artist}
+            </p>
+          </div>
+
+          {/* Controle de Volume */}
+          <div className="w-full flex items-center gap-3">
+            <Volume2 className="w-4 h-4 text-slate-400 flex-shrink-0" />
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={volume}
+              onChange={handleVolumeChange}
+              className="flex-1 h-1.5 bg-slate-700 rounded-full appearance-none cursor-pointer accent-orange-500"
+            />
+            <span className="text-xs text-slate-400 w-8 text-right">{volume}%</span>
+          </div>
+
+          {/* Controles de Reprodução e Votos */}
+          <div className="w-full flex items-center justify-center gap-4">
+            {/* Botão Play/Stop */}
+            <button
+              onClick={togglePlay}
+              className="w-14 h-14 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-orange-500/50 transition-all duration-200 flex items-center justify-center group/play flex-shrink-0"
+            >
+              {isPlaying ? (
+                <Pause className="w-7 h-7 fill-current" />
+              ) : (
+                <Play className="w-7 h-7 fill-current ml-0.5" />
+              )}
+            </button>
+
+            {/* Botões de Voto */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => handleVote('like')}
+                className={`p-3 rounded-full transition-all duration-200 ${
+                  userVote === 'like'
+                    ? 'bg-green-500/30 text-green-400'
+                    : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 hover:text-slate-300'
+                }`}
+              >
+                <ThumbsUp className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => handleVote('dislike')}
+                className={`p-3 rounded-full transition-all duration-200 ${
+                  userVote === 'dislike'
+                    ? 'bg-red-500/30 text-red-400'
+                    : 'bg-slate-700/50 text-slate-400 hover:bg-slate-700 hover:text-slate-300'
+                }`}
+              >
+                <ThumbsDown className="w-5 h-5" />
+              </button>
             </div>
           </div>
         </div>

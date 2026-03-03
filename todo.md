@@ -475,3 +475,12 @@
 - [x] Adicionar gradiente dark (slate-900 a black)
 - [x] Efeitos hover suaves
 - [x] Sombras profundas e modernas
+
+## Fase 56: Reorganizar Layout do Player - Capa em Cima
+- [x] Mudar layout de horizontal para vertical
+- [x] Capa do álbum em cima (100% largura, aspect-square)
+- [x] Título e artista abaixo da capa
+- [x] Controle de volume abaixo das informações
+- [x] Botão PLAY/STOP + votos na base
+- [x] Manter glassmorphism e efeitos visuais
+- [x] Layout vertical focado e profissional

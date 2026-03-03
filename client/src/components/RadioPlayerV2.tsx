@@ -441,22 +441,29 @@ export function RadioPlayerV2() {
 
     try {
       if (isPlaying) {
-        // Pause: pausar a reprodução
-        console.log('🔗 Iniciando pause...');
+        // STOP: parar a reprodução e limpar buffer
+        console.log('🛑 Parando fluxo e limpando buffer...');
         audioRef.current.pause();
-        audioRef.current.currentTime = 0; // Resetar para começar do zero ao play
+        audioRef.current.currentTime = 0;
+        audioRef.current.src = ''; // Limpar src para descarregar buffer
+        audioRef.current.load(); // Forçar limpeza de buffer
         userPausedRef.current = true;
         console.log('userPausedRef.current =', userPausedRef.current);
         setIsPlaying(false);
         setPlaybackIsPlaying(false);
-        console.log('⏸️ Parado - currentTime resetado para 0');
+        console.log('🛑 Parado - buffer limpo');
       } else {
-        // Play: recarregar stream com cache-busting
+        // PLAY: recarregar stream com buffer zerado
         const newSrc = '/api/stream?' + Date.now();
+        audioRef.current.src = ''; // Limpar src anterior
+        audioRef.current.currentTime = 0;
+        audioRef.current.load(); // Limpar buffer anterior
+        
+        // Agora setar novo src
         audioRef.current.src = newSrc;
-        audioRef.current.currentTime = 0; // Garantir que comeca do zero
-        audioRef.current.load(); // Forcar recarregamento do stream
-        console.log('🔗 Recarregando stream:', newSrc);
+        audioRef.current.currentTime = 0; // Começar do zero
+        audioRef.current.load(); // Carregar novo stream
+        console.log('🔗 Recarregando stream com buffer zerado:', newSrc);
         
         userPausedRef.current = false;
         reconnectAttemptsRef.current = 0;
@@ -465,7 +472,7 @@ export function RadioPlayerV2() {
         // Aguardar um pouco para o buffer carregar
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        console.log('▶️ Tentando reproduzir...');
+        console.log('▶️ Tentando reproduzir em tempo real...');
         await audioRef.current.play();
         setIsPlaying(true);
         setPlaybackIsPlaying(true);

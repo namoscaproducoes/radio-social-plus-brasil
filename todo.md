@@ -404,3 +404,11 @@
 - [x] Garantir que ao clicar PLAY, o stream é recarregado com cache-busting
 - [x] 39 testes passando
 - [x] Testar e salvar checkpoint
+
+
+## Fase 49: Limpeza de Buffer ao STOP e PLAY
+- [x] Limpar buffer completamente ao clicar STOP (src='', load())
+- [x] Zerar buffer ao clicar PLAY (limpar src anterior, depois carregar novo)
+- [x] Iniciar musica em tempo real sem buffer anterior
+- [x] 38 testes passando
+- [x] Testar e salvar checkpoint

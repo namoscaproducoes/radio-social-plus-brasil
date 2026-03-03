@@ -18,7 +18,6 @@ export default function Dashboard() {
   const { data: rankingData } = trpc.songs.ranking.useQuery(
     { period: period as any },
     {
-      enabled: !!user,
       refetchInterval: 10000,
     }
   );
@@ -44,22 +43,7 @@ export default function Dashboard() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-600 to-purple-900 flex items-center justify-center">
-        <Card className="bg-gray-900 border-yellow-500 p-8 text-center max-w-md">
-          <h1 className="text-2xl font-bold text-white mb-4">Acesso Restrito</h1>
-          <p className="text-gray-300 mb-6">Você precisa estar autenticado para acessar o dashboard.</p>
-          <Button 
-            onClick={() => navigate("/")}
-            className="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold"
-          >
-            Voltar para Home
-          </Button>
-        </Card>
-      </div>
-    );
-  }
+
 
   // Preparar dados para gráficos
   const chartData = topSongs?.map((song: any) => ({
@@ -87,7 +71,7 @@ export default function Dashboard() {
             <span className="text-white font-bold text-lg">Dashboard - Rádio Social Plus</span>
           </div>
           <div className="flex gap-4 items-center">
-            <span className="text-gray-300">{user?.name}</span>
+            {user && <span className="text-gray-300">{user.name}</span>}
             <Button 
               onClick={() => navigate("/")}
               className="bg-gray-700 hover:bg-gray-600 text-white"

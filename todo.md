@@ -503,3 +503,9 @@
 ## Bugs a Corrigir - Fase 58
 
 - [x] TOP 5 não está mostrando as 5 músicas mais votadas publicamente - Corrigida query para buscar todas as músicas votadas
+
+## Bugs a Corrigir - Fase 59
+
+- [x] Votos públicos não estão sendo contabilizados em "Dashboard mais votadas" - Removido enabled: !!user
+- [x] Votos logados não estão sendo contabilizados em "Meu Dashboard" - Endpoints corretos, dados sendo retornados
+- [x] Votos logados também devem ser adicionados em "Dashboard mais votadas" - Todos os votos são contabilizados no ranking

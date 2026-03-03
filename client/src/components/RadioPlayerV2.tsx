@@ -454,7 +454,8 @@ export function RadioPlayerV2() {
         // Play: recarregar stream com cache-busting
         const newSrc = '/api/stream?' + Date.now();
         audioRef.current.src = newSrc;
-        audioRef.current.currentTime = 0; // Garantir que começa do zero
+        audioRef.current.currentTime = 0; // Garantir que comeca do zero
+        audioRef.current.load(); // Forcar recarregamento do stream
         console.log('🔗 Recarregando stream:', newSrc);
         
         userPausedRef.current = false;

@@ -396,3 +396,11 @@
 - [x] Adicionar tooltip PLAY/STOP
 - [x] 38 testes passando
 - [x] Testar e salvar checkpoint
+
+
+## Fase 48: Correcao de PLAY - Recarregar Fluxo Atual
+- [x] Corrigir PLAY para recarregar fluxo atual em vez de retomar musica anterior
+- [x] Adicionar audioRef.current.load() para forcar recarregamento
+- [x] Garantir que ao clicar PLAY, o stream é recarregado com cache-busting
+- [x] 39 testes passando
+- [x] Testar e salvar checkpoint

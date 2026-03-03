@@ -439,3 +439,15 @@
 - [x] Aumentar timeout de teste para 15s
 - [x] 39 testes passando (1 YouTube API quota - não relacionado)
 - [x] Servidor rodando sem erros de TypeScript
+
+## Fase 53: Simplificar Player - Remover Toda Lógica Complexa
+- [x] Reescrever RadioPlayerV2 com apenas PLAY e STOP
+- [x] Remover reconexão automática
+- [x] Remover heartbeat
+- [x] Remover sincronização complexa
+- [x] Simplificar stream.ts - proxy direto sem buffer
+- [x] Remover stream-buffer.ts
+- [x] Remover stream-debug.ts
+- [x] Corrigir imports em server/_core/index.ts
+- [x] Servidor rodando sem erros de TypeScript
+- [x] Player funcional com PLAY/STOP básico

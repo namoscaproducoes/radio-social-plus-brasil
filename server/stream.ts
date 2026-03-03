@@ -4,38 +4,36 @@ import https from "https";
 const router = Router();
 
 /**
- * Proxy endpoint para o stream de rádio
- * Implementação robusta com buffer local e envio contínuo
+ * Endpoint de stream simples
+ * Proxy direto para o stream de rádio ao vivo
+ * Sem buffer, sem reconexão automática, sem sincronização
  */
 router.get("/stream", (req: Request, res: Response) => {
   const streamUrl = "https://s01.brascast.com:7034/live";
 
   console.log("📡 Cliente conectado ao stream");
 
-  // Configurar headers CORS e streaming
+  // Configurar headers para streaming
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.setHeader("Content-Type", "audio/mpeg");
-  console.log("📡 Enviando stream com Content-Type: audio/mpeg");
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
   res.setHeader("Transfer-Encoding", "chunked");
   res.setHeader("Connection", "keep-alive");
   res.setHeader("Keep-Alive", "timeout=30, max=100");
-  // Headers importantes para streaming contínuo
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Accept-Ranges", "none");
 
-  // Configurar socket do cliente para keep-alive
+  // Configurar socket do cliente
   if (res.socket) {
     res.socket.setKeepAlive(true, 30000);
     res.socket.setTimeout(0);
-    res.socket.setNoDelay(true); // Desabilitar algoritmo de Nagle para menor latência
+    res.socket.setNoDelay(true);
   }
 
-  // Fazer requisição ao servidor de stream com opções de SSL
   const options = {
     rejectUnauthorized: false,
     timeout: 0,
@@ -48,53 +46,26 @@ router.get("/stream", (req: Request, res: Response) => {
     streamRes = response;
     console.log("✅ Conectado ao stream Icecast");
     
-    // Detectar Content-Type real do Icecast
+    // Usar Content-Type do Icecast
     const icecastContentType = response.headers["content-type"] || "audio/mpeg";
-    console.log("📡 Content-Type do Icecast:", icecastContentType);
-    
-    // Usar o Content-Type real do Icecast para melhor compatibilidade
     res.setHeader("Content-Type", icecastContentType);
-    console.log("📡 Enviando com Content-Type:", icecastContentType);
     
     if (response.headers["icy-metaint"]) {
       res.setHeader("icy-metaint", response.headers["icy-metaint"]);
     }
 
-    // Configurar socket do stream para não desligar
+    // Configurar socket do stream
     if (response.socket) {
       response.socket.setKeepAlive(true, 30000);
       response.socket.setTimeout(0);
       response.socket.setNoDelay(true);
     }
 
-    // Variáveis para monitorar fluxo
-    let bytesReceived = 0;
-    let bytesSent = 0;
-    let lastLogTime = Date.now();
-
-    // Handler para dados chegando do stream
+    // Proxy direto: enviar dados conforme chegam
     response.on("data", (chunk: Buffer) => {
-      bytesReceived += chunk.length;
-      
-      // Log do primeiro chunk para debug
-      if (bytesReceived <= chunk.length) {
-        console.log("📡 Primeiro chunk recebido, tamanho:", chunk.length, "bytes");
-      }
-
-      // Log a cada 10 segundos
-      const now = Date.now();
-      if (now - lastLogTime > 10000) {
-        console.log(`📊 Stream: recebido ${(bytesReceived / 1024).toFixed(2)}KB, enviado ${(bytesSent / 1024).toFixed(2)}KB`);
-        bytesReceived = 0;
-        bytesSent = 0;
-        lastLogTime = now;
-      }
-
-      // Enviar chunk para cliente
       if (isConnected && res.writable) {
         try {
           res.write(chunk);
-          bytesSent += chunk.length;
         } catch (error) {
           console.error("❌ Erro ao enviar chunk:", error);
           isConnected = false;
@@ -104,7 +75,7 @@ router.get("/stream", (req: Request, res: Response) => {
     });
 
     response.on("end", () => {
-      console.warn("⚠️ Stream Icecast desligou");
+      console.warn("⚠️ Stream Icecast encerrado");
       isConnected = false;
       if (res.writable) {
         res.end();
@@ -125,7 +96,6 @@ router.get("/stream", (req: Request, res: Response) => {
     });
   });
 
-  // Configurar keep-alive na requisição
   request.setTimeout(0);
 
   request.on("error", (error) => {

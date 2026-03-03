@@ -7,7 +7,7 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import streamRouter from "../stream-buffer";
+import streamRouter from "../stream";
 import youtubeRouter from "../youtube-api";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -50,7 +50,7 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
-  // Stream proxy com buffer gerenciado
+  // Stream proxy
   app.use("/api", streamRouter);
   // YouTube API
   app.use("/api", youtubeRouter);

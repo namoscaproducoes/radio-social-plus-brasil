@@ -171,8 +171,8 @@ export default function Home() {
           <div className="h-full max-w-7xl mx-auto">
             {/* Desktop Layout */}
             <div className="hidden md:grid grid-cols-12 gap-2 lg:gap-3 h-full">
-              {/* Left: Player */}
-              <div className="col-span-3 flex-shrink-0 flex flex-col">
+              {/* Left: Player - Sticky */}
+              <div className="col-span-3 flex-shrink-0 flex flex-col sticky top-0 h-fit">
                 <div className="rounded-xl shadow-2xl border h-full flex flex-col" style={{backgroundColor: '#ffac37', borderColor: '#ff9500', borderWidth: '2px'}}>
                   <div className="text-center pt-1 pb-1 flex-shrink-0">
                     <p className="text-white text-xs font-bold opacity-90 tracking-wider">TOCANDO AGORA</p>

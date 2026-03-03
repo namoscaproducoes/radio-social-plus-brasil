@@ -379,3 +379,13 @@
 - [x] Recarregar stream com cache-busting (timestamp)
 - [x] Testar pause/play com recarregamento de buffer
 - [x] Todos os testes passando (38 testes)
+
+
+## Fase 43: Seção do Player Fixa na Lateral (Corrigida)
+- [x] Adicionar sticky positioning à seção do player
+- [x] Manter player na lateral (col-span-3) conforme layout original
+- [x] Usar sticky top-0 h-fit para ficar fixo na lateral
+- [x] Garantir que design original fica intacto
+- [x] Testar navegacao sem quebrar layout
+- [x] Todos os testes passando (30 testes)
+- [x] Salvar checkpoint

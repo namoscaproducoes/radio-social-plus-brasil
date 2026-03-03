@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ThumbsUp, ThumbsDown, Play, Pause, Volume2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -24,6 +24,7 @@ export function RadioPlayerV2() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(100);
   const localAudioRef = useRef<HTMLAudioElement>(null);
+  const isTransitioningRef = useRef(false);
   const [metadata, setMetadata] = useState<SongMetadata>({
     title: 'Carregando...',
     artist: 'Artista Desconhecido',
@@ -103,101 +104,57 @@ export function RadioPlayerV2() {
           artist: metadataResponse.artist,
           cover: metadataResponse.albumCover || '',
         });
+        setAlbumCover(metadataResponse.albumCover || '');
         setSongTitle(metadataResponse.title);
         setSongArtist(metadataResponse.artist);
-        setAlbumCover(metadataResponse.albumCover || '');
-        setUserVote(null);
+        setUserVote(null); // Resetar voto quando música muda
       }
     }
   }, [metadataResponse, setAlbumCover, setSongTitle, setSongArtist]);
 
-  // Função para reconectar ao stream com retry exponencial
+  // Reconectar ao stream
   const reconnectToStream = useCallback((reason: string) => {
-    if (userPausedRef.current) {
-      console.log('⏸️ Usuário pausou manualmente, não reconectando');
-      return;
-    }
-
-    // Evitar múltiplas reconexões simultâneas
-    if (isReconnectingRef.current) {
-      console.log('⏳ Já está reconectando, aguardando...');
-      return;
-    }
-
-    // Sem limite de tentativas - continuar tentando reconectar indefinidamente
-    if (reconnectAttemptsRef.current > 20) {
-      console.log('🔄 Muitas tentativas de reconexão, aumentando delay...');
-      // Continuar tentando mas com delay maior
-    }
+    if (!audioRef.current || userPausedRef.current) return;
+    if (isReconnectingRef.current) return;
 
     isReconnectingRef.current = true;
-    reconnectAttemptsRef.current++;
-    console.log(`🔄 Reconectando ao stream (${reconnectAttemptsRef.current}/${maxReconnectAttemptsRef.current}) - Motivo: ${reason}`);
+    
+    const attemptReconnect = () => {
+      if (reconnectAttemptsRef.current >= maxReconnectAttemptsRef.current) {
+        console.error('❌ Máximo de tentativas de reconexão atingido');
+        isReconnectingRef.current = false;
+        return;
+      }
 
-    // Delay exponencial: começa em 300ms e vai até 10 segundos
-    const delayMs = Math.min(300 * reconnectAttemptsRef.current, 10000);
+      reconnectAttemptsRef.current += 1;
+      const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current - 1), 10000);
+      
+      console.log(`🔄 Tentativa ${reconnectAttemptsRef.current} de reconexão (${reason})...`);
 
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-    }
-
-    reconnectTimeoutRef.current = setTimeout(async () => {
-      try {
-        if (!audioRef.current || userPausedRef.current) return;
-
-        console.log('🔄 Preparando reconexão...');
-        
-        // Apenas pausar se não está pausado
-        if (!audioRef.current.paused) {
-          audioRef.current.pause();
-        }
-        
-        const newSrc = '/api/stream?' + Date.now();
-        audioRef.current.src = newSrc;
-        console.log('📡 Novo src definido:', newSrc);
-        
-        // Aguardar um pouco para o buffer carregar
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Tentar reproduzir automaticamente após reconectar
-        try {
-          const playPromise = audioRef.current.play();
-          if (playPromise !== undefined) {
-            playPromise
-              .then(() => {
-                console.log('▶️ Reprodução retomada após reconexão');
-                setIsPlaying(true);
-                setPlaybackIsPlaying(true);
-                reconnectAttemptsRef.current = 0;
-              })
-              .catch((error) => {
-                console.warn('⚠️ Autoplay bloqueado pelo navegador:', error);
-                console.log('✅ Stream pronto para reproduzir (aguardando clique do usuário)');
-              });
-          }
-        } catch (playError) {
-          console.warn('⚠️ Erro ao tentar reproduzir:', playError);
-          // Tentar reconectar novamente
+      reconnectTimeoutRef.current = setTimeout(() => {
+        if (!audioRef.current || userPausedRef.current) {
           isReconnectingRef.current = false;
-          if (!userPausedRef.current) {
-            reconnectToStream('autoplay failed');
-          }
           return;
         }
-        reconnectAttemptsRef.current = 0;
-        isReconnectingRef.current = false;
-      } catch (error) {
-        console.error('❌ Erro ao reconectar:', error);
-        isReconnectingRef.current = false;
-        // Não reconectar se o usuário pausou
-        if (!userPausedRef.current) {
-          reconnectToStream('retry after error');
-        }
-      }
-    }, delayMs);
-    }, [setPlaybackIsPlaying]);
 
-  // Heartbeat para monitorar se o player está tocando
+        const newSrc = '/api/stream?' + Date.now();
+        audioRef.current.src = newSrc;
+        audioRef.current.currentTime = 0;
+        
+        audioRef.current.play().then(() => {
+          console.log('✅ Reconectado com sucesso');
+          reconnectAttemptsRef.current = 0;
+          isReconnectingRef.current = false;
+        }).catch(() => {
+          attemptReconnect();
+        });
+      }, delay);
+    };
+
+    attemptReconnect();
+  }, []);
+
+  // Heartbeat para monitorar fluxo contínuo
   useEffect(() => {
     if (!audioRef.current) return;
 
@@ -298,59 +255,33 @@ export function RadioPlayerV2() {
     };
 
     const handlePause = () => {
-      console.log('⏸️ Reprodução pausada');
-      userPausedRef.current = true; // Marcar que o usuário pausou
-      setIsPlaying(false);
+      console.log('⏸️ Pausa detectada');
+      // Não fazer nada aqui - deixar o heartbeat lidar
     };
 
     const handleEnded = () => {
-      console.warn('⚠️ Stream ended');
-      if (!userPausedRef.current) {
-        reconnectToStream('stream ended');
-      }
+      console.log('⏹️ Reprodução finalizada');
+      setIsPlaying(false);
     };
 
     const handleError = (e: Event) => {
-      const audio = audioRef.current;
-      if (audio && audio.error) {
-        const errorCode = audio.error.code;
-        const errorMessage = audio.error.message;
-        console.error('❌ Erro no stream:', errorCode, errorMessage);
-        
-        let errorDescription = '';
-        switch (errorCode) {
-          case 1:
-            errorDescription = 'MEDIA_ERR_ABORTED';
-            break;
-          case 2:
-            errorDescription = 'MEDIA_ERR_NETWORK';
-            break;
-          case 3:
-            errorDescription = 'MEDIA_ERR_DECODE (formato nao suportado)';
-            break;
-          case 4:
-            errorDescription = 'MEDIA_ERR_SRC_NOT_SUPPORTED';
-            break;
-          default:
-            errorDescription = 'Erro desconhecido';
+      const error = (e.target as HTMLAudioElement).error;
+      if (error) {
+        console.error('❌ Erro no stream:', error.code, error.message);
+        if (!userPausedRef.current) {
+          reconnectToStream(`error ${error.code}`);
         }
-        console.error('Detalhes:', errorDescription);
-      }
-      // Não reconectar se o usuário pausou ou se o src está vazio (pausado)
-      if (!userPausedRef.current && audioRef.current?.src) {
-        reconnectToStream('audio error');
       }
     };
 
     const handleStalled = () => {
-      console.warn('⚠️ Stream stalled (sem dados)');
-      if (!userPausedRef.current && !isReconnectingRef.current) {
+      console.warn('⚠️ Stream travado (stalled)');
+      if (isPlaying && !userPausedRef.current) {
+        // Tentar retomar após 2 segundos
         setTimeout(() => {
-          if (!userPausedRef.current && !isReconnectingRef.current && audioRef.current && audioRef.current.paused) {
-            console.log('⏳ Tentando retomar após stall...');
+          if (audioRef.current && isPlaying && !userPausedRef.current) {
             audioRef.current.play().catch(() => {
-              console.log('🔄 Retomada falhou, reconectando...');
-              reconnectToStream('stalled');
+              reconnectToStream('stalled recovery');
             });
           }
         }, 2000);
@@ -358,14 +289,13 @@ export function RadioPlayerV2() {
     };
 
     const handleSuspend = () => {
-      console.warn('⚠️ Stream suspended');
-      if (!userPausedRef.current && !isReconnectingRef.current) {
+      console.warn('⚠️ Stream suspenso (suspend)');
+      if (isPlaying && !userPausedRef.current) {
+        // Tentar retomar após 2 segundos
         setTimeout(() => {
-          if (!userPausedRef.current && !isReconnectingRef.current && audioRef.current && audioRef.current.paused) {
-            console.log('⏳ Tentando retomar após suspend...');
+          if (audioRef.current && isPlaying && !userPausedRef.current) {
             audioRef.current.play().catch(() => {
-              console.log('🔄 Retomada falhou, reconectando...');
-              reconnectToStream('suspend');
+              reconnectToStream('suspend recovery');
             });
           }
         }, 2000);
@@ -373,25 +303,22 @@ export function RadioPlayerV2() {
     };
 
     const handleTimeUpdate = () => {
-      lastPlayTimeRef.current = Date.now();
-    };
-
-    const handleLoadStart = () => {
-      console.log('📥 Carregando novo stream...');
-    };
-
-    const handleCanPlay = () => {
-      console.log('✅ Stream pode ser reproduzido');
-      // Se estava tentando reconectar e agora pode reproduzir, tentar play
-      // Verificar se tem src antes de tentar reproduzir
-      if (!userPausedRef.current && audioRef.current?.paused && isPlaying && audioRef.current?.src) {
-        audioRef.current.play().catch((e) => {
-          console.warn('⚠️ Erro ao reproduzir após canplay:', e);
-        });
+      // Atualizar lastPlayTime quando há progresso
+      if (!audioRef.current?.paused) {
+        lastPlayTimeRef.current = Date.now();
       }
     };
 
-    // Armazenar handlers para limpeza posterior
+    const handleLoadStart = () => {
+      console.log('📥 Carregando stream...');
+    };
+
+    const handleCanPlay = () => {
+      console.log('✅ Stream pronto para reproduzir');
+      if (!audioRef.current?.src) return;
+      if (userPausedRef.current) return;
+    };
+
     handlersRef.current = {
       handlePlay,
       handlePause,
@@ -433,16 +360,18 @@ export function RadioPlayerV2() {
     };
   }, [reconnectToStream]);
 
-  // Tocar/pausar
+  // Tocar/pausar com tratamento de conflito
   const togglePlay = async () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || isTransitioningRef.current) return;
+
+    isTransitioningRef.current = true;
 
     try {
       if (isPlaying) {
         // Pause: pausar a reprodução
         console.log('🔗 Iniciando pause...');
         audioRef.current.pause();
-        audioRef.current.currentTime = 0; // Resetar para começar do zero ao play
+        audioRef.current.currentTime = 0;
         userPausedRef.current = true;
         console.log('userPausedRef.current =', userPausedRef.current);
         setIsPlaying(false);
@@ -452,7 +381,7 @@ export function RadioPlayerV2() {
         // Play: recarregar stream com cache-busting
         const newSrc = '/api/stream?' + Date.now();
         audioRef.current.src = newSrc;
-        audioRef.current.currentTime = 0; // Garantir que começa do zero
+        audioRef.current.currentTime = 0;
         console.log('🔗 Recarregando stream:', newSrc);
         
         userPausedRef.current = false;
@@ -462,8 +391,23 @@ export function RadioPlayerV2() {
         // Aguardar um pouco para o buffer carregar
         await new Promise(resolve => setTimeout(resolve, 500));
         
+        // Verificar se o usuário não pausou enquanto aguardava
+        if (userPausedRef.current) {
+          console.log('⏸️ Usuário pausou durante o carregamento');
+          isTransitioningRef.current = false;
+          return;
+        }
+        
         console.log('▶️ Tentando reproduzir...');
-        await audioRef.current.play();
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          await playPromise.catch((error: any) => {
+            // Ignorar erro de play interrompido por pause
+            if (error.name !== 'NotAllowedError') {
+              throw error;
+            }
+          });
+        }
         setIsPlaying(true);
         setPlaybackIsPlaying(true);
       }
@@ -472,6 +416,8 @@ export function RadioPlayerV2() {
       setIsPlaying(false);
       setPlaybackIsPlaying(false);
       toast.error('Erro ao reproduzir áudio');
+    } finally {
+      isTransitioningRef.current = false;
     }
   };
 
@@ -495,169 +441,119 @@ export function RadioPlayerV2() {
 
     if (user) {
       // Voto de usuário autenticado
-      // Se temos songId, usar ele; senão, buscar pela música atual
+      // Se temos songId, usar ele; senão, usar a música atual
       let songId = currentSong?.songId;
-      
-      if (!songId) {
-        try {
-          const songData = await utils.songs.getSongIdByMetadata.fetch({
-            title: metadata.title,
-            artist: metadata.artist,
-          });
-          songId = songData?.id;
-        } catch (error) {
-          console.error('Erro ao buscar songId:', error);
-        }
-      }
+
       if (songId) {
-        try {
-          await addUserVoteMutation.mutateAsync({
-            songId,
-            voteType: vote,
-          });
-        } catch (error) {
-          console.error('Erro ao registrar voto autenticado:', error);
-          toast.error('Erro ao registrar voto');
-        }
-      } else {
-        // Se não conseguir encontrar o songId, fazer voto anônimo como fallback
-        try {
-          await addAnonymousVoteMutation.mutateAsync({
-            songTitle: metadata.title,
-            songArtist: metadata.artist,
-            voteType: vote,
-          });
-        } catch (error) {
-          console.error('Erro ao registrar voto anônimo:', error);
-          toast.error('Erro ao registrar voto');
-        }
+        addUserVoteMutation.mutate({
+          songId,
+          voteType: vote,
+        });
       }
     } else {
       // Voto anônimo
-      try {
-        await addAnonymousVoteMutation.mutateAsync({
-          songTitle: metadata.title,
-          songArtist: metadata.artist,
-          voteType: vote,
-        });
-      } catch (error) {
-        console.error('Erro ao registrar voto anônimo:', error);
-      }
+      addAnonymousVoteMutation.mutate({
+        songTitle: metadata.title,
+        songArtist: metadata.artist,
+        voteType: vote,
+      });
     }
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      {/* Audio element */}
-      <audio
-        ref={audioRef}
-        crossOrigin="anonymous"
-        onLoadedMetadata={() => console.log('✅ Metadados do áudio carregados')}
-        onCanPlay={() => console.log('✅ Áudio pronto para reproduzir')}
-      />
+    <div className="w-full h-full flex flex-col justify-between">
+      {/* Capa do álbum */}
+      <div className="flex-1 flex items-center justify-center mb-3 min-h-0">
+        <div className="w-full aspect-square max-w-[200px] rounded-lg overflow-hidden shadow-lg border-2 border-gray-800">
+          {metadata.cover ? (
+            <img 
+              src={metadata.cover} 
+              alt={metadata.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
+              <div className="text-center">
+                <div className="text-4xl mb-2">🎵</div>
+                <p className="text-xs text-gray-400">Sem capa</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
-      {/* Player Container */}
-      <div className="relative rounded-lg sm:rounded-2xl overflow-hidden border-4 border-yellow-400 bg-gradient-to-b from-gray-900 to-black p-4 sm:p-6 md:p-8 shadow-2xl">
-        {/* Background Image */}
-        {metadata.cover && (
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: `url(${metadata.cover})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}
+      {/* Informações da música */}
+      <div className="text-center mb-3 min-h-[60px] flex flex-col justify-center">
+        <h3 className="text-sm font-bold text-white truncate">
+          {metadata.title}
+        </h3>
+        <p className="text-xs text-gray-300 truncate">
+          {metadata.artist}
+        </p>
+      </div>
+
+      {/* Controles */}
+      <div className="space-y-3">
+        {/* Play/Pause */}
+        <div className="flex justify-center">
+          <Button
+            onClick={togglePlay}
+            className="rounded-full w-16 h-16 flex items-center justify-center bg-yellow-400 hover:bg-yellow-500 text-black"
+          >
+            {isPlaying ? (
+              <Pause size={28} fill="currentColor" />
+            ) : (
+              <Play size={28} fill="currentColor" />
+            )}
+          </Button>
+        </div>
+
+        {/* Volume */}
+        <div className="flex items-center gap-2">
+          <Volume2 size={16} className="text-gray-400 flex-shrink-0" />
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={volume}
+            onChange={handleVolumeChange}
+            className="flex-1 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer"
           />
-        )}
+          <span className="text-xs text-gray-400 w-8 text-right">{volume}%</span>
+        </div>
 
-        {/* Content */}
-        <div className="relative z-10">
-          {/* Album Cover */}
-          <div className="flex justify-center mb-2">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden border-3 border-yellow-400 shadow-lg">
-              {metadata.cover ? (
-                <img
-                  src={metadata.cover}
-                  alt={`${metadata.title} - ${metadata.artist}`}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-purple-600 to-purple-900 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-2xl sm:text-3xl md:text-4xl mb-2">🎵</div>
-                    <p className="text-gray-400 text-xs sm:text-sm">Sem capa</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Song Info */}
-          <div className="text-center mb-2">
-            <h2 className="text-xs font-bold text-white mb-0 line-clamp-2 break-words">{metadata.title}</h2>
-            <p className="text-xs text-gray-300 truncate">{metadata.artist}</p>
-          </div>
-
-          {/* Controls */}
-          <div className="flex items-center justify-center gap-1 mb-2 flex-wrap">
-            {/* Play/Pause Button */}
-            <Button
-              onClick={togglePlay}
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-yellow-400 hover:bg-yellow-500 text-black flex items-center justify-center shadow-lg"
-            >
-              {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-            </Button>
-
-            {/* Volume Control */}
-            <div className="flex items-center gap-1">
-              <Volume2 size={14} className="text-gray-400" />
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={volume}
-                onChange={handleVolumeChange}
-                className="w-16 sm:w-20 h-1 bg-gray-600 rounded-lg appearance-none cursor-pointer"
-              />
-              <span className="text-xs text-gray-400 w-8">{volume}%</span>
-            </div>
-          </div>
-
-          {/* Vote Buttons */}
-          <div className="flex items-center justify-center gap-2">
-            <Button
-              onClick={() => handleVote('like')}
-              disabled={addUserVoteMutation.isPending || addAnonymousVoteMutation.isPending}
-              variant={userVote === 'like' ? 'default' : 'outline'}
-              className={`flex items-center gap-1 text-xs h-8 px-2 ${
-                userVote === 'like'
-                  ? 'bg-green-600 hover:bg-green-700 text-white border-green-600'
-                  : 'border-green-600 text-green-600 hover:bg-green-600/10'
-              }`}
-            >
-              <ThumbsUp size={12} />
-              Gostei
-            </Button>
-
-            <Button
-              onClick={() => handleVote('dislike')}
-              disabled={addUserVoteMutation.isPending || addAnonymousVoteMutation.isPending}
-              variant={userVote === 'dislike' ? 'default' : 'outline'}
-              className={`flex items-center gap-1 text-xs h-8 px-2 ${
-                userVote === 'dislike'
-                  ? 'bg-red-600 hover:bg-red-700 text-white border-red-600'
-                  : 'border-red-600 text-red-600 hover:bg-red-600/10'
-              }`}
-            >
-              <ThumbsDown size={12} />
-              Não Gostei
-            </Button>
-          </div>
+        {/* Like/Dislike */}
+        <div className="flex gap-2 justify-center">
+          <Button
+            onClick={() => handleVote('like')}
+            variant="outline"
+            size="sm"
+            className={`flex items-center gap-1 ${
+              userVote === 'like'
+                ? 'bg-green-600 border-green-600 text-white'
+                : 'border-green-600 text-green-600 hover:bg-green-600 hover:text-white'
+            }`}
+          >
+            <ThumbsUp size={14} />
+            <span className="text-xs">Gostei</span>
+          </Button>
+          <Button
+            onClick={() => handleVote('dislike')}
+            variant="outline"
+            size="sm"
+            className={`flex items-center gap-1 ${
+              userVote === 'dislike'
+                ? 'bg-red-600 border-red-600 text-white'
+                : 'border-red-600 text-red-600 hover:bg-red-600 hover:text-white'
+            }`}
+          >
+            <ThumbsDown size={14} />
+            <span className="text-xs">Não gostei</span>
+          </Button>
         </div>
       </div>
     </div>
   );
 }
+
+export default RadioPlayerV2;

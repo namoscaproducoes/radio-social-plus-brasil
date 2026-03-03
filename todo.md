@@ -387,3 +387,14 @@
 - [x] Verificar que pause reseta currentTime para 0
 - [x] Todos os testes passando (30 testes)
 - [x] Salvar checkpoint
+
+
+## Fase 46: Correcao de Erro Play/Pause
+- [x] Corrigir erro "The play() request was interrupted by a call to pause()"
+- [x] Adicionar flag de transicao para evitar multiplos cliques
+- [x] Adicionar verificacao de pause durante carregamento
+- [x] Adicionar tratamento de promises para play/pause
+- [x] Testar fluxo de play/pause
+- [x] Corrigir referencias de cover para albumCover
+- [x] 37 testes passando
+- [x] Salvar checkpoint

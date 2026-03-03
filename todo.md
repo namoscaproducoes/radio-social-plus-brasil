@@ -379,3 +379,11 @@
 - [x] Recarregar stream com cache-busting (timestamp)
 - [x] Testar pause/play com recarregamento de buffer
 - [x] Todos os testes passando (38 testes)
+
+
+## Fase 45: Pause como Stop
+- [x] Fazer pause funcionar como stop (parar stream completamente)
+- [x] Testar comportamento do pause
+- [x] Verificar que pause reseta currentTime para 0
+- [x] Todos os testes passando (30 testes)
+- [x] Salvar checkpoint

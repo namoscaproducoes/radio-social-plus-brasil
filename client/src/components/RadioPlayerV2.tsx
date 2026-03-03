@@ -291,10 +291,12 @@ export function RadioPlayerV2() {
     // Definir novos handlers
     const handlePlay = () => {
       console.log('▶️ Reprodução iniciada');
-      setIsPlaying(true);
-      userPausedRef.current = false;
-      reconnectAttemptsRef.current = 0;
-      lastPlayTimeRef.current = Date.now();
+      // Não resetar userPausedRef aqui - deixar que o togglePlay controle isso
+      if (!userPausedRef.current) {
+        setIsPlaying(true);
+        reconnectAttemptsRef.current = 0;
+        lastPlayTimeRef.current = Date.now();
+      }
     };
 
     const handlePause = () => {
@@ -603,12 +605,17 @@ export function RadioPlayerV2() {
 
           {/* Controls */}
           <div className="flex items-center justify-center gap-1 mb-2 flex-wrap">
-            {/* Play/Pause Button */}
+            {/* Play/Stop Button */}
             <Button
               onClick={togglePlay}
               className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-yellow-400 hover:bg-yellow-500 text-black flex items-center justify-center shadow-lg"
+              title={isPlaying ? 'STOP' : 'PLAY'}
             >
-              {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+              {isPlaying ? (
+                <div className="w-3 h-3 bg-black rounded-sm"></div>
+              ) : (
+                <Play size={14} fill="currentColor" />
+              )}
             </Button>
 
             {/* Volume Control */}

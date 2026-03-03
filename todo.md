@@ -387,3 +387,12 @@
 - [x] Verificar que pause reseta currentTime para 0
 - [x] Todos os testes passando (30 testes)
 - [x] Salvar checkpoint
+
+
+## Fase 47: Correcoes de Layout e Auto-Play
+- [x] Reverter layout para mostrar capa do album com blur
+- [x] Corrigir handlePlay para nao resetar userPausedRef quando usuario pausou
+- [x] Trocar pause por STOP no UI (icone de quadrado preto)
+- [x] Adicionar tooltip PLAY/STOP
+- [x] 38 testes passando
+- [x] Testar e salvar checkpoint

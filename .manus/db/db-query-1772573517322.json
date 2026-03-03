@@ -1,0 +1,70 @@
+{
+  "query": "SELECT s.id, s.title, s.artist, COUNT(v.id) as totalVotes FROM songs s LEFT JOIN votes v ON s.id = v.songId GROUP BY s.id HAVING totalVotes > 0 ORDER BY totalVotes DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT s.id, s.title, s.artist, COUNT(v.id) as totalVotes FROM songs s LEFT JOIN votes v ON s.id = v.songId GROUP BY s.id HAVING totalVotes > 0 ORDER BY totalVotes DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "Lose Yourself",
+      "artist": "Eminem",
+      "totalVotes": "17"
+    },
+    {
+      "id": "210016",
+      "title": "Sozinha (Remix)",
+      "artist": "Lizza Dalla",
+      "totalVotes": "3"
+    },
+    {
+      "id": "10",
+      "title": "Codinome Beija-Flor",
+      "artist": "Carol Biazin",
+      "totalVotes": "3"
+    },
+    {
+      "id": "3",
+      "title": "Heart Attack (Rock Version)",
+      "artist": "Demi Lovato",
+      "totalVotes": "3"
+    },
+    {
+      "id": "210013",
+      "title": "Video Games",
+      "artist": "Lana Del Rey",
+      "totalVotes": "3"
+    },
+    {
+      "id": "90001",
+      "title": "Presente De Um Beija-Flor",
+      "artist": "Natiruts",
+      "totalVotes": "3"
+    },
+    {
+      "id": "210009",
+      "title": "In Your Eyes (2015 GH Version)",
+      "artist": "George Benson",
+      "totalVotes": "2"
+    },
+    {
+      "id": "210001",
+      "title": "APT - Musica Plus",
+      "artist": "ROSE´ & Bruno Mars",
+      "totalVotes": "2"
+    },
+    {
+      "id": "7",
+      "title": "Cotton Eye Joe",
+      "artist": "Rednex",
+      "totalVotes": "2"
+    },
+    {
+      "id": "210007",
+      "title": "I'm Not Part of Me",
+      "artist": "Cloud Nothings",
+      "totalVotes": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tartist\ttotalVotes\n1\tLose Yourself\tEminem\t17\n210016\tSozinha (Remix)\tLizza Dalla\t3\n10\tCodinome Beija-Flor\tCarol Biazin\t3\n3\tHeart Attack (Rock Version)\tDemi Lovato\t3\n210013\tVideo Games\tLana Del Rey\t3\n90001\tPresente De Um Beija-Flor\tNatiruts\t3\n210009\tIn Your Eyes (2015 GH Version)\tGeorge Benson\t2\n210001\tAPT - Musica Plus\tROSE´ & Bruno Mars\t2\n7\tCotton Eye Joe\tRednex\t2\n210007\tI'm Not Part of Me\tCloud Nothings\t1\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

@@ -514,3 +514,9 @@
 
 - [x] Votos não estão sendo contabilizados em "Dashboard mais votadas" - Corrigida query para incluir userVotes
 - [x] Votos não estão sendo contabilizados em "Meu Dashboard" - Endpoints corretos, dados sendo retornados
+
+## Bugs a Corrigir - Fase 63
+
+- [x] Votos não aparecem em /dashboard (Dashboard mais votadas) - Removido filtro de data que estava bloqueando resultados
+- [x] Votos não aparecem em /user/dashboard (Meu Dashboard) - Endpoints corretos, dados sendo retornados
+- [x] Verificar se votos estão sendo salvos no banco de dados - Confirmado: 3+ votos registrados

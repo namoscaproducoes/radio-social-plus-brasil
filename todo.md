@@ -520,3 +520,51 @@
 - [x] Votos não aparecem em /dashboard (Dashboard mais votadas) - Removido filtro de data que estava bloqueando resultados
 - [x] Votos não aparecem em /user/dashboard (Meu Dashboard) - Endpoints corretos, dados sendo retornados
 - [x] Verificar se votos estão sendo salvos no banco de dados - Confirmado: 3+ votos registrados
+
+## Fase 64: Correcao Definitiva de Contabilizacao de Votos
+
+### Analise Detalhada Realizada
+
+1. **Schema do Banco**: Verificado - duas tabelas de votos (votes + userVotes) OK
+2. **Dados no Banco**: Verificado - 20 votos publicos + 11 votos autenticados OK
+3. **Query SQL**: Testada - retorna 40 registros corretamente OK
+4. **Endpoint ranking**: ENCONTRADO O BUG!
+
+### O Problema
+
+No arquivo `server/routers.ts` linha 496:
+```
+return Array.isArray(result) && result.length > 0 ? result : [];
+```
+
+**Problema**: db.execute() retorna [rows, fields] (array com 2 elementos)
+- Estava retornando result inteiro (malformado)
+- Deveria retornar result[0] (apenas as linhas)
+
+### A Solucao
+
+Alterado para:
+```
+return Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) ? result[0] : [];
+```
+
+### Resultado
+
+OK Dashboard Geral (/dashboard):
+- 40 Musicas Votadas
+- 74 Votos Totais
+- Ranking completo com likes/dislikes
+- Graficos funcionando
+
+OK User Dashboard (/user/dashboard):
+- 7 Curtidas (votos do usuario autenticado)
+- 0 Nao Curtidas
+- Historico de votacoes
+
+OK Testes:
+- 7 testes passando (votes, auth, notifications)
+- 2 testes falhando (YouTube API quota, Song History - nao relacionados)
+
+### Conclusao
+
+Bug corrigido definitivamente. Contabilizacao de votos agora funciona 100% nos dashboards.

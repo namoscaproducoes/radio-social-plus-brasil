@@ -1,0 +1,410 @@
+{
+  "query": "SELECT \n  s.id,\n  s.title,\n  s.artist,\n  s.albumCover,\n  s.duration,\n  (COALESCE(SUM(CASE WHEN v.voteType = 'like' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'like' THEN 1 ELSE 0 END), 0)) as likes,\n  (COALESCE(SUM(CASE WHEN v.voteType = 'dislike' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'dislike' THEN 1 ELSE 0 END), 0)) as dislikes,\n  (COALESCE(COUNT(DISTINCT v.id), 0) + COALESCE(COUNT(DISTINCT uv.id), 0)) as totalVotes\nFROM songs s\nLEFT JOIN votes v ON s.id = v.songId\nLEFT JOIN userVotes uv ON s.id = uv.songId\nGROUP BY s.id\nHAVING totalVotes > 0\nORDER BY totalVotes DESC;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT \n  s.id,\n  s.title,\n  s.artist,\n  s.albumCover,\n  s.duration,\n  (COALESCE(SUM(CASE WHEN v.voteType = 'like' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'like' THEN 1 ELSE 0 END), 0)) as likes,\n  (COALESCE(SUM(CASE WHEN v.voteType = 'dislike' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'dislike' THEN 1 ELSE 0 END), 0)) as dislikes,\n  (COALESCE(COUNT(DISTINCT v.id), 0) + COALESCE(COUNT(DISTINCT uv.id), 0)) as totalVotes\nFROM songs s\nLEFT JOIN votes v ON s.id = v.songId\nLEFT JOIN userVotes uv ON s.id = uv.songId\nGROUP BY s.id\nHAVING totalVotes > 0\nORDER BY totalVotes DESC;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "Lose Yourself",
+      "artist": "Eminem",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "27",
+      "dislikes": "7",
+      "totalVotes": "18"
+    },
+    {
+      "id": "210016",
+      "title": "Sozinha (Remix)",
+      "artist": "Lizza Dalla",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "3",
+      "dislikes": "0",
+      "totalVotes": "3"
+    },
+    {
+      "id": "3",
+      "title": "Heart Attack (Rock Version)",
+      "artist": "Demi Lovato",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "2",
+      "dislikes": "1",
+      "totalVotes": "3"
+    },
+    {
+      "id": "90001",
+      "title": "Presente De Um Beija-Flor",
+      "artist": "Natiruts",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "3",
+      "dislikes": "0",
+      "totalVotes": "3"
+    },
+    {
+      "id": "210013",
+      "title": "Video Games",
+      "artist": "Lana Del Rey",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "3",
+      "dislikes": "0",
+      "totalVotes": "3"
+    },
+    {
+      "id": "10",
+      "title": "Codinome Beija-Flor",
+      "artist": "Carol Biazin",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "3",
+      "dislikes": "0",
+      "totalVotes": "3"
+    },
+    {
+      "id": "7",
+      "title": "Cotton Eye Joe",
+      "artist": "Rednex",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "1",
+      "totalVotes": "2"
+    },
+    {
+      "id": "210019",
+      "title": "There Is a Party (Greatest Hits Version)",
+      "artist": "DJ BoBo",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "2",
+      "dislikes": "0",
+      "totalVotes": "2"
+    },
+    {
+      "id": "210020",
+      "title": "Graveyard",
+      "artist": "Halsey",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "2",
+      "dislikes": "0",
+      "totalVotes": "2"
+    },
+    {
+      "id": "210021",
+      "title": "Wake Me up When September Ends",
+      "artist": "Green Day",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "2",
+      "dislikes": "0",
+      "totalVotes": "2"
+    },
+    {
+      "id": "210001",
+      "title": "APT - Musica Plus",
+      "artist": "ROSE´ & Bruno Mars",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "2",
+      "dislikes": "0",
+      "totalVotes": "2"
+    },
+    {
+      "id": "210022",
+      "title": "Time is Running Out",
+      "artist": "Muse",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "2",
+      "dislikes": "0",
+      "totalVotes": "2"
+    },
+    {
+      "id": "210009",
+      "title": "In Your Eyes (2015 GH Version)",
+      "artist": "George Benson",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "2",
+      "dislikes": "0",
+      "totalVotes": "2"
+    },
+    {
+      "id": "60003",
+      "title": "IDGAF",
+      "artist": "Dua Lipa",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "60002",
+      "title": "Stupid Girl",
+      "artist": "Garbage",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "180002",
+      "title": "Undress the World",
+      "artist": "The Milk Carton Kids",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "0",
+      "dislikes": "1",
+      "totalVotes": "1"
+    },
+    {
+      "id": "150001",
+      "title": "No, No, No Pt. 2 (#1's Edit)",
+      "artist": "Destiny's Child",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "210003",
+      "title": "Roda Gigante",
+      "artist": "Cidade Verde Sounds",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "210004",
+      "title": "Mood (feat. iann dior)",
+      "artist": "24kgoldn",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "210005",
+      "title": "Yes I'm Ready",
+      "artist": "Teri DeSario",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "210006",
+      "title": "Quando o sol se for",
+      "artist": "Detonautas Roque Clube",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "210007",
+      "title": "I'm Not Part of Me",
+      "artist": "Cloud Nothings",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "210008",
+      "title": "toxic energy",
+      "artist": "blackbear",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "0",
+      "dislikes": "1",
+      "totalVotes": "1"
+    },
+    {
+      "id": "120001",
+      "title": "Let's Dance (2002 Remaster)",
+      "artist": "David Bowie",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "210011",
+      "title": "My Oh My (feat. DaBaby)",
+      "artist": "Camila Cabello",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "210012",
+      "title": "Gato Siames",
+      "artist": "LUDMILLA",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "180001",
+      "title": "American Jesus (Andy Wallace Mix)",
+      "artist": "Bad Religion",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "60001",
+      "title": "Crazy In Love (feat. Jay-Z)",
+      "artist": "Beyonce",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "30001",
+      "title": "Whistle",
+      "artist": "Flo Rida",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "13",
+      "title": "Lollipop (Album Version Explicit)",
+      "artist": "Lil Wayne",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "9",
+      "title": "Mirrors (Radio Edit)",
+      "artist": "Justin Timberlake",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "0",
+      "dislikes": "1",
+      "totalVotes": "1"
+    },
+    {
+      "id": "6",
+      "title": "Gold",
+      "artist": "Oberhofer",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "210023",
+      "title": "Free (feat. Corinne Bailey Rae)",
+      "artist": "Marcus Miller",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "210024",
+      "title": "rockstar",
+      "artist": "Post Malone",
+      "albumCover": "",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "210025",
+      "title": "End of the World",
+      "artist": "Miley Cyrus",
+      "albumCover": "",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "210026",
+      "title": "Down (feat. Gucci Mane)",
+      "artist": "Fifth Harmony",
+      "albumCover": "",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "240001",
+      "title": "Magoas Passadas",
+      "artist": "CPM 22",
+      "albumCover": "NULL",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "270001",
+      "title": "Wind of Change (feat. Brandon Boyd of Incubus & Portugal. The Man)",
+      "artist": "AWOLNATION",
+      "albumCover": "",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "270002",
+      "title": "Rebel In Me",
+      "artist": "Jimmy Cliff",
+      "albumCover": "",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    },
+    {
+      "id": "270003",
+      "title": "Jericho (2008 Remaster)",
+      "artist": "Simply Red",
+      "albumCover": "",
+      "duration": "NULL",
+      "likes": "1",
+      "dislikes": "0",
+      "totalVotes": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tartist\talbumCover\tduration\tlikes\tdislikes\ttotalVotes\n1\tLose Yourself\tEminem\tNULL\tNULL\t27\t7\t18\n210016\tSozinha (Remix)\tLizza Dalla\tNULL\tNULL\t3\t0\t3\n3\tHeart Attack (Rock Version)\tDemi Lovato\tNULL\tNULL\t2\t1\t3\n90001\tPresente De Um Beija-Flor\tNatiruts\tNULL\tNULL\t3\t0\t3\n210013\tVideo Games\tLana Del Rey\tNULL\tNULL\t3\t0\t3\n10\tCodinome Beija-Flor\tCarol Biazin\tNULL\tNULL\t3\t0\t3\n7\tCotton Eye Joe\tRednex\tNULL\tNULL\t1\t1\t2\n210019\tThere Is a Party (Greatest Hits Version)\tDJ BoBo\tNULL\tNULL\t2\t0\t2\n210020\tGraveyard\tHalsey\tNULL\tNULL\t2\t0\t2\n210021\tWake Me up When September Ends\tGreen Day\tNULL\tNULL\t2\t0\t2\n210001\tAPT - Musica Plus\tROSE´ & Bruno Mars\tNULL\tNULL\t2\t0\t2\n210022\tTime is Running Out\tMuse\tNULL\tNULL\t2\t0\t2\n210009\tIn Your Eyes (2015 GH Version)\tGeorge Benson\tNULL\tNULL\t2\t0\t2\n60003\tIDGAF\tDua Lipa\tNULL\tNULL\t1\t0\t1\n60002\tStupid Girl\tGarbage\tNULL\tNULL\t1\t0\t1\n180002\tUndress the World\tThe Milk Carton Kids\tNULL\tNULL\t0\t1\t1\n150001\tNo, No, No Pt. 2 (#1's Edit)\tDestiny's Child\tNULL\tNULL\t1\t0\t1\n210003\tRoda Gigante\tCidade Verde Sounds\tNULL\tNULL\t1\t0\t1\n210004\tMood (feat. iann dior)\t24kgoldn\tNULL\tNULL\t1\t0\t1\n210005\tYes I'm Ready\tTeri DeSario\tNULL\tNULL\t1\t0\t1\n210006\tQuando o sol se for\tDetonautas Roque Clube\tNULL\tNULL\t1\t0\t1\n210007\tI'm Not Part of Me\tCloud Nothings\tNULL\tNULL\t1\t0\t1\n210008\ttoxic energy\tblackbear\tNULL\tNULL\t0\t1\t1\n120001\tLet's Dance (2002 Remaster)\tDavid Bowie\tNULL\tNULL\t1\t0\t1\n210011\tMy Oh My (feat. DaBaby)\tCamila Cabello\tNULL\tNULL\t1\t0\t1\n210012\tGato Siames\tLUDMILLA\tNULL\tNULL\t1\t0\t1\n180001\tAmerican Jesus (Andy Wallace Mix)\tBad Religion\tNULL\tNULL\t1\t0\t1\n60001\tCrazy In Love (feat. Jay-Z)\tBeyonce\tNULL\tNULL\t1\t0\t1\n30001\tWhistle\tFlo Rida\tNULL\tNULL\t1\t0\t1\n13\tLollipop (Album Version Explicit)\tLil Wayne\tNULL\tNULL\t1\t0\t1\n9\tMirrors (Radio Edit)\tJustin Timberlake\tNULL\tNULL\t0\t1\t1\n6\tGold\tOberhofer\tNULL\tNULL\t1\t0\t1\n210023\tFree (feat. Corinne Bailey Rae)\tMarcus Miller\tNULL\tNULL\t1\t0\t1\n210024\trockstar\tPost Malone\t\tNULL\t1\t0\t1\n210025\tEnd of the World\tMiley Cyrus\t\tNULL\t1\t0\t1\n210026\tDown (feat. Gucci Mane)\tFifth Harmony\t\tNULL\t1\t0\t1\n240001\tMagoas Passadas\tCPM 22\tNULL\tNULL\t1\t0\t1\n270001\tWind of Change (feat. Brandon Boyd of Incubus & Portugal. The Man)\tAWOLNATION\t\tNULL\t1\t0\t1\n270002\tRebel In Me\tJimmy Cliff\t\tNULL\t1\t0\t1\n270003\tJericho (2008 Remaster)\tSimply Red\t\tNULL\t1\t0\t1\n",
+  "stderr": "",
+  "execution_time_ms": 61
+}

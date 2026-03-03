@@ -1,0 +1,110 @@
+{
+  "query": "SELECT COUNT(*) as total_votes, songId, voteType FROM votes GROUP BY songId, voteType ORDER BY total_votes DESC LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT COUNT(*) as total_votes, songId, voteType FROM votes GROUP BY songId, voteType ORDER BY total_votes DESC LIMIT 20;",
+  "rows": [
+    {
+      "total_votes": "10",
+      "songId": "1",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "7",
+      "songId": "1",
+      "voteType": "dislike"
+    },
+    {
+      "total_votes": "6",
+      "songId": "2",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "3",
+      "songId": "210013",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "3",
+      "songId": "210016",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "3",
+      "songId": "10",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "3",
+      "songId": "90001",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "3",
+      "songId": "107135",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "2",
+      "songId": "210001",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "2",
+      "songId": "3",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "2",
+      "songId": "210009",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "7",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "210011",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "210006",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "210012",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "210007",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "60002",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "150001",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "13",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "6",
+      "voteType": "like"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_votes\tsongId\tvoteType\n10\t1\tlike\n7\t1\tdislike\n6\t2\tlike\n3\t210013\tlike\n3\t210016\tlike\n3\t10\tlike\n3\t90001\tlike\n3\t107135\tlike\n2\t210001\tlike\n2\t3\tlike\n2\t210009\tlike\n1\t7\tlike\n1\t210011\tlike\n1\t210006\tlike\n1\t210012\tlike\n1\t210007\tlike\n1\t60002\tlike\n1\t150001\tlike\n1\t13\tlike\n1\t6\tlike\n",
+  "stderr": "",
+  "execution_time_ms": 74
+}

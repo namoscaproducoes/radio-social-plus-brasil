@@ -493,7 +493,8 @@ export const appRouter = router({
           ORDER BY totalVotes DESC
         `)
         
-        return Array.isArray(result) && result.length > 0 ? result : [];
+        // db.execute retorna [rows, fields], entao extrair apenas as linhas
+        return Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) ? result[0] : [];
       }),
 
     history: publicProcedure

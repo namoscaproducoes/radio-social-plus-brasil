@@ -1,0 +1,65 @@
+{
+  "query": "SELECT COUNT(*) as total_votes, songId, voteType FROM userVotes GROUP BY songId, voteType ORDER BY total_votes DESC LIMIT 20;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT COUNT(*) as total_votes, songId, voteType FROM userVotes GROUP BY songId, voteType ORDER BY total_votes DESC LIMIT 20;",
+  "rows": [
+    {
+      "total_votes": "1",
+      "songId": "210025",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "210021",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "270001",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "210022",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "270003",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "210020",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "210026",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "210024",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "270002",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "210019",
+      "voteType": "like"
+    },
+    {
+      "total_votes": "1",
+      "songId": "1",
+      "voteType": "like"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_votes\tsongId\tvoteType\n1\t210025\tlike\n1\t210021\tlike\n1\t270001\tlike\n1\t210022\tlike\n1\t270003\tlike\n1\t210020\tlike\n1\t210026\tlike\n1\t210024\tlike\n1\t270002\tlike\n1\t210019\tlike\n1\t1\tlike\n",
+  "stderr": "",
+  "execution_time_ms": 65
+}

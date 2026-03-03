@@ -1,6 +1,5 @@
 import { useLocation } from "wouter";
 import { RadioPlayerV2 } from "@/components/RadioPlayerV2";
-import { FixedPlayerWrapper } from "@/components/FixedPlayerWrapper";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { VoteButtons } from "@/components/VoteButtons";
 import { SongHistory } from "@/components/SongHistory";
@@ -172,8 +171,8 @@ export default function Home() {
           <div className="h-full max-w-7xl mx-auto">
             {/* Desktop Layout */}
             <div className="hidden md:grid grid-cols-12 gap-2 lg:gap-3 h-full">
-              {/* Left: Player - Fixed */}
-              <FixedPlayerWrapper>
+              {/* Left: Player */}
+              <div className="col-span-3 flex-shrink-0 flex flex-col">
                 <div className="rounded-xl shadow-2xl border h-full flex flex-col" style={{backgroundColor: '#ffac37', borderColor: '#ff9500', borderWidth: '2px'}}>
                   <div className="text-center pt-1 pb-1 flex-shrink-0">
                     <p className="text-white text-xs font-bold opacity-90 tracking-wider">TOCANDO AGORA</p>
@@ -182,7 +181,7 @@ export default function Home() {
                     <RadioPlayerV2 />
                   </div>
                 </div>
-              </FixedPlayerWrapper>
+              </div>
 
               {/* Center: Video and TOP 5 */}
               <div className="col-span-5 flex flex-col overflow-hidden">
@@ -224,8 +223,8 @@ export default function Home() {
 
             {/* Mobile Layout - Stacked */}
             <div className="md:hidden flex flex-col gap-2 h-full overflow-y-auto pb-2">
-              {/* Player - Fixed */}
-              <FixedPlayerWrapper>
+              {/* Player */}
+              <div className="flex-shrink-0">
                 <div className="rounded-xl shadow-2xl border flex flex-col" style={{backgroundColor: '#ffac37', borderColor: '#ff9500', borderWidth: '2px', minHeight: '280px'}}>
                   <div className="text-center pt-1 pb-1 flex-shrink-0">
                     <p className="text-white text-xs font-bold opacity-90 tracking-wider">TOCANDO AGORA</p>
@@ -234,7 +233,7 @@ export default function Home() {
                     <RadioPlayerV2 />
                   </div>
                 </div>
-              </FixedPlayerWrapper>
+              </div>
 
               {/* Video and TOP 5 */}
               <div className="flex-shrink-0">

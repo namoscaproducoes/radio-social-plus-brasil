@@ -1,5 +1,6 @@
 import { publicProcedure, router } from "./_core/trpc";
 import { z } from "zod";
+import { search } from "youtube-search-without-api-key";
 
 // Cache em memória para vídeos já buscados
 // TTL diferente para sucesso (24h) vs falha (1h) para permitir retry
@@ -54,50 +55,17 @@ export const youtubeRouter = router({
           }
         }
 
-        // Usar YouTube Data API v3
-        const apiKey = process.env.YOUTUBE_API_KEY;
+        console.log(`🔍 Searching YouTube (no API key needed) for: ${query}`);
 
-        if (!apiKey) {
-          console.warn("⚠️ YouTube API Key not configured");
-          // Cache o resultado negativo com isSuccess=false para permitir retry em 1 hora
-          setCachedVideo(query, null, false);
-          return { videoId: null };
-        }
+        // Usar youtube-search-without-api-key para buscar vídeo
+        // Passa apenas a string de query (não um objeto)
+        const results = await search(query);
 
-        const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=1&key=${apiKey}`;
-
-        console.log(`🔍 Searching YouTube for: ${query}`);
-
-        const response = await fetch(searchUrl);
-        const data = await response.json();
-
-        // Verificar se há erro na resposta
-        if (data.error) {
-          console.error(
-            `YouTube API error: ${data.error.code} - ${data.error.message}`
-          );
-
-          // Se for erro de quota, cache por menos tempo (1 hora)
-          if (data.error.code === 403) {
-            console.error("⚠️ YouTube API quota exceeded or access denied");
-            videoCache.set(query, {
-              videoId: null,
-              timestamp: Date.now() - (CACHE_TTL_SUCCESS - 60 * 60 * 1000), // Expira em 1 hora
-              isSuccess: false,
-            });
-          } else {
-            // Para outros erros, cache normalmente
-            setCachedVideo(query, null, false);
-          }
-
-          return { videoId: null, error: data.error.message };
-        }
-
-        if (data.items && data.items.length > 0) {
-          const video = data.items[0];
+        if (results && results.length > 0) {
+          const video = results[0];
           const videoId = video.id.videoId;
-          const title = video.snippet.title;
-          const thumbnail = video.snippet.thumbnails.default?.url;
+          const title = video.title;
+          const thumbnail = video.snippet?.thumbnails?.default?.url || video.url;
 
           console.log(`✅ Video found: ${videoId} - ${title}`);
 

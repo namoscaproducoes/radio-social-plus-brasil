@@ -55,10 +55,6 @@ export function YouTubePlayer({ songTitle, artistName }: YouTubePlayerProps) {
         setLastSearchQuery(searchQuery);
         setError(null);
         console.log('🎬 Vídeo encontrado:', youtubeQuery.data.videoId);
-      } else if (youtubeQuery.data.error) {
-        console.warn('YouTube API error:', youtubeQuery.data.error);
-        setError('YouTube API não configurada');
-        setVideoId(null);
       } else {
         setError('Vídeo não encontrado');
         setVideoId(null);

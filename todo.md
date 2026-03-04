@@ -589,3 +589,15 @@ Bug corrigido definitivamente. Contabilizacao de votos agora funciona 100% nos d
 - [x] Reescrever youtube-router.ts com cache melhorado
 - [x] Atualizar testes para validar cache e fallback
 - [x] 25 testes passando (1 não relacionado ao YouTube)
+
+## Fase 67: Busca de YouTube SEM API (Web Scraping)
+
+- [x] Instalar pacote youtube-search-without-api-key
+- [x] Reescrever youtube-router.ts para usar web scraping
+- [x] Remover dependência de YouTube Data API v3
+- [x] Eliminar limitações de quota diária
+- [x] Corrigir YouTubePlayer.tsx para novos tipos de resposta
+- [x] Testar busca de vídeos (Michael McDonald, Owl City, etc)
+- [x] Validar cache funcionando corretamente
+- [x] 25 testes passando
+- [x] Vídeos carregando sem erros de API

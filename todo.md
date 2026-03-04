@@ -578,3 +578,14 @@ Bug corrigido definitivamente. Contabilizacao de votos agora funciona 100% nos d
 - [ ] Implementar navegacao em nova aba para todas as paginas
 - [ ] Validar funcionamento dos botoes like/dislike do player
 - [ ] Testar fluxo completo de votacao com novos votos
+
+## Fase 66: Implementacao de Cache Robusto para YouTube
+
+- [x] Implementar cache em memória com TTL diferenciado
+- [x] Vídeos encontrados: cache 24 horas (reduz requisições)
+- [x] Vídeos não encontrados: cache 1 hora (permite retry)
+- [x] Quota excedida: cache 1 hora (permite retry após reset)
+- [x] Graceful degradation: mostra capa do álbum quando vídeo não disponível
+- [x] Reescrever youtube-router.ts com cache melhorado
+- [x] Atualizar testes para validar cache e fallback
+- [x] 25 testes passando (1 não relacionado ao YouTube)

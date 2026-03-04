@@ -3,7 +3,7 @@ import { RadioPlayerV2 } from "@/components/RadioPlayerV2";
 import { YouTubePlayer } from "@/components/YouTubePlayer";
 import { VoteButtons } from "@/components/VoteButtons";
 import { SongHistory } from "@/components/SongHistory";
-import { TopVotedSongs } from "@/components/TopVotedSongs";
+import { TopVotedSongsImproved } from "@/components/TopVotedSongsImproved";
 import { UserProfile } from "@/components/UserProfile";
 import { NotificationCenter } from "@/components/NotificationCenter";
 import { useMetadata } from "@/contexts/MetadataContext";
@@ -206,7 +206,7 @@ export default function Home() {
                   <div className="border-t border-gray-700 p-2 flex-shrink-0">
                     <h4 className="text-white text-xs font-bold mb-1">TOP 5</h4>
                     <div className="text-xs">
-                      <TopVotedSongs />
+                      <TopVotedSongsImproved />
                     </div>
                   </div>
                 </div>
@@ -266,7 +266,7 @@ export default function Home() {
                   <div className="border-t border-gray-700 p-2 flex-shrink-0">
                     <h4 className="text-white text-xs font-bold mb-1">TOP 5</h4>
                     <div className="text-xs overflow-x-auto">
-                      <TopVotedSongs />
+                      <TopVotedSongsImproved />
                     </div>
                   </div>
                 </div>

@@ -26,13 +26,13 @@ export function TopVotedSongsImproved() {
 
   const renderTopList = (songs: any[], type: 'likes' | 'dislikes') => {
     const isEmpty = songs.length === 0;
-    const icon = type === 'likes' ? <ThumbsUp size={18} /> : <ThumbsDown size={18} />;
+    const icon = type === 'likes' ? <ThumbsUp size={14} /> : <ThumbsDown size={14} />;
     const iconColor = type === 'likes' ? 'text-green-500' : 'text-red-500';
 
     return (
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-1 items-center">
         {/* Lista de capas */}
-        <div className="flex gap-2 overflow-x-auto flex-1 pb-1">
+        <div className="flex gap-1 overflow-x-auto flex-1 pb-1">
           {isEmpty ? (
             <div className="flex items-center justify-center w-full py-4 text-gray-400">
               <p className="text-xs">Sem votos</p>
@@ -47,7 +47,7 @@ export function TopVotedSongsImproved() {
                 <div className="flex items-center gap-2">
                   {/* Número da posição - centralizado com a capa */}
                   <div className="flex items-center justify-center min-w-fit">
-                    <span className="text-sm font-bold text-gray-300">#{index + 1}</span>
+                    <span className="text-xs font-bold text-gray-300">#{index + 1}</span>
                   </div>
 
                   {/* Capa do álbum */}
@@ -56,11 +56,11 @@ export function TopVotedSongsImproved() {
                       <img
                         src={song.albumCover}
                         alt={song.title}
-                        className="w-20 h-20 rounded object-cover border border-gray-600 hover:border-yellow-500 transition-colors"
+                        className="w-14 h-14 rounded object-cover border border-gray-600 hover:border-yellow-500 transition-colors"
                       />
                     ) : (
-                      <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-purple-900 rounded flex items-center justify-center border border-gray-600 hover:border-yellow-500 transition-colors">
-                        <Music size={20} className="text-gray-400" />
+                      <div className="w-14 h-14 bg-gradient-to-br from-purple-600 to-purple-900 rounded flex items-center justify-center border border-gray-600 hover:border-yellow-500 transition-colors">
+                        <Music size={16} className="text-gray-400" />
                       </div>
                     )}
 
@@ -101,9 +101,9 @@ export function TopVotedSongsImproved() {
           <p className="text-gray-400 text-xs">Carregando...</p>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-3">
           {/* Título em destaque */}
-          <h3 className="text-lg font-bold text-white">Top 5 Gostei e Não Gostei da Semana</h3>
+          <h3 className="text-base font-bold text-white">Top 5 Gostei e Não Gostei da Semana</h3>
 
           {/* TOP 5 Gostei */}
           <div>

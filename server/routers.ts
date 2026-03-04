@@ -15,6 +15,11 @@ import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
 import { sdk } from "./_core/sdk";
 
+// Cache em memória para metadados
+let metadataCache: any = null;
+let lastMetadataTime = 0;
+const METADATA_CACHE_TTL = 30000; // 30 segundos
+
 export const appRouter = router({
   system: systemRouter,
   votes: router({
@@ -359,6 +364,13 @@ export const appRouter = router({
 
     metadata: publicProcedure.query(async () => {
       try {
+        // Verificar cache
+        const now = Date.now();
+        if (metadataCache && (now - lastMetadataTime) < METADATA_CACHE_TTL) {
+          console.log("Retornando metadados do cache");
+          return metadataCache;
+        }
+
         const db = await getDb();
         const icecastData = await getIcecastMetadata();
 
@@ -409,13 +421,19 @@ export const appRouter = router({
             }
           }
           
-          return {
+          const response = {
             title: icecastData.title,
             artist: icecastData.artist,
             albumCover,
             source: "icecast",
             songId,
           };
+          
+          // Atualizar cache
+          metadataCache = response;
+          lastMetadataTime = now;
+          
+          return response;
         }
 
         return {

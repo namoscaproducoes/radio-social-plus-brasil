@@ -20,6 +20,31 @@ export function PlaybackProvider({ children }: { children: React.ReactNode }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Função para reconectar ao stream
+  const reconnectStream = useCallback(() => {
+    if (audioRef.current && isPlaying) {
+      console.log('🔄 Tentando reconectar ao stream...');
+      const streamUrl = '/api/stream?' + Date.now();
+      audioRef.current.src = streamUrl;
+      audioRef.current.load();
+      audioRef.current.play().catch((err) => {
+        console.error('❌ Erro ao reconectar:', err);
+      });
+    }
+  }, [isPlaying]);
+
+  // Handler para erro de stream
+  const handleStreamError = useCallback(() => {
+    console.log('⚠️ Erro no stream, tentando reconectar em 2 segundos...');
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+    }
+    reconnectTimeoutRef.current = setTimeout(() => {
+      reconnectStream();
+    }, 2000);
+  }, [reconnectStream]);
 
   const value: PlaybackContextType = {
     audioRef,
@@ -43,7 +68,12 @@ export function PlaybackProvider({ children }: { children: React.ReactNode }) {
         onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
         onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
         onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
+        onPause={() => {
+          // Não desligar automaticamente se estava tocando
+          // Deixar o usuário controlar via botão STOP
+        }}
+        onError={handleStreamError}
+        onEnded={handleStreamError}
       />
     </PlaybackContext.Provider>
   );
@@ -55,4 +85,11 @@ export function usePlayback() {
     throw new Error('usePlayback must be used within PlaybackProvider');
   }
   return context;
+}
+
+// Cleanup de timeouts
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
+    // Cleanup será feito automaticamente pelo React
+  });
 }

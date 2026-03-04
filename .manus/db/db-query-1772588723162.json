@@ -1,0 +1,20 @@
+{
+  "query": "SELECT * FROM songs WHERE title LIKE '%Don%' OR artist LIKE '%Mabel%' ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT * FROM songs WHERE title LIKE '%Don%' OR artist LIKE '%Mabel%' ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "300002",
+      "title": "Don't Call Me Up",
+      "artist": "Mabel",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/87/0c/2f/870c2f51-6495-ec45-b054-fb57f0177335/18UMGIM59599.rgb.jpg/600x600bb.jpg",
+      "duration": "NULL",
+      "externalId": "NULL",
+      "createdAt": "2026-03-04 01:44:07",
+      "updatedAt": "2026-03-04 01:44:07"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tartist\talbumCover\tduration\texternalId\tcreatedAt\tupdatedAt\n300002\tDon't Call Me Up\tMabel\thttps://is1-ssl.mzstatic.com/image/thumb/Music112/v4/87/0c/2f/870c2f51-6495-ec45-b054-fb57f0177335/18UMGIM59599.rgb.jpg/600x600bb.jpg\tNULL\tNULL\t2026-03-04 01:44:07\t2026-03-04 01:44:07\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

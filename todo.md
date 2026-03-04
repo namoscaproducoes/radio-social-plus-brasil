@@ -568,3 +568,13 @@ OK Testes:
 ### Conclusao
 
 Bug corrigido definitivamente. Contabilizacao de votos agora funciona 100% nos dashboards.
+
+
+## Fase 65: Correcao de Fluxo de Votacao - Novos Votos Nao Contabilizam
+
+- [ ] Analisar fluxo de votacao atual (player -> backend -> dashboard)
+- [ ] Corrigir TOP 5 para somar votos publicos + autenticados
+- [ ] Implementar propagacao de novos votos nos dashboards (invalidar cache)
+- [ ] Implementar navegacao em nova aba para todas as paginas
+- [ ] Validar funcionamento dos botoes like/dislike do player
+- [ ] Testar fluxo completo de votacao com novos votos

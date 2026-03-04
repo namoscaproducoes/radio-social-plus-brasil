@@ -4,16 +4,26 @@ import { trpc } from '@/lib/trpc';
 
 export function TopVotedSongs() {
   // Buscar músicas mais votadas com like
-  const likeQuery = trpc.songs.topVotedThisMonth.useQuery({
-    voteType: 'like',
-    limit: 5,
-  });
+  const likeQuery = trpc.songs.topVotedThisMonth.useQuery(
+    {
+      voteType: 'like',
+      limit: 5,
+    },
+    {
+      refetchInterval: 5000, // Atualizar a cada 5 segundos
+    }
+  );
 
   // Buscar músicas mais votadas com dislike
-  const dislikeQuery = trpc.songs.topVotedThisMonth.useQuery({
-    voteType: 'dislike',
-    limit: 5,
-  });
+  const dislikeQuery = trpc.songs.topVotedThisMonth.useQuery(
+    {
+      voteType: 'dislike',
+      limit: 5,
+    },
+    {
+      refetchInterval: 5000, // Atualizar a cada 5 segundos
+    }
+  );
 
   const isLoading = likeQuery.isLoading || dislikeQuery.isLoading;
   const likeData = (likeQuery.data) as any[] | undefined;
@@ -61,7 +71,7 @@ export function TopVotedSongs() {
         <div className="flex gap-1 overflow-x-auto pb-1">
           {combinedData.map((song: any, index: number) => (
             <div
-              key={`${song.title}-${song.artist}-${index}`}
+              key={`top-voted-${song.title}-${song.artist}-${index}`}
               className="flex-shrink-0 relative group"
             >
               {/* Número da posição */}

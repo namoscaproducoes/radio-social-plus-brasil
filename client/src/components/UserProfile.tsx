@@ -63,7 +63,7 @@ export function UserProfile() {
   };
 
   const handleNavigateToDashboard = () => {
-    navigate('/user/dashboard');
+    window.open('/user/dashboard', '_blank');
     setIsDropdownOpen(false);
   };
 
@@ -130,7 +130,7 @@ export function UserProfile() {
             {/* Profile Button */}
             <button
               onClick={() => {
-                navigate('/user/profile');
+                window.open('/user/profile', '_blank');
                 setIsDropdownOpen(false);
               }}
               className="w-full px-4 py-2 text-left text-gray-300 hover:bg-gray-800 hover:text-white transition flex items-center gap-2 text-sm"

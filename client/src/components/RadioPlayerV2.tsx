@@ -29,6 +29,7 @@ export function RadioPlayerV2() {
     cover: '',
   });
   const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(null);
+  const [currentSongId, setCurrentSongId] = useState<number | null>(null);
   const lastMetadataRef = useRef('');
   
   const { setAlbumCover, setSongTitle, setSongArtist } = useMetadata();
@@ -51,6 +52,9 @@ export function RadioPlayerV2() {
       toast.success('Voto registrado com sucesso!');
       utils.votes.getUserVotes.invalidate();
       utils.votes.getVoteStats.invalidate();
+      // Invalidar cache de TOP 5 e ranking
+      utils.songs.topVotedThisMonth.invalidate();
+      utils.songs.ranking.invalidate();
     },
     onError: (error) => {
       toast.error(error.message || 'Erro ao registrar voto');
@@ -61,6 +65,9 @@ export function RadioPlayerV2() {
   const addAnonymousVoteMutation = trpc.songs.vote.useMutation({
     onSuccess: () => {
       toast.success('Voto registrado com sucesso!');
+      // Invalidar cache de TOP 5 e ranking para votos anônimos também
+      utils.songs.topVotedThisMonth.invalidate();
+      utils.songs.ranking.invalidate();
     },
     onError: () => {
       toast.error('Erro ao registrar voto');
@@ -82,6 +89,7 @@ export function RadioPlayerV2() {
         setSongTitle(metadataResponse.title);
         setSongArtist(metadataResponse.artist);
         setAlbumCover(metadataResponse.albumCover || '');
+        setCurrentSongId(metadataResponse.songId || null);
         setUserVote(null);
       }
     }
@@ -139,8 +147,12 @@ export function RadioPlayerV2() {
   const handleVote = (voteType: 'like' | 'dislike') => {
     if (user) {
       // Usuário autenticado - usar mutation protegida
+      if (!currentSongId) {
+        toast.error('ID da música não encontrado');
+        return;
+      }
       addUserVoteMutation.mutate({
-        songId: 1, // TODO: usar ID real da música
+        songId: currentSongId,
         voteType,
       });
     } else {

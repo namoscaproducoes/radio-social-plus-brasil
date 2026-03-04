@@ -75,7 +75,7 @@ export default function Home() {
                   Sobre a rádio
                 </a>
                 <button 
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => window.open('/dashboard', '_blank')}
                   className="text-white hover:text-yellow-500 transition font-medium"
                 >
                   Dashboard mais votadas
@@ -133,7 +133,7 @@ export default function Home() {
               </a>
               <button 
                 onClick={() => {
-                  navigate('/dashboard');
+                  window.open('/dashboard', '_blank');
                   setMobileMenuOpen(false);
                 }}
                 className="block w-full text-left text-white hover:text-yellow-500 transition font-medium text-xs py-1"

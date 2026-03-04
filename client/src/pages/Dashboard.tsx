@@ -18,7 +18,7 @@ export default function Dashboard() {
   const { data: rankingData } = trpc.songs.ranking.useQuery(
     { period: period as any },
     {
-      refetchInterval: 10000,
+      refetchInterval: 5000, // Atualizar a cada 5 segundos para refletir novos votos
     }
   );
 

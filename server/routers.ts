@@ -359,6 +359,7 @@ export const appRouter = router({
 
     metadata: publicProcedure.query(async () => {
       try {
+        const db = await getDb();
         const icecastData = await getIcecastMetadata();
 
         if (icecastData && icecastData.title !== "Musica Desconhecida") {
@@ -366,11 +367,54 @@ export const appRouter = router({
           
           const albumCover = await searchItunesAlbumCover(icecastData.artist, icecastData.title);
           
+          // Buscar ou criar a música para obter o ID
+          let songId = null;
+          if (db) {
+            const result = await db
+              .select()
+              .from(songs)
+              .where(
+                and(
+                  eq(songs.title, icecastData.title),
+                  eq(songs.artist, icecastData.artist)
+                )
+              )
+              .limit(1);
+
+            if (result.length > 0) {
+              songId = result[0].id;
+            } else {
+              // Criar a música se não existir
+              await db.insert(songs).values({
+                title: icecastData.title,
+                artist: icecastData.artist,
+                albumCover: albumCover || '',
+              });
+
+              // Buscar o ID da música criada
+              const newResult = await db
+                .select()
+                .from(songs)
+                .where(
+                  and(
+                    eq(songs.title, icecastData.title),
+                    eq(songs.artist, icecastData.artist)
+                  )
+                )
+                .limit(1);
+
+              if (newResult.length > 0) {
+                songId = newResult[0].id;
+              }
+            }
+          }
+          
           return {
             title: icecastData.title,
             artist: icecastData.artist,
             albumCover,
             source: "icecast",
+            songId,
           };
         }
 
@@ -379,6 +423,7 @@ export const appRouter = router({
           artist: "Artista Desconhecido",
           albumCover: null,
           source: "error",
+          songId: null,
         };
       } catch (error) {
         console.error("Erro ao buscar metadados:", error);
@@ -387,6 +432,7 @@ export const appRouter = router({
           artist: "Artista Desconhecido",
           albumCover: null,
           source: "error",
+          songId: null,
         };
       }
     }),

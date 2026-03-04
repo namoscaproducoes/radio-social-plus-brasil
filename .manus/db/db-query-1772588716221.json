@@ -1,0 +1,55 @@
+{
+  "query": "SELECT * FROM votes ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT * FROM votes ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "270001",
+      "songId": "240001",
+      "voteType": "like",
+      "userId": "NULL",
+      "ipAddress": "NULL",
+      "userAgent": "NULL",
+      "createdAt": "2026-03-03 11:17:51"
+    },
+    {
+      "id": "240023",
+      "songId": "210023",
+      "voteType": "like",
+      "userId": "NULL",
+      "ipAddress": "NULL",
+      "userAgent": "NULL",
+      "createdAt": "2026-03-02 23:26:58"
+    },
+    {
+      "id": "240022",
+      "songId": "210022",
+      "voteType": "like",
+      "userId": "807487",
+      "ipAddress": "NULL",
+      "userAgent": "NULL",
+      "createdAt": "2026-03-02 23:18:54"
+    },
+    {
+      "id": "240021",
+      "songId": "210021",
+      "voteType": "like",
+      "userId": "807487",
+      "ipAddress": "NULL",
+      "userAgent": "NULL",
+      "createdAt": "2026-03-02 23:15:35"
+    },
+    {
+      "id": "240020",
+      "songId": "210020",
+      "voteType": "like",
+      "userId": "807487",
+      "ipAddress": "NULL",
+      "userAgent": "NULL",
+      "createdAt": "2026-03-02 21:33:59"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tsongId\tvoteType\tuserId\tipAddress\tuserAgent\tcreatedAt\n270001\t240001\tlike\tNULL\tNULL\tNULL\t2026-03-03 11:17:51\n240023\t210023\tlike\tNULL\tNULL\tNULL\t2026-03-02 23:26:58\n240022\t210022\tlike\t807487\tNULL\tNULL\t2026-03-02 23:18:54\n240021\t210021\tlike\t807487\tNULL\tNULL\t2026-03-02 23:15:35\n240020\t210020\tlike\t807487\tNULL\tNULL\t2026-03-02 21:33:59\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}

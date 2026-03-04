@@ -49,9 +49,12 @@ export function VoteButtons() {
   const addUserVoteMutation = trpc.votes.addVote.useMutation({
     onSuccess: () => {
       toast.success('Voto registrado com sucesso!');
-      // Invalidar cache de votos do usuário
+      // Invalidar cache de votos do usuário e dashboards
       trpc.useUtils().votes.getUserVotes.invalidate();
       trpc.useUtils().votes.getVoteStats.invalidate();
+      // Invalidar cache de TOP 5 e ranking
+      trpc.useUtils().songs.topVotedThisMonth.invalidate();
+      trpc.useUtils().songs.ranking.invalidate();
     },
     onError: (error) => {
       toast.error(error.message || 'Erro ao registrar voto');
@@ -62,6 +65,9 @@ export function VoteButtons() {
   const addAnonymousVoteMutation = trpc.songs.vote.useMutation({
     onSuccess: () => {
       toast.success('Voto registrado com sucesso!');
+      // Invalidar cache de TOP 5 e ranking para votos anônimos também
+      trpc.useUtils().songs.topVotedThisMonth.invalidate();
+      trpc.useUtils().songs.ranking.invalidate();
     },
     onError: () => {
       toast.error('Erro ao registrar voto');

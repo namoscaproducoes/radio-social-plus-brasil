@@ -26,22 +26,14 @@ export function TopVotedSongsImproved() {
 
   const renderTopList = (songs: any[], type: 'likes' | 'dislikes') => {
     const isEmpty = songs.length === 0;
-    const icon = type === 'likes' ? <ThumbsUp size={12} /> : <ThumbsDown size={12} />;
+    const icon = type === 'likes' ? <ThumbsUp size={16} /> : <ThumbsDown size={16} />;
     const color = type === 'likes' ? 'text-green-500' : 'text-red-500';
-    const bgColor = type === 'likes' ? 'bg-green-500/10' : 'bg-red-500/10';
-    const title = type === 'likes' ? 'TOP 5 Gostei da Semana' : 'TOP 5 Não Gostei da Semana';
 
     return (
       <div className="flex-1">
-        <div className={`flex items-center gap-1 mb-2 ${color}`}>
-          {icon}
-          <span className="text-xs font-semibold">
-            {title}
-          </span>
-        </div>
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto pb-2">
           {isEmpty ? (
-            <div className="flex items-center justify-center w-full py-2 text-gray-400">
+            <div className="flex items-center justify-center w-full py-4 text-gray-400">
               <p className="text-xs">Sem votos</p>
             </div>
           ) : (
@@ -50,29 +42,29 @@ export function TopVotedSongsImproved() {
                 key={`top-${type}-${song.id}-${index}`}
                 className="flex-shrink-0 relative group"
               >
-                {/* Container com capa e informações */}
-                <div className="flex flex-col items-center">
+                {/* Container com posição e capa */}
+                <div className="flex items-start gap-2">
                   {/* Número da posição */}
-                  <div className={`absolute -top-2 -left-2 w-5 h-5 flex items-center justify-center ${bgColor} ${color} font-bold rounded-full text-xs z-10`}>
-                    #{index + 1}
+                  <div className="flex items-center justify-center min-w-fit pt-1">
+                    <span className="text-sm font-bold text-gray-300">#{index + 1}</span>
                   </div>
 
-                  {/* Capa do álbum */}
+                  {/* Capa do álbum - maior */}
                   <div className="relative">
                     {song.albumCover ? (
                       <img
                         src={song.albumCover}
                         alt={song.title}
-                        className="w-12 h-12 rounded object-cover border border-gray-600 hover:border-yellow-500 transition-colors"
+                        className="w-20 h-20 rounded object-cover border border-gray-600 hover:border-yellow-500 transition-colors"
                       />
                     ) : (
-                      <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-900 rounded flex items-center justify-center border border-gray-600 hover:border-yellow-500 transition-colors">
-                        <Music size={14} className="text-gray-400" />
+                      <div className="w-20 h-20 bg-gradient-to-br from-purple-600 to-purple-900 rounded flex items-center justify-center border border-gray-600 hover:border-yellow-500 transition-colors">
+                        <Music size={20} className="text-gray-400" />
                       </div>
                     )}
 
                     {/* Tooltip ao passar mouse */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-95 rounded-b p-0.5 opacity-0 group-hover:opacity-100 transition-opacity text-xs z-20 pointer-events-none whitespace-nowrap">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-95 rounded-b p-1 opacity-0 group-hover:opacity-100 transition-opacity text-xs z-20 pointer-events-none whitespace-nowrap">
                       <p className="font-semibold text-white truncate text-xs">{song.title}</p>
                       <p className="text-gray-400 truncate text-xs">{song.artist}</p>
                       <div className="flex gap-1 mt-0.5">
@@ -87,12 +79,6 @@ export function TopVotedSongsImproved() {
                       </div>
                     </div>
                   </div>
-                  
-                  {/* Título e artista abaixo */}
-                  <div className="mt-1 text-center w-14">
-                    <p className="text-xs font-semibold text-white truncate">{song.title}</p>
-                    <p className="text-xs text-gray-400 truncate">{song.artist}</p>
-                  </div>
                 </div>
               </div>
             ))
@@ -105,13 +91,34 @@ export function TopVotedSongsImproved() {
   return (
     <div className="w-full">
       {isLoading ? (
-        <div className="flex items-center justify-center py-2">
+        <div className="flex items-center justify-center py-4">
           <p className="text-gray-400 text-xs">Carregando...</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {renderTopList(topLikes, 'likes')}
-          {renderTopList(topDislikes, 'dislikes')}
+        <div className="space-y-6">
+          {/* Título unificado */}
+          <div className="mb-4">
+            <h3 className="text-lg font-bold text-white mb-1">Top 5 Gostei e Não Gostei da Semana</h3>
+            <p className="text-xs text-gray-400">Confira todos os Top 5 que estão acontecendo por aqui.</p>
+          </div>
+
+          {/* TOP 5 Gostei */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <ThumbsUp size={16} className="text-green-500" />
+              <span className="text-sm font-semibold text-green-500">Gostei</span>
+            </div>
+            {renderTopList(topLikes, 'likes')}
+          </div>
+
+          {/* TOP 5 Não Gostei */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <ThumbsDown size={16} className="text-red-500" />
+              <span className="text-sm font-semibold text-red-500">Não Gostei</span>
+            </div>
+            {renderTopList(topDislikes, 'dislikes')}
+          </div>
         </div>
       )}
     </div>

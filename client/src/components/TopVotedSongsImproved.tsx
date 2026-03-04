@@ -26,12 +26,13 @@ export function TopVotedSongsImproved() {
 
   const renderTopList = (songs: any[], type: 'likes' | 'dislikes') => {
     const isEmpty = songs.length === 0;
-    const icon = type === 'likes' ? <ThumbsUp size={16} /> : <ThumbsDown size={16} />;
-    const color = type === 'likes' ? 'text-green-500' : 'text-red-500';
+    const icon = type === 'likes' ? <ThumbsUp size={18} /> : <ThumbsDown size={18} />;
+    const iconColor = type === 'likes' ? 'text-green-500' : 'text-red-500';
 
     return (
-      <div className="flex-1">
-        <div className="flex gap-2 overflow-x-auto pb-2">
+      <div className="flex gap-2 items-center">
+        {/* Lista de capas */}
+        <div className="flex gap-2 overflow-x-auto flex-1 pb-1">
           {isEmpty ? (
             <div className="flex items-center justify-center w-full py-4 text-gray-400">
               <p className="text-xs">Sem votos</p>
@@ -43,13 +44,13 @@ export function TopVotedSongsImproved() {
                 className="flex-shrink-0 relative group"
               >
                 {/* Container com posição e capa */}
-                <div className="flex items-start gap-2">
-                  {/* Número da posição */}
-                  <div className="flex items-center justify-center min-w-fit pt-1">
+                <div className="flex items-center gap-2">
+                  {/* Número da posição - centralizado com a capa */}
+                  <div className="flex items-center justify-center min-w-fit">
                     <span className="text-sm font-bold text-gray-300">#{index + 1}</span>
                   </div>
 
-                  {/* Capa do álbum - maior */}
+                  {/* Capa do álbum */}
                   <div className="relative">
                     {song.albumCover ? (
                       <img
@@ -84,6 +85,11 @@ export function TopVotedSongsImproved() {
             ))
           )}
         </div>
+
+        {/* Ícone no final da linha */}
+        <div className={`flex-shrink-0 flex items-center justify-center ${iconColor}`}>
+          {icon}
+        </div>
       </div>
     );
   };
@@ -96,27 +102,16 @@ export function TopVotedSongsImproved() {
         </div>
       ) : (
         <div className="space-y-6">
-          {/* Título unificado */}
-          <div className="mb-4">
-            <h3 className="text-lg font-bold text-white mb-1">Top 5 Gostei e Não Gostei da Semana</h3>
-            <p className="text-xs text-gray-400">Confira todos os Top 5 que estão acontecendo por aqui.</p>
-          </div>
+          {/* Título em destaque */}
+          <h3 className="text-lg font-bold text-white">Top 5 Gostei e Não Gostei da Semana</h3>
 
           {/* TOP 5 Gostei */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <ThumbsUp size={16} className="text-green-500" />
-              <span className="text-sm font-semibold text-green-500">Gostei</span>
-            </div>
             {renderTopList(topLikes, 'likes')}
           </div>
 
           {/* TOP 5 Não Gostei */}
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <ThumbsDown size={16} className="text-red-500" />
-              <span className="text-sm font-semibold text-red-500">Não Gostei</span>
-            </div>
             {renderTopList(topDislikes, 'dislikes')}
           </div>
         </div>

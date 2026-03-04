@@ -2,10 +2,10 @@ import { Music, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 
 export function TopVotedSongsImproved() {
-  // Buscar ranking completo de todas as músicas
+  // Buscar ranking da semana
   const { data: rankingData, isLoading } = trpc.songs.ranking.useQuery(
     {
-      period: 'month',
+      period: 'week',
     },
     {
       refetchInterval: 5000, // Atualizar a cada 5 segundos
@@ -29,16 +29,17 @@ export function TopVotedSongsImproved() {
     const icon = type === 'likes' ? <ThumbsUp size={12} /> : <ThumbsDown size={12} />;
     const color = type === 'likes' ? 'text-green-500' : 'text-red-500';
     const bgColor = type === 'likes' ? 'bg-green-500/10' : 'bg-red-500/10';
+    const title = type === 'likes' ? 'TOP 5 Gostei da Semana' : 'TOP 5 Não Gostei da Semana';
 
     return (
       <div className="flex-1">
-        <div className={`flex items-center gap-1 mb-1 ${color}`}>
+        <div className={`flex items-center gap-1 mb-2 ${color}`}>
           {icon}
           <span className="text-xs font-semibold">
-            {type === 'likes' ? 'Gostei' : 'Não Gostei'}
+            {title}
           </span>
         </div>
-        <div className="flex gap-1 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto pb-1">
           {isEmpty ? (
             <div className="flex items-center justify-center w-full py-2 text-gray-400">
               <p className="text-xs">Sem votos</p>
@@ -49,39 +50,48 @@ export function TopVotedSongsImproved() {
                 key={`top-${type}-${song.id}-${index}`}
                 className="flex-shrink-0 relative group"
               >
-                {/* Número da posição */}
-                <div className={`absolute -top-2 -left-2 w-5 h-5 flex items-center justify-center ${bgColor} ${color} font-bold rounded-full text-xs z-10`}>
-                  #{index + 1}
-                </div>
+                {/* Container com capa e informações */}
+                <div className="flex flex-col items-center">
+                  {/* Número da posição */}
+                  <div className={`absolute -top-2 -left-2 w-5 h-5 flex items-center justify-center ${bgColor} ${color} font-bold rounded-full text-xs z-10`}>
+                    #{index + 1}
+                  </div>
 
-                {/* Capa do álbum */}
-                <div className="relative">
-                  {song.albumCover ? (
-                    <img
-                      src={song.albumCover}
-                      alt={song.title}
-                      className="w-12 h-12 rounded object-cover border border-gray-600 hover:border-yellow-500 transition-colors"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-900 rounded flex items-center justify-center border border-gray-600 hover:border-yellow-500 transition-colors">
-                      <Music size={14} className="text-gray-400" />
-                    </div>
-                  )}
+                  {/* Capa do álbum */}
+                  <div className="relative">
+                    {song.albumCover ? (
+                      <img
+                        src={song.albumCover}
+                        alt={song.title}
+                        className="w-12 h-12 rounded object-cover border border-gray-600 hover:border-yellow-500 transition-colors"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-900 rounded flex items-center justify-center border border-gray-600 hover:border-yellow-500 transition-colors">
+                        <Music size={14} className="text-gray-400" />
+                      </div>
+                    )}
 
-                  {/* Tooltip ao passar mouse */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-95 rounded-b p-0.5 opacity-0 group-hover:opacity-100 transition-opacity text-xs z-20 pointer-events-none whitespace-nowrap">
-                    <p className="font-semibold text-white truncate text-xs">{song.title}</p>
-                    <p className="text-gray-400 truncate text-xs">{song.artist}</p>
-                    <div className="flex gap-1 mt-0.5">
-                      <div className="flex items-center gap-0.5">
-                        <ThumbsUp size={8} className="text-green-500" />
-                        <span className="text-green-500 text-xs">{song.likes || 0}</span>
-                      </div>
-                      <div className="flex items-center gap-0.5">
-                        <ThumbsDown size={8} className="text-red-500" />
-                        <span className="text-red-500 text-xs">{song.dislikes || 0}</span>
+                    {/* Tooltip ao passar mouse */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gray-900 bg-opacity-95 rounded-b p-0.5 opacity-0 group-hover:opacity-100 transition-opacity text-xs z-20 pointer-events-none whitespace-nowrap">
+                      <p className="font-semibold text-white truncate text-xs">{song.title}</p>
+                      <p className="text-gray-400 truncate text-xs">{song.artist}</p>
+                      <div className="flex gap-1 mt-0.5">
+                        <div className="flex items-center gap-0.5">
+                          <ThumbsUp size={8} className="text-green-500" />
+                          <span className="text-green-500 text-xs">{song.likes || 0}</span>
+                        </div>
+                        <div className="flex items-center gap-0.5">
+                          <ThumbsDown size={8} className="text-red-500" />
+                          <span className="text-red-500 text-xs">{song.dislikes || 0}</span>
+                        </div>
                       </div>
                     </div>
+                  </div>
+                  
+                  {/* Título e artista abaixo */}
+                  <div className="mt-1 text-center w-14">
+                    <p className="text-xs font-semibold text-white truncate">{song.title}</p>
+                    <p className="text-xs text-gray-400 truncate">{song.artist}</p>
                   </div>
                 </div>
               </div>

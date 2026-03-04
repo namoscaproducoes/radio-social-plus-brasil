@@ -1,0 +1,19 @@
+{
+  "query": "SELECT COUNT(*) as total_votes FROM votes; SELECT COUNT(*) as total_user_votes FROM userVotes;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT COUNT(*) as total_votes FROM votes; SELECT COUNT(*) as total_user_votes FROM userVotes;",
+  "rows": [
+    {
+      "total_votes": "0"
+    },
+    {
+      "total_votes": "total_user_votes"
+    },
+    {
+      "total_votes": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "total_votes\n0\ntotal_user_votes\n0\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}

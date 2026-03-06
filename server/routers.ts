@@ -1,4 +1,5 @@
 
+import { calculateTrending } from './trending-helper';
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
@@ -508,6 +509,7 @@ export const appRouter = router({
       .input(
         z.object({
           period: z.enum(["day", "week", "month", "year"]).optional(),
+          genreId: z.number().optional(),
         })
       )
       .query(async ({ input }) => {
@@ -564,7 +566,7 @@ export const appRouter = router({
         const rows = Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) ? result[0] : [];
         
         // Converter valores para numero inteiro (evitar Buffer binario)
-        const convertedRows = rows.map((row: any) => {
+        const convertedRows = rows.map((row: any, index: number) => {
           const likes = parseInt(String(row.likes), 10) || 0;
           const dislikes = parseInt(String(row.dislikes), 10) || 0;
           const totalVotes = parseInt(String(row.totalVotes), 10) || 0;
@@ -574,6 +576,8 @@ export const appRouter = router({
             likes,
             dislikes,
             totalVotes,
+            rank: index + 1,
+            trending: 0, // Trending será calculado no frontend comparando com dados anteriores
           };
         });
         

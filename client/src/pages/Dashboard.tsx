@@ -13,11 +13,12 @@ export default function Dashboard() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
   const [period, setPeriod] = useState<Period>("week");
+  const [genreId, setGenreId] = useState<number | undefined>(undefined);
   const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(null);
 
   // Fetch dashboard stats
   const { data: rankingData } = trpc.songs.ranking.useQuery(
-    { period: period as any },
+    { period: period as any, genreId },
     {
       refetchInterval: 5000, // Atualizar a cada 5 segundos para refletir novos votos
     }
@@ -261,6 +262,7 @@ export default function Dashboard() {
                     <th className="text-center py-3 px-4 text-red-500">Dislikes</th>
                     <th className="text-center py-3 px-4 text-yellow-500">Total</th>
                     <th className="text-center py-3 px-4 text-gray-300">% Likes</th>
+                    <th className="text-center py-3 px-4 text-gray-300">Trending</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -286,6 +288,9 @@ export default function Dashboard() {
                       </td>
                       <td className="py-3 px-4 text-center text-gray-300">
                         {song.likePercentage}%
+                      </td>
+                      <td className="py-3 px-4 text-center text-lg">
+                        {song.trending > 0 ? <span className="text-green-400">↑</span> : song.trending < 0 ? <span className="text-red-400">↓</span> : <span className="text-gray-400">→</span>}
                       </td>
                     </tr>
                   ))}

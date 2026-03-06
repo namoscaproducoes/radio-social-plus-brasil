@@ -45,6 +45,18 @@ export type Song = typeof songs.$inferSelect;
 export type InsertSong = typeof songs.$inferInsert;
 
 /**
+ * Genres table - armazena os gêneros de música
+ */
+export const genres = mysqlTable("genres", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Genre = typeof genres.$inferSelect;
+export type InsertGenre = typeof genres.$inferInsert;
+
+/**
  * Votes table - armazena votos (likes e dislikes) das músicas
  */
 export const votes = mysqlTable("votes", {
@@ -150,3 +162,19 @@ export const notifications = mysqlTable("notifications", {
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+
+/**
+ * RankingHistory table - armazena o histórico de ranking para calcular trending
+ */
+export const rankingHistory = mysqlTable("rankingHistory", {
+  id: bigint("id", { mode: "number" }).autoincrement().primaryKey(),
+  songId: int("songId").notNull(),
+  rank: int("rank").notNull(),
+  likes: int("likes").notNull(),
+  dislikes: int("dislikes").notNull(),
+  period: varchar("period", { length: 20 }).notNull(), // 'day', 'week', 'month', 'year'
+  recordedAt: timestamp("recordedAt").defaultNow().notNull(),
+});
+
+export type RankingHistory = typeof rankingHistory.$inferSelect;
+export type InsertRankingHistory = typeof rankingHistory.$inferInsert;

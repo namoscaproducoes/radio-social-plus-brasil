@@ -615,3 +615,11 @@ Bug corrigido definitivamente. Contabilizacao de votos agora funciona 100% nos d
 - [x] Mudança de "Total de Likes" para mostrar música mais votada
 - [x] Transformação de "Proporção de Votos" em "Tocando Agora" com player de votação
 - [x] Adição de capa do álbum, nome do artista e botões de votação
+
+
+## Fase 70: Indicador de Trending e Filtro por Gênero
+- [x] Adicionar campo de gênero ao schema de músicas
+- [x] Criar tabela de gêneros (genres) com 15 gêneros padrão
+- [x] Implementar lógica de Trending (comparar ranking)
+- [x] Adicionar estado de genreId na dashboard
+- [x] Adicionar indicador visual de Trending (↑/↓) na tabela

@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO `genres` (`name`) VALUES \n('Pop'),\n('Rock'),\n('Sertanejo'),\n('Funk'),\n('Samba'),\n('Forró'),\n('MPB'),\n('Reggae'),\n('Hip-Hop'),\n('Eletrônico'),\n('Clássico'),\n('Jazz'),\n('Blues'),\n('Country'),\n('Indie');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute INSERT INTO `genres` (`name`) VALUES \n('Pop'),\n('Rock'),\n('Sertanejo'),\n('Funk'),\n('Samba'),\n('Forró'),\n('MPB'),\n('Reggae'),\n('Hip-Hop'),\n('Eletrônico'),\n('Clássico'),\n('Jazz'),\n('Blues'),\n('Country'),\n('Indie');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 70
+}

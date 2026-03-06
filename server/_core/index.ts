@@ -9,6 +9,7 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import streamRouter from "../stream";
 import youtubeRouter from "../youtube-api";
+import superjson from "superjson";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {

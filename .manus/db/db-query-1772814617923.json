@@ -1,0 +1,45 @@
+{
+  "query": "\nSELECT \n  s.id,\n  s.title,\n  s.artist,\n  (COALESCE(SUM(CASE WHEN v.voteType = 'like' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'like' THEN 1 ELSE 0 END), 0)) as likes,\n  (COALESCE(SUM(CASE WHEN v.voteType = 'dislike' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'dislike' THEN 1 ELSE 0 END), 0)) as dislikes\nFROM songs s\nLEFT JOIN votes v ON s.id = v.songId\nLEFT JOIN userVotes uv ON s.id = uv.songId\nGROUP BY s.id\nHAVING (COALESCE(SUM(CASE WHEN v.voteType = 'like' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'like' THEN 1 ELSE 0 END), 0)) > 0 \n  OR (COALESCE(SUM(CASE WHEN v.voteType = 'dislike' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'dislike' THEN 1 ELSE 0 END), 0)) > 0\nLIMIT 5\n",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute \nSELECT \n  s.id,\n  s.title,\n  s.artist,\n  (COALESCE(SUM(CASE WHEN v.voteType = 'like' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'like' THEN 1 ELSE 0 END), 0)) as likes,\n  (COALESCE(SUM(CASE WHEN v.voteType = 'dislike' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'dislike' THEN 1 ELSE 0 END), 0)) as dislikes\nFROM songs s\nLEFT JOIN votes v ON s.id = v.songId\nLEFT JOIN userVotes uv ON s.id = uv.songId\nGROUP BY s.id\nHAVING (COALESCE(SUM(CASE WHEN v.voteType = 'like' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'like' THEN 1 ELSE 0 END), 0)) > 0 \n  OR (COALESCE(SUM(CASE WHEN v.voteType = 'dislike' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'dislike' THEN 1 ELSE 0 END), 0)) > 0\nLIMIT 5\n",
+  "rows": [
+    {
+      "id": "450028",
+      "title": "With Or Without You (Remastered 2007)",
+      "artist": "U2",
+      "likes": "1",
+      "dislikes": "0"
+    },
+    {
+      "id": "450020",
+      "title": "CHEER UP",
+      "artist": "TWICE",
+      "likes": "0",
+      "dislikes": "1"
+    },
+    {
+      "id": "450026",
+      "title": "NSYNC - Muito Alem da Musica",
+      "artist": "Better Place",
+      "likes": "0",
+      "dislikes": "1"
+    },
+    {
+      "id": "450032",
+      "title": "Now And Then",
+      "artist": "The Beatles",
+      "likes": "0",
+      "dislikes": "1"
+    },
+    {
+      "id": "1170002",
+      "title": "Shallow",
+      "artist": "Lady Gaga",
+      "likes": "1",
+      "dislikes": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tartist\tlikes\tdislikes\n450028\tWith Or Without You (Remastered 2007)\tU2\t1\t0\n450020\tCHEER UP\tTWICE\t0\t1\n450026\tNSYNC - Muito Alem da Musica\tBetter Place\t0\t1\n450032\tNow And Then\tThe Beatles\t0\t1\n1170002\tShallow\tLady Gaga\t1\t0\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

@@ -609,3 +609,9 @@ Bug corrigido definitivamente. Contabilizacao de votos agora funciona 100% nos d
 - [x] Testar filtros Hoje, Esta Semana, Este Mes, Este Ano
 - [x] Validar que todos os 26 testes passam
 - [x] Confirmar funcionamento na dashboard
+
+
+## Fase 69: Redesenho da Dashboard com "Tocando Agora"
+- [x] Mudança de "Total de Likes" para mostrar música mais votada
+- [x] Transformação de "Proporção de Votos" em "Tocando Agora" com player de votação
+- [x] Adição de capa do álbum, nome do artista e botões de votação

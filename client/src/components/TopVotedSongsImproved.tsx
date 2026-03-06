@@ -12,14 +12,17 @@ export function TopVotedSongsImproved() {
     }
   );
 
+  // Extrair songs do novo formato
+  const songs = (rankingData as any)?.songs || (Array.isArray(rankingData) ? rankingData : []);
+  
   // Filtrar TOP 5 com mais likes
-  const topLikes = (rankingData || [])
+  const topLikes = (songs || [])
     .filter((song: any) => song.likes > 0)
     .sort((a: any, b: any) => b.likes - a.likes)
     .slice(0, 5);
 
   // Filtrar TOP 5 com mais dislikes
-  const topDislikes = (rankingData || [])
+  const topDislikes = (songs || [])
     .filter((song: any) => song.dislikes > 0)
     .sort((a: any, b: any) => b.dislikes - a.dislikes)
     .slice(0, 5);

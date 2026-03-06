@@ -549,9 +549,9 @@ export const appRouter = router({
             s.artist,
             s.albumCover,
             s.duration,
-            (COALESCE(SUM(CASE WHEN v.voteType = 'like' AND v.createdAt >= '${startDateStr}' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'like' AND uv.createdAt >= '${startDateStr}' THEN 1 ELSE 0 END), 0)) as likes,
-            (COALESCE(SUM(CASE WHEN v.voteType = 'dislike' AND v.createdAt >= '${startDateStr}' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'dislike' AND uv.createdAt >= '${startDateStr}' THEN 1 ELSE 0 END), 0)) as dislikes,
-            (COALESCE(COUNT(DISTINCT CASE WHEN v.createdAt >= '${startDateStr}' THEN v.id END), 0) + COALESCE(COUNT(DISTINCT CASE WHEN uv.createdAt >= '${startDateStr}' THEN uv.id END), 0)) as totalVotes
+            CAST((COALESCE(SUM(CASE WHEN v.voteType = 'like' AND v.createdAt >= '${startDateStr}' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'like' AND uv.createdAt >= '${startDateStr}' THEN 1 ELSE 0 END), 0)) AS UNSIGNED) as likes,
+            CAST((COALESCE(SUM(CASE WHEN v.voteType = 'dislike' AND v.createdAt >= '${startDateStr}' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'dislike' AND uv.createdAt >= '${startDateStr}' THEN 1 ELSE 0 END), 0)) AS UNSIGNED) as dislikes,
+            CAST((COALESCE(COUNT(DISTINCT CASE WHEN v.createdAt >= '${startDateStr}' THEN v.id END), 0) + COALESCE(COUNT(DISTINCT CASE WHEN uv.createdAt >= '${startDateStr}' THEN uv.id END), 0)) AS UNSIGNED) as totalVotes
           FROM songs s
           LEFT JOIN votes v ON s.id = v.songId
           LEFT JOIN userVotes uv ON s.id = uv.songId
@@ -561,7 +561,37 @@ export const appRouter = router({
         `)
         
         // db.execute retorna [rows, fields], entao extrair apenas as linhas
-        return Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) ? result[0] : [];
+        const rows = Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) ? result[0] : [];
+        
+        // Converter valores para numero inteiro (evitar Buffer binario)
+        const convertedRows = rows.map((row: any) => {
+          const likes = parseInt(String(row.likes), 10) || 0;
+          const dislikes = parseInt(String(row.dislikes), 10) || 0;
+          const totalVotes = parseInt(String(row.totalVotes), 10) || 0;
+          
+          return {
+            ...row,
+            likes,
+            dislikes,
+            totalVotes,
+          };
+        });
+        
+        // Calcular totais explicitamente no backend
+        const totalLikes = convertedRows.reduce((sum: number, row: any) => sum + (row.likes || 0), 0);
+        const totalDislikes = convertedRows.reduce((sum: number, row: any) => sum + (row.dislikes || 0), 0);
+        const totalVotesSum = convertedRows.reduce((sum: number, row: any) => sum + (row.totalVotes || 0), 0);
+        
+        // Retornar com metadados de totais - como strings para evitar problemas de serialização
+        return {
+          songs: convertedRows,
+          stats: {
+            totalLikes: String(totalLikes),
+            totalDislikes: String(totalDislikes),
+            totalVotes: String(totalVotesSum),
+            totalSongs: convertedRows.length,
+          },
+        };
       }),
 
     history: publicProcedure

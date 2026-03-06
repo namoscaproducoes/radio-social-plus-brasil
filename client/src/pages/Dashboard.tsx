@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -13,6 +13,7 @@ export default function Dashboard() {
   const { user, loading } = useAuth();
   const [, navigate] = useLocation();
   const [period, setPeriod] = useState<Period>("week");
+  const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(null);
 
   // Fetch dashboard stats
   const { data: rankingData } = trpc.songs.ranking.useQuery(
@@ -22,18 +23,43 @@ export default function Dashboard() {
     }
   );
 
-  const rankingRows = Array.isArray(rankingData) ? rankingData : [];
+  // Extrair dados do novo formato
+  const rankingData_ = rankingData as any;
+  const rankingRows = rankingData_?.songs || (Array.isArray(rankingData) ? rankingData : []);
+  
   const topSongs = rankingRows.map((song: any) => ({
     ...song,
     likePercentage: song.totalVotes > 0 ? Math.round((song.likes / song.totalVotes) * 100) : 0,
   }));
   
+  // Calcular totais manualmente no frontend para evitar problemas de serialização
+  let totalLikesCalc = 0;
+  let totalDislikesCalc = 0;
+  let totalVotesCalc = 0;
+  
+  for (const song of topSongs) {
+    totalLikesCalc += song.likes || 0;
+    totalDislikesCalc += song.dislikes || 0;
+    totalVotesCalc += song.totalVotes || 0;
+  }
+  
   const stats = {
-    totalVotes: topSongs.reduce((sum: number, song: any) => sum + (song.totalVotes || 0), 0),
-    totalLikes: topSongs.reduce((sum: number, song: any) => sum + (song.likes || 0), 0),
-    totalDislikes: topSongs.reduce((sum: number, song: any) => sum + (song.dislikes || 0), 0),
+    totalVotes: totalVotesCalc,
+    totalLikes: totalLikesCalc,
+    totalDislikes: totalDislikesCalc,
     totalSongs: topSongs.length,
   };
+  
+  // Obter música mais votada
+  const mostVotedSong = topSongs.length > 0 ? topSongs[0] : null;
+  
+  // Mutation para adicionar voto
+  const addVoteMutation = trpc.votes.addVote.useMutation({
+    onSuccess: () => {
+      // Invalidar dados para atualizar
+      trpc.useUtils().songs.ranking.invalidate();
+    },
+  });
 
   if (loading) {
     return (
@@ -43,21 +69,12 @@ export default function Dashboard() {
     );
   }
 
-
-
   // Preparar dados para gráficos
   const chartData = topSongs?.map((song: any) => ({
     name: (song.title || "Música").substring(0, 20),
     likes: song.likes || 0,
     dislikes: song.dislikes || 0,
   })) || [];
-
-  const pieData = [
-    { name: "Likes", value: (stats as any)?.totalLikes || 0 },
-    { name: "Dislikes", value: (stats as any)?.totalDislikes || 0 },
-  ];
-
-  const COLORS = ["#10b981", "#ef4444"];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-purple-900">
@@ -95,12 +112,13 @@ export default function Dashboard() {
             <div className="text-3xl font-bold text-yellow-500">{(stats as any)?.totalVotes || 0}</div>
           </Card>
           <Card className="bg-gray-800 border-green-500 p-6">
-            <div className="text-gray-400 text-sm mb-2">Total de Likes</div>
-            <div className="text-3xl font-bold text-green-500">{(stats as any)?.totalLikes || 0}</div>
+            <div className="text-gray-400 text-sm mb-2">Música Mais Votada</div>
+            <div className="text-lg font-bold text-green-500">{mostVotedSong?.title || "N/A"}</div>
+            <div className="text-xs text-gray-400 mt-1">{mostVotedSong?.artist || ""}</div>
           </Card>
-          <Card className="bg-gray-800 border-red-500 p-6">
-            <div className="text-gray-400 text-sm mb-2">Total de Dislikes</div>
-            <div className="text-3xl font-bold text-red-500">{(stats as any)?.totalDislikes || 0}</div>
+          <Card className="bg-gray-800 border-yellow-500 p-6">
+            <div className="text-gray-400 text-sm mb-2">Votos Totais</div>
+            <div className="text-3xl font-bold text-yellow-500">{mostVotedSong?.totalVotes || 0}</div>
           </Card>
         </div>
 
@@ -127,7 +145,7 @@ export default function Dashboard() {
           </div>
         </Card>
 
-        {/* Charts */}
+        {/* Charts and Now Playing */}
         <div className="grid lg:grid-cols-3 gap-8 mb-8">
           {/* Bar Chart */}
           <Card className="bg-gray-800 border-yellow-500 p-6 lg:col-span-2">
@@ -154,35 +172,75 @@ export default function Dashboard() {
             )}
           </Card>
 
-          {/* Pie Chart */}
+          {/* Now Playing */}
           <Card className="bg-gray-800 border-yellow-500 p-6">
-            <h2 className="text-xl font-bold text-white mb-4">Proporção de Votos</h2>
-            {stats && ((stats as any).totalLikes || (stats as any).totalDislikes) ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
+            <h2 className="text-xl font-bold text-white mb-4">Tocando Agora</h2>
+            {mostVotedSong ? (
+              <div className="flex flex-col items-center gap-4">
+                {/* Album Cover */}
+                <div className="w-full aspect-square bg-gray-700 rounded-lg overflow-hidden">
+                  {mostVotedSong.albumCover ? (
+                    <img 
+                      src={mostVotedSong.albumCover} 
+                      alt={mostVotedSong.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Music size={48} className="text-gray-500" />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Song Info */}
+                <div className="text-center w-full">
+                  <h3 className="text-lg font-bold text-white truncate">{mostVotedSong.title}</h3>
+                  <p className="text-sm text-gray-400 truncate">{mostVotedSong.artist}</p>
+                </div>
+                
+                {/* Vote Buttons */}
+                <div className="flex gap-4 w-full">
+                  <Button
+                    onClick={() => {
+                      addVoteMutation.mutate({
+                        songId: mostVotedSong.id,
+                        voteType: 'like',
+                      });
+                      setUserVote('like');
+                    }}
+                    disabled={addVoteMutation.isPending}
+                    className={`flex-1 flex items-center justify-center gap-2 ${
+                      userVote === 'like'
+                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                    }`}
                   >
-                    {pieData.map((entry) => (
-                      <Cell key={`cell-${entry.name}`} fill={COLORS[pieData.indexOf(entry) % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: "#1f2937", border: "1px solid #fbbf24" }}
-                    labelStyle={{ color: "#fff" }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+                    <ThumbsUp size={20} />
+                    Gostei
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      addVoteMutation.mutate({
+                        songId: mostVotedSong.id,
+                        voteType: 'dislike',
+                      });
+                      setUserVote('dislike');
+                    }}
+                    disabled={addVoteMutation.isPending}
+                    className={`flex-1 flex items-center justify-center gap-2 ${
+                      userVote === 'dislike'
+                        ? 'bg-red-600 hover:bg-red-700 text-white'
+                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                    }`}
+                  >
+                    <ThumbsDown size={20} />
+                    Não Gostei
+                  </Button>
+                </div>
+              </div>
             ) : (
               <div className="h-64 flex items-center justify-center text-gray-400">
-                Nenhum voto registrado
+                <p>Nenhuma música disponível</p>
               </div>
             )}
           </Card>

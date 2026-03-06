@@ -1,0 +1,66 @@
+{
+  "query": "SELECT id, userId, songId, voteType, createdAt, DATE(createdAt) as data FROM userVotes ORDER BY createdAt DESC",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT id, userId, songId, voteType, createdAt, DATE(createdAt) as data FROM userVotes ORDER BY createdAt DESC",
+  "rows": [
+    {
+      "id": "150001",
+      "userId": "1",
+      "songId": "1170002",
+      "voteType": "like",
+      "createdAt": "2026-03-06 15:37:32",
+      "data": "2026-03-06"
+    },
+    {
+      "id": "120009",
+      "userId": "1",
+      "songId": "450038",
+      "voteType": "like",
+      "createdAt": "2026-03-04 16:59:55",
+      "data": "2026-03-04"
+    },
+    {
+      "id": "120008",
+      "userId": "1",
+      "songId": "450032",
+      "voteType": "dislike",
+      "createdAt": "2026-03-04 16:43:04",
+      "data": "2026-03-04"
+    },
+    {
+      "id": "120007",
+      "userId": "1",
+      "songId": "450028",
+      "voteType": "like",
+      "createdAt": "2026-03-04 16:17:09",
+      "data": "2026-03-04"
+    },
+    {
+      "id": "120006",
+      "userId": "1",
+      "songId": "450026",
+      "voteType": "dislike",
+      "createdAt": "2026-03-04 16:08:47",
+      "data": "2026-03-04"
+    },
+    {
+      "id": "120005",
+      "userId": "1",
+      "songId": "450021",
+      "voteType": "like",
+      "createdAt": "2026-03-04 15:52:09",
+      "data": "2026-03-04"
+    },
+    {
+      "id": "120004",
+      "userId": "1",
+      "songId": "450020",
+      "voteType": "dislike",
+      "createdAt": "2026-03-04 15:48:40",
+      "data": "2026-03-04"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\tsongId\tvoteType\tcreatedAt\tdata\n150001\t1\t1170002\tlike\t2026-03-06 15:37:32\t2026-03-06\n120009\t1\t450038\tlike\t2026-03-04 16:59:55\t2026-03-04\n120008\t1\t450032\tdislike\t2026-03-04 16:43:04\t2026-03-04\n120007\t1\t450028\tlike\t2026-03-04 16:17:09\t2026-03-04\n120006\t1\t450026\tdislike\t2026-03-04 16:08:47\t2026-03-04\n120005\t1\t450021\tlike\t2026-03-04 15:52:09\t2026-03-04\n120004\t1\t450020\tdislike\t2026-03-04 15:48:40\t2026-03-04\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

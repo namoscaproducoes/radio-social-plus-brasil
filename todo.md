@@ -601,3 +601,11 @@ Bug corrigido definitivamente. Contabilizacao de votos agora funciona 100% nos d
 - [x] Validar cache funcionando corretamente
 - [x] 25 testes passando
 - [x] Vídeos carregando sem erros de API
+
+
+## Fase 68: Correcao de Filtro de Periodo na Dashboard
+- [x] Identificar problema no SQL de ranking que nao estava filtrando por periodo
+- [x] Corrigir query para incluir condicoes WHERE com createdAt >= startDate
+- [x] Testar filtros Hoje, Esta Semana, Este Mes, Este Ano
+- [x] Validar que todos os 26 testes passam
+- [x] Confirmar funcionamento na dashboard

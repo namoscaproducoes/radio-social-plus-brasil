@@ -110,7 +110,7 @@ export function TopVotedSongsImproved() {
       ) : (
         <div className="space-y-2">
           {/* Título em destaque */}
-          <h3 className="text-sm font-bold text-white">Top 5 Gostei e Não Gostei da Semana</h3>
+          <h3 className="text-2xl font-bold text-white" style={{ fontFamily: 'Roboto, sans-serif' }}>Top 5 Gostei e Não Gostei da Semana</h3>
 
           {/* TOP 5 Gostei */}
           <div>

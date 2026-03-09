@@ -204,7 +204,6 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="border-t border-gray-700 p-2 flex-shrink-0">
-                    <h4 className="text-white text-xs font-bold mb-1">TOP 5</h4>
                     <div className="text-xs">
                       <TopVotedSongsImproved />
                     </div>

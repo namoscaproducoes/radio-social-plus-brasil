@@ -804,6 +804,27 @@ export const appRouter = router({
           throw new Error(`Falha ao fazer upload da foto: ${error instanceof Error ? error.message : 'erro desconhecido'}`);
         }
       }),
+
+    exportUsers: protectedProcedure.query(async ({ ctx }) => {
+      if (!ctx.user) throw new Error("User not authenticated");
+      if (ctx.user.role !== 'admin') throw new Error("Acesso negado: apenas administradores podem exportar usuarios");
+      
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      
+      // Buscar todos os usuarios com nome e email
+      const allUsers = await db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          createdAt: users.createdAt,
+        })
+        .from(users)
+        .orderBy(desc(users.createdAt));
+      
+      return allUsers;
+    }),
   }),
 });
 

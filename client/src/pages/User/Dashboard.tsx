@@ -2,7 +2,7 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { trpc } from '@/lib/trpc';
 import { useEffect, useState } from 'react';
-import { Heart, LogOut, Home, Music, TrendingUp, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Heart, LogOut, Home, Music, TrendingUp, ThumbsUp, ThumbsDown, Download } from 'lucide-react';
 
 export default function UserDashboard() {
   const [, navigate] = useLocation();
@@ -18,6 +18,9 @@ export default function UserDashboard() {
   const userVotesQuery = trpc.votes.getUserVotes.useQuery(undefined, {
     refetchInterval: 5000, // Refetch a cada 5 segundos
   });
+  const exportUsersQuery = trpc.user.exportUsers.useQuery(undefined, {
+    enabled: false, // Não executar automaticamente
+  });
 
   useEffect(() => {
     if (meQuery.data) {
@@ -32,6 +35,41 @@ export default function UserDashboard() {
       navigate('/');
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
+    }
+  };
+
+  const handleExportUsers = async () => {
+    try {
+      const data = await exportUsersQuery.refetch();
+      if (data.data && Array.isArray(data.data)) {
+        // Criar CSV
+        const headers = ['ID', 'Nome', 'Email', 'Data de Cadastro'];
+        const rows = data.data.map((user: any) => [
+          user.id,
+          user.name || '',
+          user.email || '',
+          new Date(user.createdAt).toLocaleDateString('pt-BR'),
+        ]);
+
+        // Criar conteúdo do CSV
+        let csvContent = headers.join(',') + '\n';
+        rows.forEach((row: any) => {
+          csvContent += row.map((cell: any) => `"${cell}"`).join(',') + '\n';
+        });
+
+        // Criar blob e download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `usuarios_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (error) {
+      console.error('Erro ao exportar usuarios:', error);
     }
   };
 
@@ -117,6 +155,15 @@ export default function UserDashboard() {
             </div>
           </div>
           <div className="flex gap-2">
+            {userInfo?.role === 'admin' && (
+              <Button 
+                onClick={handleExportUsers}
+                className="bg-blue-600 hover:bg-blue-700 text-white flex gap-2"
+              >
+                <Download size={18} />
+                Exportar Usuarios
+              </Button>
+            )}
             <Button 
               onClick={() => navigate('/')}
               className="bg-gray-800 hover:bg-gray-700 text-white flex gap-2"

@@ -63,6 +63,18 @@ export default function UserDashboard() {
   const likes = userVotes.filter(v => v.voteType === 'like').length;
   const dislikes = userVotes.filter(v => v.voteType === 'dislike').length;
 
+  // Ordenar votos do mais novo para o mais velho
+  const sortedUserVotes = [...userVotes].sort((a, b) => {
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  // Contar votos por música
+  const voteCountByMusic = userVotes.reduce((acc: any, vote: any) => {
+    const key = `${vote.songTitle}-${vote.songArtist}`;
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-900 to-gray-950">
       {/* Header */}
@@ -160,7 +172,10 @@ export default function UserDashboard() {
             <p className="text-gray-400">Você ainda não votou em nenhuma música. Volte para a página inicial e comece a votar!</p>
           ) : (
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {userVotes.map((vote, index) => (
+              {sortedUserVotes.map((vote, index) => {
+                const musicKey = `${vote.songTitle}-${vote.songArtist}`;
+                const voteCount = voteCountByMusic[musicKey];
+                return (
                 <div key={index} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
                   <div className="flex-1">
                     <p className="text-white text-sm font-semibold">{vote.songTitle || 'Música desconhecida'}</p>
@@ -169,7 +184,11 @@ export default function UserDashboard() {
                       {new Date(vote.createdAt).toLocaleDateString('pt-BR')} às {new Date(vote.createdAt).toLocaleTimeString('pt-BR')}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="text-center">
+                      <p className="text-gray-400 text-xs">Votos</p>
+                      <p className="text-yellow-500 font-bold text-sm">{voteCount}</p>
+                    </div>
                     {vote.voteType === 'like' ? (
                       <>
                         <ThumbsUp className="text-green-500" size={18} />
@@ -183,7 +202,8 @@ export default function UserDashboard() {
                     )}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

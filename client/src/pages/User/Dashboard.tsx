@@ -8,6 +8,7 @@ export default function UserDashboard() {
   const [, navigate] = useLocation();
   const [userInfo, setUserInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [periodFilter, setPeriodFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
 
   const meQuery = trpc.auth.me.useQuery();
   const logoutMutation = trpc.auth.logout.useMutation();
@@ -74,6 +75,30 @@ export default function UserDashboard() {
     acc[key] = (acc[key] || 0) + 1;
     return acc;
   }, {});
+
+  // Filtrar votos por período
+  const getFilteredVotes = () => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+
+    return sortedUserVotes.filter((vote: any) => {
+      const voteDate = new Date(vote.createdAt);
+      switch (periodFilter) {
+        case 'today':
+          return voteDate >= today;
+        case 'week':
+          return voteDate >= weekAgo;
+        case 'month':
+          return voteDate >= monthAgo;
+        default:
+          return true;
+      }
+    });
+  };
+
+  const filteredVotes = getFilteredVotes();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-900 to-gray-950">
@@ -163,23 +188,86 @@ export default function UserDashboard() {
 
         {/* Voted Songs */}
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8">
-          <h3 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
-            <Heart className="text-red-500" size={24} />
-            Histórico de Votações
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-white text-xl font-bold flex items-center gap-2">
+              <Heart className="text-red-500" size={24} />
+              Histórico de Votações
+            </h3>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPeriodFilter('all')}
+                className={`px-3 py-1 rounded text-sm font-semibold transition ${
+                  periodFilter === 'all'
+                    ? 'bg-yellow-500 text-gray-900'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}
+              >
+                Todos
+              </button>
+              <button
+                onClick={() => setPeriodFilter('today')}
+                className={`px-3 py-1 rounded text-sm font-semibold transition ${
+                  periodFilter === 'today'
+                    ? 'bg-yellow-500 text-gray-900'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}
+              >
+                Hoje
+              </button>
+              <button
+                onClick={() => setPeriodFilter('week')}
+                className={`px-3 py-1 rounded text-sm font-semibold transition ${
+                  periodFilter === 'week'
+                    ? 'bg-yellow-500 text-gray-900'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}
+              >
+                Semana
+              </button>
+              <button
+                onClick={() => setPeriodFilter('month')}
+                className={`px-3 py-1 rounded text-sm font-semibold transition ${
+                  periodFilter === 'month'
+                    ? 'bg-yellow-500 text-gray-900'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}
+              >
+                Mês
+              </button>
+            </div>
+          </div>
           
           {userVotes.length === 0 ? (
             <p className="text-gray-400">Você ainda não votou em nenhuma música. Volte para a página inicial e comece a votar!</p>
+          ) : filteredVotes.length === 0 ? (
+            <p className="text-gray-400">Nenhum voto neste período.</p>
           ) : (
             <div className="space-y-2 max-h-96 overflow-y-auto">
-              {sortedUserVotes.map((vote, index) => {
+              {filteredVotes.map((vote, index) => {
                 const musicKey = `${vote.songTitle}-${vote.songArtist}`;
                 const voteCount = voteCountByMusic[musicKey];
                 return (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
-                  <div className="flex-1">
-                    <p className="text-white text-sm font-semibold">{vote.songTitle || 'Música desconhecida'}</p>
-                    <p className="text-gray-400 text-xs">{vote.songArtist || 'Artista desconhecido'}</p>
+                <div key={index} className="flex items-center gap-3 p-3 bg-gray-800 rounded-lg hover:bg-gray-700 transition">
+                  {/* Capa do álbum */}
+                  <div className="flex-shrink-0">
+                    {vote.albumCover && typeof vote.albumCover === 'string' && vote.albumCover.trim() ? (
+                      <img
+                        src={vote.albumCover}
+                        alt={vote.songTitle || 'Música'}
+                        className="w-12 h-12 rounded object-cover border border-gray-600"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-900 rounded flex items-center justify-center border border-gray-600">
+                        <Music size={20} className="text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-semibold truncate">{vote.songTitle || 'Música desconhecida'}</p>
+                    <p className="text-gray-400 text-xs truncate">{vote.songArtist || 'Artista desconhecido'}</p>
                     <p className="text-gray-500 text-xs">
                       {new Date(vote.createdAt).toLocaleDateString('pt-BR')} às {new Date(vote.createdAt).toLocaleTimeString('pt-BR')}
                     </p>

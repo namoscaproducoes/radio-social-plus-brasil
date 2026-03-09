@@ -85,6 +85,7 @@ export const appRouter = router({
           createdAt: userVotes.createdAt,
           songTitle: songs.title,
           songArtist: songs.artist,
+          albumCover: songs.albumCover,
         })
         .from(userVotes)
         .leftJoin(songs, eq(userVotes.songId, songs.id))

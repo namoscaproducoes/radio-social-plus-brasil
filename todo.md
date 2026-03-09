@@ -629,3 +629,13 @@ Bug corrigido definitivamente. Contabilizacao de votos agora funciona 100% nos d
 - [x] Remover TOP 5 duplicado na Home.tsx
 - [x] Adicionar tratamento para albumCover vazio
 - [ ] Investigar por que albumCover não está sendo retornado do backend
+
+
+## Fase 71: Remover TOP 5 Duplicado e Corrigir Capas de Álbuns
+- [x] Remover TOP 5 duplicado na Home.tsx
+- [x] Adicionar tratamento para albumCover vazio
+- [x] Investigar por que albumCover não está sendo retornado do backend
+- [x] Identificar que músicas antigas têm albumCover = null
+- [x] Criar procedure updateMissingAlbumCovers para preencher capas faltantes
+- [x] Corrigir testes que esperavam array mas recebem objeto { songs, stats }
+- [ ] Executar procedure para atualizar capas no banco de dados

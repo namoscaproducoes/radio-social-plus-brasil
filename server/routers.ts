@@ -363,6 +363,54 @@ export const appRouter = router({
         }
       }),
 
+    updateMissingAlbumCovers: protectedProcedure
+      .input(
+        z.object({
+          limit: z.number().min(1).max(100).optional().default(10),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        // Apenas admin pode atualizar capas
+        if (ctx.user?.role !== 'admin') {
+          throw new Error('Acesso negado: apenas administradores podem atualizar capas');
+        }
+
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+
+        // Buscar músicas sem capa
+        const result = await db.execute(`
+          SELECT id, title, artist FROM songs 
+          WHERE albumCover IS NULL OR albumCover = '' 
+          LIMIT ${input.limit}
+        `);
+
+        const rows = Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) ? result[0] : [];
+        
+        console.log(`Encontradas ${rows.length} músicas sem capa`);
+        
+        let updated = 0;
+        for (const song of rows as any[]) {
+          try {
+            const cover = await searchItunesAlbumCover(song.artist, song.title);
+            if (cover) {
+              const escapedCover = cover.replace(/'/g, "\\'");
+              await db.execute(`
+                UPDATE songs SET albumCover = '${escapedCover}' WHERE id = ${song.id}
+              `);
+              updated++;
+              console.log(`✓ Atualizado: ${song.title}`);
+            }
+          } catch (error) {
+            console.error(`Erro ao processar ${song.title}:`, error);
+          }
+          // Aguardar 500ms entre requisições
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+        return { success: true, updated, total: rows.length };
+      }),
+
     metadata: publicProcedure.query(async () => {
       try {
         // Verificar cache

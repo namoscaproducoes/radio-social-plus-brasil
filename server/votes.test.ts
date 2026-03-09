@@ -95,7 +95,9 @@ describe("ranking router", () => {
     const caller = appRouter.createCaller(ctx);
 
     const result = await caller.songs.ranking({ period: "week" });
-    expect(Array.isArray(result)).toBe(true);
+    expect(result).toBeDefined();
+    expect(result).toHaveProperty("songs");
+    expect(result).toHaveProperty("stats");
   });
 
   it("should get top songs for ranking", async () => {
@@ -103,7 +105,10 @@ describe("ranking router", () => {
     const caller = appRouter.createCaller(ctx);
 
     const result = await caller.songs.ranking({ period: "week" });
-    expect(Array.isArray(result)).toBe(true);
+    expect(result).toBeDefined();
+    expect(result).toHaveProperty("songs");
+    expect(result).toHaveProperty("stats");
+    expect(Array.isArray(result.songs)).toBe(true);
   });
 
   it("should filter ranking songs by different periods", async () => {
@@ -116,7 +121,9 @@ describe("ranking router", () => {
       const result = await caller.songs.ranking({
         period,
       });
-      expect(Array.isArray(result)).toBe(true);
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty("songs");
+      expect(Array.isArray(result.songs)).toBe(true);
     }
   });
 });

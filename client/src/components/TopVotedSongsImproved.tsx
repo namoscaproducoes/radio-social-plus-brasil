@@ -56,11 +56,14 @@ export function TopVotedSongsImproved() {
 
                   {/* Capa do álbum */}
                   <div className="relative">
-                    {song.albumCover ? (
+                    {song.albumCover && song.albumCover.trim() ? (
                       <img
                         src={song.albumCover}
                         alt={song.title}
                         className="w-12 h-12 rounded object-cover border border-gray-600 hover:border-yellow-500 transition-colors"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
                       />
                     ) : (
                       <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-900 rounded flex items-center justify-center border border-gray-600 hover:border-yellow-500 transition-colors">

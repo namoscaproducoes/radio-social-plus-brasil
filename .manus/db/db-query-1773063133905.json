@@ -1,0 +1,40 @@
+{
+  "query": "SELECT id, title, artist, albumCover FROM songs WHERE id IN (SELECT songId FROM userVotes LIMIT 10) LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT id, title, artist, albumCover FROM songs WHERE id IN (SELECT songId FROM userVotes LIMIT 10) LIMIT 5;",
+  "rows": [
+    {
+      "id": "450020",
+      "title": "CHEER UP",
+      "artist": "TWICE",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/7d/46/66/7d4666f3-1dec-c3ae-e81c-1efef0ae5d6b/00602508870033_Cover.jpg/600x600bb.jpg"
+    },
+    {
+      "id": "450021",
+      "title": "Warm Eyelids",
+      "artist": "Motorama",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/e7/be/2a/e7be2a05-8b67-ae6e-e9eb-853a2b171f18/198026848338.jpg/600x600bb.jpg"
+    },
+    {
+      "id": "450026",
+      "title": "NSYNC - Muito Alem da Musica",
+      "artist": "Better Place",
+      "albumCover": ""
+    },
+    {
+      "id": "450028",
+      "title": "With Or Without You (Remastered 2007)",
+      "artist": "U2",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/1a/ba/3e/1aba3e49-70e9-7443-4c00-32364a9205b7/17UMGIM81723.rgb.jpg/600x600bb.jpg"
+    },
+    {
+      "id": "450032",
+      "title": "Now And Then",
+      "artist": "The Beatles",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/96/e6/1b/96e61b5a-df50-7597-8866-183d22698b91/22UMGIM64020.rgb.jpg/600x600bb.jpg"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tartist\talbumCover\n450020\tCHEER UP\tTWICE\thttps://is1-ssl.mzstatic.com/image/thumb/Music124/v4/7d/46/66/7d4666f3-1dec-c3ae-e81c-1efef0ae5d6b/00602508870033_Cover.jpg/600x600bb.jpg\n450021\tWarm Eyelids\tMotorama\thttps://is1-ssl.mzstatic.com/image/thumb/Music116/v4/e7/be/2a/e7be2a05-8b67-ae6e-e9eb-853a2b171f18/198026848338.jpg/600x600bb.jpg\n450026\tNSYNC - Muito Alem da Musica\tBetter Place\t\n450028\tWith Or Without You (Remastered 2007)\tU2\thttps://is1-ssl.mzstatic.com/image/thumb/Music125/v4/1a/ba/3e/1aba3e49-70e9-7443-4c00-32364a9205b7/17UMGIM81723.rgb.jpg/600x600bb.jpg\n450032\tNow And Then\tThe Beatles\thttps://is1-ssl.mzstatic.com/image/thumb/Music126/v4/96/e6/1b/96e61b5a-df50-7597-8866-183d22698b91/22UMGIM64020.rgb.jpg/600x600bb.jpg\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

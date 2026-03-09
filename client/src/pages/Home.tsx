@@ -251,26 +251,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Video and TOP 5 */}
-              <div className="flex-shrink-0">
-                <div className="bg-gray-900 rounded-lg border border-gray-700 flex flex-col overflow-hidden" style={{minHeight: '300px'}}>
-                  <h3 className="text-white text-xs font-bold mb-1 p-2 pb-0">video clip</h3>
-                  <div className="p-2 pt-1 flex-1 flex items-center justify-center relative group min-h-0">
-                    <button className="absolute top-3 right-3 text-white hover:text-yellow-500 transition z-20">
-                      <Maximize2 size={14} />
-                    </button>
-                    <div className="w-full h-full">
-                      <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
-                    </div>
-                  </div>
-                  <div className="border-t border-gray-700 p-2 flex-shrink-0">
-                    <h4 className="text-white text-xs font-bold mb-1">TOP 5</h4>
-                    <div className="text-xs overflow-x-auto">
-                      <TopVotedSongsImproved />
-                    </div>
-                  </div>
-                </div>
-              </div>
+
 
               {/* Recent Songs */}
               <div className="flex-shrink-0">

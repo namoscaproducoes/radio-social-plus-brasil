@@ -623,3 +623,9 @@ Bug corrigido definitivamente. Contabilizacao de votos agora funciona 100% nos d
 - [x] Implementar lógica de Trending (comparar ranking)
 - [x] Adicionar estado de genreId na dashboard
 - [x] Adicionar indicador visual de Trending (↑/↓) na tabela
+
+
+## Fase 71: Remover TOP 5 Duplicado e Corrigir Capas de Álbuns
+- [x] Remover TOP 5 duplicado na Home.tsx
+- [x] Adicionar tratamento para albumCover vazio
+- [ ] Investigar por que albumCover não está sendo retornado do backend

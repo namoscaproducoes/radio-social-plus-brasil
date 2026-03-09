@@ -6,6 +6,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { ThumbsUp, ThumbsDown, Music } from "lucide-react";
+import { useMetadata } from "@/contexts/MetadataContext";
 
 type Period = "day" | "week" | "month" | "year";
 
@@ -15,6 +16,8 @@ export default function Dashboard() {
   const [period, setPeriod] = useState<Period>("week");
   const [genreId, setGenreId] = useState<number | undefined>(undefined);
   const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(null);
+  const { albumCover, songTitle, songArtist } = useMetadata();
+  const [currentSongId, setCurrentSongId] = useState<number | null>(null);
 
   // Fetch dashboard stats
   const { data: rankingData } = trpc.songs.ranking.useQuery(
@@ -23,6 +26,19 @@ export default function Dashboard() {
       refetchInterval: 5000, // Atualizar a cada 5 segundos para refletir novos votos
     }
   );
+
+  // Buscar música atual pelo título e artista
+  const { data: currentSong } = trpc.songs.getSongIdByMetadata.useQuery(
+    { title: songTitle || '', artist: songArtist || '' },
+    {
+      enabled: !!(songTitle && songTitle !== 'Carregando...' && songArtist && songArtist !== 'Artista Desconhecido'),
+    }
+  );
+
+  // Atualizar ID da música atual quando encontrada
+  if (currentSong && !currentSongId) {
+    setCurrentSongId(currentSong.id);
+  }
 
   // Extrair dados do novo formato
   const rankingData_ = rankingData as any;
@@ -176,15 +192,18 @@ export default function Dashboard() {
           {/* Now Playing */}
           <Card className="bg-gray-800 border-yellow-500 p-6">
             <h2 className="text-xl font-bold text-white mb-4">Tocando Agora</h2>
-            {mostVotedSong ? (
+            {songTitle && songTitle !== 'Carregando...' ? (
               <div className="flex flex-col items-center gap-4">
                 {/* Album Cover */}
                 <div className="w-full aspect-square bg-gray-700 rounded-lg overflow-hidden">
-                  {mostVotedSong.albumCover ? (
+                  {albumCover ? (
                     <img 
-                      src={mostVotedSong.albumCover} 
-                      alt={mostVotedSong.title}
+                      src={albumCover} 
+                      alt={songTitle}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -195,53 +214,55 @@ export default function Dashboard() {
                 
                 {/* Song Info */}
                 <div className="text-center w-full">
-                  <h3 className="text-lg font-bold text-white truncate">{mostVotedSong.title}</h3>
-                  <p className="text-sm text-gray-400 truncate">{mostVotedSong.artist}</p>
+                  <h3 className="text-lg font-bold text-white truncate">{songTitle}</h3>
+                  <p className="text-sm text-gray-400 truncate">{songArtist}</p>
                 </div>
                 
-                {/* Vote Buttons */}
-                <div className="flex gap-4 w-full">
-                  <Button
-                    onClick={() => {
-                      addVoteMutation.mutate({
-                        songId: mostVotedSong.id,
-                        voteType: 'like',
-                      });
-                      setUserVote('like');
-                    }}
-                    disabled={addVoteMutation.isPending}
-                    className={`flex-1 flex items-center justify-center gap-2 ${
-                      userVote === 'like'
-                        ? 'bg-green-600 hover:bg-green-700 text-white'
-                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-                    }`}
-                  >
-                    <ThumbsUp size={20} />
-                    Gostei
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      addVoteMutation.mutate({
-                        songId: mostVotedSong.id,
-                        voteType: 'dislike',
-                      });
-                      setUserVote('dislike');
-                    }}
-                    disabled={addVoteMutation.isPending}
-                    className={`flex-1 flex items-center justify-center gap-2 ${
-                      userVote === 'dislike'
-                        ? 'bg-red-600 hover:bg-red-700 text-white'
-                        : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-                    }`}
-                  >
-                    <ThumbsDown size={20} />
-                    Não Gostei
-                  </Button>
-                </div>
+                {/* Vote Buttons - usar música atual encontrada no banco */}
+                {currentSong && (
+                  <div className="flex gap-4 w-full">
+                    <Button
+                      onClick={() => {
+                        addVoteMutation.mutate({
+                          songId: currentSong.id,
+                          voteType: 'like',
+                        });
+                        setUserVote('like');
+                      }}
+                      disabled={addVoteMutation.isPending}
+                      className={`flex-1 flex items-center justify-center gap-2 ${
+                        userVote === 'like'
+                          ? 'bg-green-600 hover:bg-green-700 text-white'
+                          : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                      }`}
+                    >
+                      <ThumbsUp size={20} />
+                      Gostei
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        addVoteMutation.mutate({
+                          songId: currentSong.id,
+                          voteType: 'dislike',
+                        });
+                        setUserVote('dislike');
+                      }}
+                      disabled={addVoteMutation.isPending}
+                      className={`flex-1 flex items-center justify-center gap-2 ${
+                        userVote === 'dislike'
+                          ? 'bg-red-600 hover:bg-red-700 text-white'
+                          : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                      }`}
+                    >
+                      <ThumbsDown size={20} />
+                      Não Gostei
+                    </Button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="h-64 flex items-center justify-center text-gray-400">
-                <p>Nenhuma música disponível</p>
+                <p>Carregando música ao vivo...</p>
               </div>
             )}
           </Card>

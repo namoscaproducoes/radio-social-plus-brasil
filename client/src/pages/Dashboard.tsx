@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -16,8 +16,25 @@ export default function Dashboard() {
   const [period, setPeriod] = useState<Period>("week");
   const [genreId, setGenreId] = useState<number | undefined>(undefined);
   const [userVote, setUserVote] = useState<'like' | 'dislike' | null>(null);
-  const { albumCover, songTitle, songArtist } = useMetadata();
+  const { albumCover, songTitle, songArtist, setAlbumCover, setSongTitle, setSongArtist } = useMetadata();
   const [currentSongId, setCurrentSongId] = useState<number | null>(null);
+
+  // Buscar metadados do player ao vivo
+  const { data: metadataResponse } = trpc.songs.metadata.useQuery(
+    undefined,
+    {
+      refetchInterval: 1000, // Atualizar a cada 1 segundo
+    }
+  );
+
+  // Atualizar MetadataContext com dados do player
+  useEffect(() => {
+    if (metadataResponse) {
+      setSongTitle(metadataResponse.title);
+      setSongArtist(metadataResponse.artist);
+      setAlbumCover(metadataResponse.albumCover || '');
+    }
+  }, [metadataResponse, setSongTitle, setSongArtist, setAlbumCover]);
 
   // Fetch dashboard stats
   const { data: rankingData } = trpc.songs.ranking.useQuery(

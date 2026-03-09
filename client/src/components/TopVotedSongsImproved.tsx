@@ -66,9 +66,23 @@ export function TopVotedSongsImproved() {
                         }}
                       />
                     ) : (
-                      <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-900 rounded flex items-center justify-center border border-gray-600 hover:border-yellow-500 transition-colors">
-                        <Music size={14} className="text-gray-400" />
-                      </div>
+                      <img
+                        src="https://d2xsxph8kpxj0f.cloudfront.net/310519663116708350/CNRu7GES3iB6wBFuctvJmZ/logoradiosocialplusbrasil_9774c761.jpg"
+                        alt="Rádio Social Plus Brasil"
+                        className="w-12 h-12 rounded object-cover border border-gray-600 hover:border-yellow-500 transition-colors"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                          const parent = (e.target as HTMLImageElement).parentElement;
+                          if (parent && !parent.querySelector('.fallback-icon')) {
+                            const fallback = document.createElement('div');
+                            fallback.className = 'fallback-icon w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-900 rounded flex items-center justify-center border border-gray-600';
+                            const icon = document.createElement('div');
+                            icon.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-400"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="21" r="1"></circle><circle cx="18" cy="21" r="1"></circle></svg>';
+                            fallback.appendChild(icon);
+                            parent.appendChild(fallback);
+                          }
+                        }}
+                      />
                     )}
 
                     {/* Tooltip ao passar mouse */}

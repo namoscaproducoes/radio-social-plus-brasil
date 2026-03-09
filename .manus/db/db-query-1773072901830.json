@@ -1,0 +1,80 @@
+{
+  "query": "SELECT \n  s.id,\n  s.title,\n  s.artist,\n  s.albumCover,\n  COUNT(DISTINCT v.id) as vote_count\nFROM songs s\nLEFT JOIN votes v ON s.id = v.songId\nGROUP BY s.id\nORDER BY vote_count DESC\nLIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT \n  s.id,\n  s.title,\n  s.artist,\n  s.albumCover,\n  COUNT(DISTINCT v.id) as vote_count\nFROM songs s\nLEFT JOIN votes v ON s.id = v.songId\nGROUP BY s.id\nORDER BY vote_count DESC\nLIMIT 10;",
+  "rows": [
+    {
+      "id": "2250048",
+      "title": "The Greatest",
+      "artist": "Sia",
+      "albumCover": "NULL",
+      "vote_count": "4"
+    },
+    {
+      "id": "1320005",
+      "title": "The Fate of Ophelia",
+      "artist": "Taylor Swift",
+      "albumCover": "NULL",
+      "vote_count": "3"
+    },
+    {
+      "id": "2250042",
+      "title": "Dont Worry Be Happy",
+      "artist": "Chart Hits Allstars",
+      "albumCover": "NULL",
+      "vote_count": "3"
+    },
+    {
+      "id": "1290002",
+      "title": "Don't Cha",
+      "artist": "The Pussycat Dolls",
+      "albumCover": "NULL",
+      "vote_count": "3"
+    },
+    {
+      "id": "1740008",
+      "title": "Sympathy For The Devil",
+      "artist": "The Rolling Stones",
+      "albumCover": "NULL",
+      "vote_count": "2"
+    },
+    {
+      "id": "1170012",
+      "title": "Cara Mia",
+      "artist": "Blanka",
+      "albumCover": "NULL",
+      "vote_count": "1"
+    },
+    {
+      "id": "1170017",
+      "title": "Unstoppable",
+      "artist": "Sia",
+      "albumCover": "NULL",
+      "vote_count": "1"
+    },
+    {
+      "id": "1710003",
+      "title": "COMPLETE MESS",
+      "artist": "5 Seconds Of Summer",
+      "albumCover": "NULL",
+      "vote_count": "1"
+    },
+    {
+      "id": "1470002",
+      "title": "Love My Way",
+      "artist": "The Psychedelic Furs",
+      "albumCover": "NULL",
+      "vote_count": "1"
+    },
+    {
+      "id": "1710001",
+      "title": "Roommates",
+      "artist": "Hilary Duff",
+      "albumCover": "NULL",
+      "vote_count": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tartist\talbumCover\tvote_count\n2250048\tThe Greatest\tSia\tNULL\t4\n1320005\tThe Fate of Ophelia\tTaylor Swift\tNULL\t3\n2250042\tDont Worry Be Happy\tChart Hits Allstars\tNULL\t3\n1290002\tDon't Cha\tThe Pussycat Dolls\tNULL\t3\n1740008\tSympathy For The Devil\tThe Rolling Stones\tNULL\t2\n1170012\tCara Mia\tBlanka\tNULL\t1\n1170017\tUnstoppable\tSia\tNULL\t1\n1710003\tCOMPLETE MESS\t5 Seconds Of Summer\tNULL\t1\n1470002\tLove My Way\tThe Psychedelic Furs\tNULL\t1\n1710001\tRoommates\tHilary Duff\tNULL\t1\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

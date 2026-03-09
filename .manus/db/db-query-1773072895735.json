@@ -1,0 +1,70 @@
+{
+  "query": "SELECT id, title, artist, albumCover FROM songs WHERE albumCover IS NOT NULL AND albumCover != '' LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT id, title, artist, albumCover FROM songs WHERE albumCover IS NOT NULL AND albumCover != '' LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "Lose Yourself",
+      "artist": "Eminem",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/08/23/fc/0823fcd9-cb44-695b-32bf-b3bf51d9f800/00606949351229.rgb.jpg/600x600bb.jpg"
+    },
+    {
+      "id": "3",
+      "title": "Heart Attack (Rock Version)",
+      "artist": "Demi Lovato",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/47/a4/c5/47a4c568-0be3-3b05-02d5-0820a522fb55/23UMGIM79570.rgb.jpg/600x600bb.jpg"
+    },
+    {
+      "id": "6",
+      "title": "Gold",
+      "artist": "Oberhofer",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/f9/f7/75/f9f775a3-d7ca-c293-4459-87f7fbb0043e/0892038002442_Cover.jpg/600x600bb.jpg"
+    },
+    {
+      "id": "7",
+      "title": "Cotton Eye Joe",
+      "artist": "Rednex",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music/a0/7e/dc/mzi.bvturdqb.jpg/600x600bb.jpg"
+    },
+    {
+      "id": "9",
+      "title": "Mirrors (Radio Edit)",
+      "artist": "Justin Timberlake",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/e9/c6/83/e9c68325-7de0-e420-e668-386ca9c26d84/886443898325.jpg/600x600bb.jpg"
+    },
+    {
+      "id": "10",
+      "title": "Codinome Beija-Flor",
+      "artist": "Carol Biazin",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/6a/4e/57/6a4e5792-c1ce-7d02-c599-793ef36a3a38/23UMGIM37916.rgb.jpg/600x600bb.jpg"
+    },
+    {
+      "id": "13",
+      "title": "Lollipop (Album Version Explicit)",
+      "artist": "Lil Wayne",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/f9/6c/dc/f96cdc5c-09fe-06b6-4629-be4afeb71cca/08UMGIM15512.rgb.jpg/600x600bb.jpg"
+    },
+    {
+      "id": "30001",
+      "title": "Whistle",
+      "artist": "Flo Rida",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music123/v4/60/cb/80/60cb805d-f231-4f92-b531-781625d84f5a/5059460031142.jpg/600x600bb.jpg"
+    },
+    {
+      "id": "60001",
+      "title": "Crazy In Love (feat. Jay-Z)",
+      "artist": "Beyonce",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music/03/c5/d4/mzi.ldvrmhxt.jpg/600x600bb.jpg"
+    },
+    {
+      "id": "60002",
+      "title": "Stupid Girl",
+      "artist": "Garbage",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music128/v4/60/ab/1e/60ab1ef7-2a86-65f5-4c63-39847b7edb11/00602547364920.rgb.jpg/600x600bb.jpg"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tartist\talbumCover\n1\tLose Yourself\tEminem\thttps://is1-ssl.mzstatic.com/image/thumb/Music125/v4/08/23/fc/0823fcd9-cb44-695b-32bf-b3bf51d9f800/00606949351229.rgb.jpg/600x600bb.jpg\n3\tHeart Attack (Rock Version)\tDemi Lovato\thttps://is1-ssl.mzstatic.com/image/thumb/Music126/v4/47/a4/c5/47a4c568-0be3-3b05-02d5-0820a522fb55/23UMGIM79570.rgb.jpg/600x600bb.jpg\n6\tGold\tOberhofer\thttps://is1-ssl.mzstatic.com/image/thumb/Music211/v4/f9/f7/75/f9f775a3-d7ca-c293-4459-87f7fbb0043e/0892038002442_Cover.jpg/600x600bb.jpg\n7\tCotton Eye Joe\tRednex\thttps://is1-ssl.mzstatic.com/image/thumb/Music/a0/7e/dc/mzi.bvturdqb.jpg/600x600bb.jpg\n9\tMirrors (Radio Edit)\tJustin Timberlake\thttps://is1-ssl.mzstatic.com/image/thumb/Music125/v4/e9/c6/83/e9c68325-7de0-e420-e668-386ca9c26d84/886443898325.jpg/600x600bb.jpg\n10\tCodinome Beija-Flor\tCarol Biazin\thttps://is1-ssl.mzstatic.com/image/thumb/Music126/v4/6a/4e/57/6a4e5792-c1ce-7d02-c599-793ef36a3a38/23UMGIM37916.rgb.jpg/600x600bb.jpg\n13\tLollipop (Album Version Explicit)\tLil Wayne\thttps://is1-ssl.mzstatic.com/image/thumb/Music221/v4/f9/6c/dc/f96cdc5c-09fe-06b6-4629-be4afeb71cca/08UMGIM15512.rgb.jpg/600x600bb.jpg\n30001\tWhistle\tFlo Rida\thttps://is1-ssl.mzstatic.com/image/thumb/Music123/v4/60/cb/80/60cb805d-f231-4f92-b531-781625d84f5a/5059460031142.jpg/600x600bb.jpg\n60001\tCrazy In Love (feat. Jay-Z)\tBeyonce\thttps://is1-ssl.mzstatic.com/image/thumb/Music/03/c5/d4/mzi.ldvrmhxt.jpg/600x600bb.jpg\n60002\tStupid Girl\tGarbage\thttps://is1-ssl.mzstatic.com/image/thumb/Music128/v4/60/ab/1e/60ab1ef7-2a86-65f5-4c63-39847b7edb11/00602547364920.rgb.jpg/600x600bb.jpg\n",
+  "stderr": "",
+  "execution_time_ms": 77
+}

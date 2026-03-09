@@ -847,6 +847,41 @@ export const appRouter = router({
       
       return allUsers;
     }),
+
+    deleteUser: protectedProcedure
+      .input(z.object({ userId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (!ctx.user) throw new Error("User not authenticated");
+        if (ctx.user.role !== 'admin') throw new Error("Acesso negado: apenas administradores podem deletar usuarios");
+        
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        // Deletar usuário
+        const result = await db
+          .delete(users)
+          .where(eq(users.id, input.userId));
+        
+        return { success: true, message: "Usuário deletado com sucesso" };
+      }),
+
+    promoteUserToAdmin: protectedProcedure
+      .input(z.object({ userId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        if (!ctx.user) throw new Error("User not authenticated");
+        if (ctx.user.role !== 'admin') throw new Error("Acesso negado: apenas administradores podem promover usuarios");
+        
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        // Promover usuário para admin
+        const result = await db
+          .update(users)
+          .set({ role: 'admin' })
+          .where(eq(users.id, input.userId));
+        
+        return { success: true, message: "Usuário promovido a administrador com sucesso" };
+      }),
   }),
 });
 

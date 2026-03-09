@@ -2,7 +2,7 @@ import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { trpc } from '@/lib/trpc';
 import { useEffect, useState } from 'react';
-import { Heart, LogOut, Home, Music, TrendingUp, ThumbsUp, ThumbsDown, Download } from 'lucide-react';
+import { Heart, LogOut, Home, Music, TrendingUp, ThumbsUp, ThumbsDown, Download, Trash2, Shield } from 'lucide-react';
 
 export default function UserDashboard() {
   const [, navigate] = useLocation();
@@ -26,6 +26,8 @@ export default function UserDashboard() {
     enabled: userInfo?.role === 'admin',
     refetchInterval: 10000, // Refetch a cada 10 segundos
   });
+  const deleteUserMutation = trpc.user.deleteUser.useMutation();
+  const promoteUserMutation = trpc.user.promoteUserToAdmin.useMutation();
 
   useEffect(() => {
     if (meQuery.data) {
@@ -40,6 +42,36 @@ export default function UserDashboard() {
       navigate('/');
     } catch (error) {
       console.error('Erro ao fazer logout:', error);
+    }
+  };
+
+  const handleDeleteUser = async (userId: number, userName: string) => {
+    if (!window.confirm(`Tem certeza que deseja deletar o usuário "${userName}"? Esta ação não pode ser desfeita.`)) {
+      return;
+    }
+    try {
+      await deleteUserMutation.mutateAsync({ userId });
+      // Refetch da lista de usuários
+      getAllUsersQuery.refetch();
+      alert('Usuário deletado com sucesso!');
+    } catch (error) {
+      console.error('Erro ao deletar usuário:', error);
+      alert('Erro ao deletar usuário');
+    }
+  };
+
+  const handlePromoteUser = async (userId: number, userName: string) => {
+    if (!window.confirm(`Tem certeza que deseja promover "${userName}" a administrador?`)) {
+      return;
+    }
+    try {
+      await promoteUserMutation.mutateAsync({ userId });
+      // Refetch da lista de usuários
+      getAllUsersQuery.refetch();
+      alert('Usuário promovido a administrador com sucesso!');
+    } catch (error) {
+      console.error('Erro ao promover usuário:', error);
+      alert('Erro ao promover usuário');
     }
   };
 
@@ -441,12 +473,13 @@ export default function UserDashboard() {
                     <th className="text-left py-3 px-4 text-gray-400 font-semibold">Nome</th>
                     <th className="text-left py-3 px-4 text-gray-400 font-semibold">E-mail</th>
                     <th className="text-left py-3 px-4 text-gray-400 font-semibold">Data de Cadastro</th>
+                    <th className="text-left py-3 px-4 text-gray-400 font-semibold">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredUsers.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="text-center py-4 text-gray-400">
+                      <td colSpan={5} className="text-center py-4 text-gray-400">
                         Nenhum usuário neste período
                       </td>
                     </tr>
@@ -458,6 +491,24 @@ export default function UserDashboard() {
                         <td className="py-3 px-4 text-gray-400">{user.email || 'N/A'}</td>
                         <td className="py-3 px-4 text-gray-400">
                           {new Date(user.createdAt).toLocaleDateString('pt-BR')} às {new Date(user.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className="py-3 px-4 flex gap-2">
+                          {user.role !== 'admin' && (
+                            <button
+                              onClick={() => handlePromoteUser(user.id, user.name)}
+                              className="p-1 bg-blue-600 hover:bg-blue-700 rounded text-white transition"
+                              title="Tornar administrador"
+                            >
+                              <Shield size={16} />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteUser(user.id, user.name)}
+                            className="p-1 bg-red-600 hover:bg-red-700 rounded text-white transition"
+                            title="Deletar usuário"
+                          >
+                            <Trash2 size={16} />
+                          </button>
                         </td>
                       </tr>
                     ))

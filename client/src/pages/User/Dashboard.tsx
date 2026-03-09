@@ -9,6 +9,7 @@ export default function UserDashboard() {
   const [userInfo, setUserInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [periodFilter, setPeriodFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
+  const [adminPeriodFilter, setAdminPeriodFilter] = useState<'day' | 'week' | 'month' | 'year'>('day');
 
   const meQuery = trpc.auth.me.useQuery();
   const logoutMutation = trpc.auth.logout.useMutation();
@@ -20,6 +21,10 @@ export default function UserDashboard() {
   });
   const exportUsersQuery = trpc.user.exportUsers.useQuery(undefined, {
     enabled: false, // Não executar automaticamente
+  });
+  const getAllUsersQuery = trpc.user.getAllUsers.useQuery(undefined, {
+    enabled: userInfo?.role === 'admin',
+    refetchInterval: 10000, // Refetch a cada 10 segundos
   });
 
   useEffect(() => {
@@ -137,6 +142,35 @@ export default function UserDashboard() {
   };
 
   const filteredVotes = getFilteredVotes();
+
+  // Filtrar usuários por período (admin only)
+  const getFilteredUsers = () => {
+    const allUsers = getAllUsersQuery.data || [];
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+    const yearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+
+    return allUsers.filter((user: any) => {
+      const userDate = new Date(user.createdAt);
+      switch (adminPeriodFilter) {
+        case 'day':
+          return userDate >= today;
+        case 'week':
+          return userDate >= weekAgo;
+        case 'month':
+          return userDate >= monthAgo;
+        case 'year':
+          return userDate >= yearAgo;
+        default:
+          return true;
+      }
+    });
+  };
+
+  const filteredUsers = getFilteredUsers();
+  const allUsers = getAllUsersQuery.data || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-purple-900 to-gray-950">
@@ -342,6 +376,97 @@ export default function UserDashboard() {
             </div>
           )}
         </div>
+
+        {/* Admin Users Management */}
+        {userInfo?.role === 'admin' && (
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8">
+            <h3 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
+              <TrendingUp className="text-blue-500" size={24} />
+              Gerenciamento de Usuários
+            </h3>
+            
+            {/* Period Filter */}
+            <div className="flex gap-2 mb-6">
+              <button
+                onClick={() => setAdminPeriodFilter('day')}
+                className={`px-3 py-1 rounded text-sm font-semibold transition ${
+                  adminPeriodFilter === 'day'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}
+              >
+                Hoje
+              </button>
+              <button
+                onClick={() => setAdminPeriodFilter('week')}
+                className={`px-3 py-1 rounded text-sm font-semibold transition ${
+                  adminPeriodFilter === 'week'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}
+              >
+                Semana
+              </button>
+              <button
+                onClick={() => setAdminPeriodFilter('month')}
+                className={`px-3 py-1 rounded text-sm font-semibold transition ${
+                  adminPeriodFilter === 'month'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}
+              >
+                Mês
+              </button>
+              <button
+                onClick={() => setAdminPeriodFilter('year')}
+                className={`px-3 py-1 rounded text-sm font-semibold transition ${
+                  adminPeriodFilter === 'year'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}
+              >
+                Ano
+              </button>
+              <div className="ml-auto text-white font-semibold">
+                Total: <span className="text-blue-400">{filteredUsers.length}</span> usuários
+              </div>
+            </div>
+            
+            {/* Users Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-700">
+                    <th className="text-left py-3 px-4 text-gray-400 font-semibold">ID</th>
+                    <th className="text-left py-3 px-4 text-gray-400 font-semibold">Nome</th>
+                    <th className="text-left py-3 px-4 text-gray-400 font-semibold">E-mail</th>
+                    <th className="text-left py-3 px-4 text-gray-400 font-semibold">Data de Cadastro</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="text-center py-4 text-gray-400">
+                        Nenhum usuário neste período
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredUsers.map((user: any, index: number) => (
+                      <tr key={index} className="border-b border-gray-800 hover:bg-gray-800 transition">
+                        <td className="py-3 px-4 text-gray-300">{user.id}</td>
+                        <td className="py-3 px-4 text-white font-medium">{user.name || 'N/A'}</td>
+                        <td className="py-3 px-4 text-gray-400">{user.email || 'N/A'}</td>
+                        <td className="py-3 px-4 text-gray-400">
+                          {new Date(user.createdAt).toLocaleDateString('pt-BR')} às {new Date(user.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* Coming Soon Features */}
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">

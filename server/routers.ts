@@ -825,6 +825,28 @@ export const appRouter = router({
       
       return allUsers;
     }),
+
+    getAllUsers: protectedProcedure.query(async ({ ctx }) => {
+      if (!ctx.user) throw new Error("User not authenticated");
+      if (ctx.user.role !== 'admin') throw new Error("Acesso negado: apenas administradores podem ver lista de usuarios");
+      
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      
+      // Buscar todos os usuarios com dados completos
+      const allUsers = await db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          createdAt: users.createdAt,
+          role: users.role,
+        })
+        .from(users)
+        .orderBy(desc(users.createdAt));
+      
+      return allUsers;
+    }),
   }),
 });
 
@@ -843,3 +865,4 @@ function getSessionCookieOptions(req: any) {
 if (typeof getSessionCookieOptions === 'undefined') {
   console.warn('getSessionCookieOptions not properly imported');
 }
+

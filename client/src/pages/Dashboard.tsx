@@ -136,23 +136,23 @@ export default function Dashboard() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-gray-800 border-yellow-500 p-6">
-            <div className="text-gray-400 text-sm mb-2">Músicas Votadas</div>
-            <div className="text-3xl font-bold text-yellow-500">{topSongs.length}</div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-8">
+          <Card className="bg-gray-800 border-yellow-500 p-3 md:p-6">
+            <div className="text-gray-400 text-xs md:text-sm mb-2">Músicas Votadas</div>
+            <div className="text-2xl md:text-3xl font-bold text-yellow-500">{topSongs.length}</div>
           </Card>
-          <Card className="bg-gray-800 border-yellow-500 p-6">
-            <div className="text-gray-400 text-sm mb-2">Total de Votos</div>
-            <div className="text-3xl font-bold text-yellow-500">{(stats as any)?.totalVotes || 0}</div>
+          <Card className="bg-gray-800 border-yellow-500 p-3 md:p-6">
+            <div className="text-gray-400 text-xs md:text-sm mb-2">Total de Votos</div>
+            <div className="text-2xl md:text-3xl font-bold text-yellow-500">{(stats as any)?.totalVotes || 0}</div>
           </Card>
-          <Card className="bg-gray-800 border-green-500 p-6">
-            <div className="text-gray-400 text-sm mb-2">Música Mais Votada</div>
-            <div className="text-lg font-bold text-green-500">{mostVotedSong?.title || "N/A"}</div>
-            <div className="text-xs text-gray-400 mt-1">{mostVotedSong?.artist || ""}</div>
+          <Card className="bg-gray-800 border-green-500 p-3 md:p-6 col-span-2 md:col-span-1">
+            <div className="text-gray-400 text-xs md:text-sm mb-2">Música Mais Votada</div>
+            <div className="text-sm md:text-lg font-bold text-green-500 truncate">{mostVotedSong?.title || "N/A"}</div>
+            <div className="text-xs text-gray-400 mt-1 truncate">{mostVotedSong?.artist || ""}</div>
           </Card>
-          <Card className="bg-gray-800 border-yellow-500 p-6">
-            <div className="text-gray-400 text-sm mb-2">Votos Totais</div>
-            <div className="text-3xl font-bold text-yellow-500">{mostVotedSong?.totalVotes || 0}</div>
+          <Card className="bg-gray-800 border-yellow-500 p-3 md:p-6 col-span-2 md:col-span-1">
+            <div className="text-gray-400 text-xs md:text-sm mb-2">Votos Totais</div>
+            <div className="text-2xl md:text-3xl font-bold text-yellow-500">{mostVotedSong?.totalVotes || 0}</div>
           </Card>
         </div>
 
@@ -180,7 +180,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Charts and Now Playing */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           {/* Bar Chart */}
           <Card className="bg-gray-800 border-yellow-500 p-6 lg:col-span-2">
             <h2 className="text-xl font-bold text-white mb-4">Ranking de Músicas</h2>
@@ -289,46 +289,36 @@ export default function Dashboard() {
         <Card className="bg-gray-800 border-yellow-500 p-6">
           <h2 className="text-xl font-bold text-white mb-4">Músicas Mais Votadas</h2>
           {topSongs && topSongs.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto -mx-6 px-6 md:mx-0 md:px-0">
+              <table className="w-full text-xs md:text-sm">
                 <thead>
                   <tr className="border-b border-gray-700">
-                    <th className="text-left py-3 px-4 text-gray-300">Posição</th>
-                    <th className="text-left py-3 px-4 text-gray-300">Música</th>
-                    <th className="text-left py-3 px-4 text-gray-300">Artista</th>
-                    <th className="text-center py-3 px-4 text-green-500">Likes</th>
-                    <th className="text-center py-3 px-4 text-red-500">Dislikes</th>
-                    <th className="text-center py-3 px-4 text-yellow-500">Total</th>
-                    <th className="text-center py-3 px-4 text-gray-300">% Likes</th>
-                    <th className="text-center py-3 px-4 text-gray-300">Trending</th>
+                    <th className="text-left py-3 px-2 md:px-4 text-gray-300">Pos</th>
+                    <th className="text-left py-3 px-2 md:px-4 text-gray-300">Música</th>
+                    <th className="text-left py-3 px-2 md:px-4 text-gray-300 hidden sm:table-cell">Artista</th>
+                    <th className="text-center py-3 px-2 md:px-4 text-green-500">👍</th>
+                    <th className="text-center py-3 px-2 md:px-4 text-red-500">👎</th>
+                    <th className="text-center py-3 px-2 md:px-4 text-yellow-500">Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   {topSongs.map((song: any, index: number) => (
                     <tr key={song.id} className="border-b border-gray-700 hover:bg-gray-700 transition">
-                      <td className="py-3 px-4 text-white font-bold">{index + 1}</td>
-                      <td className="py-3 px-4 text-white">{song.title}</td>
-                      <td className="py-3 px-4 text-gray-300">{song.artist}</td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="inline-flex items-center gap-1 bg-green-900 text-green-200 px-3 py-1 rounded-full">
-                          <ThumbsUp size={14} />
+                      <td className="py-3 px-2 md:px-4 text-white font-bold">{index + 1}</td>
+                      <td className="py-3 px-2 md:px-4 text-white text-xs md:text-sm">{song.title}</td>
+                      <td className="py-3 px-2 md:px-4 text-gray-300 text-xs md:text-sm hidden sm:table-cell">{song.artist}</td>
+                      <td className="py-3 px-2 md:px-4 text-center">
+                        <span className="inline-flex items-center gap-1 bg-green-900 text-green-200 px-2 py-1 rounded text-xs">
                           {song.likes}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="inline-flex items-center gap-1 bg-red-900 text-red-200 px-3 py-1 rounded-full">
-                          <ThumbsDown size={14} />
+                      <td className="py-3 px-2 md:px-4 text-center">
+                        <span className="inline-flex items-center gap-1 bg-red-900 text-red-200 px-2 py-1 rounded text-xs">
                           {song.dislikes}
                         </span>
                       </td>
-                      <td className="py-3 px-4 text-center text-yellow-500 font-bold">
+                      <td className="py-3 px-2 md:px-4 text-center text-yellow-500 font-bold text-xs md:text-sm">
                         {song.totalVotes}
-                      </td>
-                      <td className="py-3 px-4 text-center text-gray-300">
-                        {song.likePercentage}%
-                      </td>
-                      <td className="py-3 px-4 text-center text-lg">
-                        {song.trending > 0 ? <span className="text-green-400">↑</span> : song.trending < 0 ? <span className="text-red-400">↓</span> : <span className="text-gray-400">→</span>}
                       </td>
                     </tr>
                   ))}

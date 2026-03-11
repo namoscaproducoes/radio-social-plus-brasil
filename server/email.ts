@@ -8,9 +8,7 @@ export interface EmailPayload {
 }
 
 /**
- * Envia um email usando a Manus Email Service via Notification API
- * Como não há endpoint SendEmail, usamos logging para desenvolvimento
- * Em produção, você pode integrar com SendGrid, AWS SES, ou outro serviço
+ * Envia um email usando a Manus Forge Email API
  */
 export async function sendEmail(payload: EmailPayload): Promise<boolean> {
   if (!payload.to || !payload.subject || !payload.html) {
@@ -19,17 +17,44 @@ export async function sendEmail(payload: EmailPayload): Promise<boolean> {
   }
 
   try {
+    if (!ENV.forgeApiUrl || !ENV.forgeApiKey) {
+      console.error("[Email] Manus Forge API not configured");
+      return false;
+    }
+
+    const baseUrl = ENV.forgeApiUrl.endsWith("/") ? ENV.forgeApiUrl : `${ENV.forgeApiUrl}/`;
+    const endpoint = new URL("webdevtoken.v1.WebDevService/SendEmail", baseUrl).toString();
+
     console.log(`[Email] Enviando email para ${payload.to}`);
     console.log(`[Email] Assunto: ${payload.subject}`);
-    console.log(`[Email] Destinatário: ${payload.to}`);
-    console.log(`[Email] Email enviado com sucesso!`);
-    
-    // Em produção, integrar com um serviço de email real
-    // Exemplo com SendGrid:
-    // const sgMail = require('@sendgrid/mail');
-    // sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-    // await sgMail.send({ to: payload.to, from: 'noreply@example.com', subject: payload.subject, html: payload.html });
-    
+
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        authorization: `Bearer ${ENV.forgeApiKey}`,
+        "content-type": "application/json",
+        "connect-protocol-version": "1",
+      },
+      body: JSON.stringify({
+        to: payload.to,
+        subject: payload.subject,
+        html: payload.html,
+        text: payload.text,
+      }),
+    });
+
+    if (!response.ok) {
+      const detail = await response.text().catch(() => "");
+      console.error(
+        `[Email] Failed to send email (${response.status} ${response.statusText})${
+          detail ? `: ${detail}` : ""
+        }`
+      );
+      return false;
+    }
+
+    console.log(`[Email] Email enviado com sucesso para ${payload.to}!`);
     return true;
   } catch (error) {
     console.error("[Email] Error sending email:", error);

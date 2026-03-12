@@ -485,3 +485,79 @@ export async function getUserById(userId: number) {
     return null;
   }
 }
+
+
+/**
+ * Get count of likes a user has given to a specific song
+ */
+export async function getUserLikeCountForSong(userId: number, songId: number) {
+  const db = await getDb();
+  if (!db) return 0;
+
+  try {
+    const result = await db.execute(`
+      SELECT COUNT(*) as count
+      FROM userVotes
+      WHERE userId = ${userId} AND songId = ${songId} AND voteType = 'like'
+    `) as any;
+
+    if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) && result[0].length > 0) {
+      return result[0][0].count || 0;
+    }
+    return 0;
+  } catch (error) {
+    console.error("[Database] Failed to get user like count:", error);
+    return 0;
+  }
+}
+
+/**
+ * Check if a notification already exists for a user and song
+ */
+export async function checkNotificationExists(userId: number, songId: number, type: string) {
+  const db = await getDb();
+  if (!db) return false;
+
+  try {
+    const result = await db.execute(`
+      SELECT COUNT(*) as count
+      FROM notifications
+      WHERE userId = ${userId} AND songId = ${songId} AND type = '${type}' AND isRead = 'false'
+      LIMIT 1
+    `) as any;
+
+    if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) && result[0].length > 0) {
+      return result[0][0].count > 0;
+    }
+    return false;
+  } catch (error) {
+    console.error("[Database] Failed to check notification:", error);
+    return false;
+  }
+}
+
+/**
+ * Get all users who have liked a specific song (2+ times)
+ */
+export async function getUsersWhoLikedSong(songId: number, minLikes: number = 2) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const result = await db.execute(`
+      SELECT DISTINCT userId
+      FROM userVotes
+      WHERE songId = ${songId} AND voteType = 'like'
+      GROUP BY userId
+      HAVING COUNT(*) >= ${minLikes}
+    `) as any;
+
+    if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0])) {
+      return result[0].map((row: any) => row.userId);
+    }
+    return [];
+  } catch (error) {
+    console.error("[Database] Failed to get users who liked song:", error);
+    return [];
+  }
+}

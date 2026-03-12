@@ -74,6 +74,13 @@ export function RadioPlayerV2() {
     },
   });
 
+  // Mutation para verificar e notificar quando musica favorita toca
+  const checkFavoritePlayedMutation = trpc.songs.checkAndNotifyFavoritePlayed.useMutation({
+    onError: (error) => {
+      console.error('Erro ao verificar musica favorita:', error);
+    },
+  });
+
   // Atualizar metadados quando dados chegam
   useEffect(() => {
     if (metadataResponse) {
@@ -91,9 +98,14 @@ export function RadioPlayerV2() {
         setAlbumCover(metadataResponse.albumCover || '');
         setCurrentSongId(metadataResponse.songId || null);
         setUserVote(null);
+
+        // Se usuario esta autenticado e musica tem ID, verificar se eh favorita
+        if (user && metadataResponse.songId) {
+          checkFavoritePlayedMutation.mutate({ songId: metadataResponse.songId });
+        }
       }
     }
-  }, [metadataResponse, setAlbumCover, setSongTitle, setSongArtist]);
+  }, [metadataResponse, setAlbumCover, setSongTitle, setSongArtist, user, checkFavoritePlayedMutation]);
 
   // Tocar/pausar - LÓGICA SIMPLES
   const togglePlay = async () => {

@@ -94,15 +94,7 @@ export function NotificationCenter() {
           className="relative"
           title="Notificações"
         >
-          <Bell className="h-5 w-5" />
-          {unreadCount && unreadCount > 0 && (
-            <Badge
-              className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
-              variant="destructive"
-            >
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </Badge>
-          )}
+          <Bell className="h-5 w-5 text-white" />
         </Button>
       </DropdownMenuTrigger>
 

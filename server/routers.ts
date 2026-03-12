@@ -3,7 +3,7 @@ import { calculateTrending } from './trending-helper';
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, addToHistory, getRecentSongHistory, getTopVotedSongsThisMonth, getVoteCountsForSong, addFavorite, removeFavorite, getUserFavorites, createNotification, getUserNotifications, markNotificationAsRead, getUnreadNotificationCount, updateUserProfile, getUserById } from "./db";
+import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, addToHistory, getRecentSongHistory, getTopVotedSongsThisMonth, getVoteCountsForSong, addFavorite, removeFavorite, getUserFavorites, createNotification, getUserNotifications, markNotificationAsRead, getUnreadNotificationCount, updateUserProfile, getUserById, getUserLikeCountForSong, checkNotificationExists, getUsersWhoLikedSong } from "./db";
 import { eq, and, gt, desc } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
 import { getIcecastMetadata } from "./icecast-metadata";
@@ -66,6 +66,41 @@ export const appRouter = router({
             songId: input.songId,
             voteType: input.voteType,
           });
+        }
+
+        // Se o voto eh um like, notificar usuarios que ja curtiram essa musica 2+ vezes
+        if (input.voteType === 'like') {
+          try {
+            // Buscar usuarios que ja curtiram essa musica 2+ vezes
+            const usersToNotify = await getUsersWhoLikedSong(input.songId, 2);
+            
+            // Buscar informacoes da musica
+            const song = await db.select().from(songs).where(eq(songs.id, input.songId)).limit(1);
+            
+            if (song && song.length > 0) {
+              const songInfo = song[0];
+              
+              // Notificar cada usuario (exceto o que acabou de votar)
+              for (const userId of usersToNotify) {
+                if (userId !== ctx.user.id) {
+                  // Verificar se ja existe notificacao nao lida
+                  const exists = await checkNotificationExists(userId, input.songId, 'new_votes');
+                  
+                  if (!exists) {
+                    await createNotification(
+                      userId,
+                      input.songId,
+                      'new_votes',
+                      `Alguem curtiu "${songInfo.title}"`,
+                      `Um usuario tambem gostou de "${songInfo.title}" de ${songInfo.artist}`
+                    );
+                  }
+                }
+              }
+            }
+          } catch (error) {
+            console.error('Erro ao notificar usuarios:', error);
+          }
         }
 
         return { success: true };
@@ -692,6 +727,51 @@ export const appRouter = router({
       )
       .query(async ({ input }) => {
         return await getVoteCountsForSong(input.songId);
+      }),
+
+    checkAndNotifyFavoritePlayed: protectedProcedure
+      .input(
+        z.object({
+          songId: z.number(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new Error('User not authenticated');
+
+        try {
+          // Contar quantos likes o usuario deu para essa musica
+          const likeCount = await getUserLikeCountForSong(ctx.user.id, input.songId);
+
+          // Se o usuario deu 2+ likes, criar notificacao
+          if (likeCount >= 2) {
+            // Verificar se ja existe notificacao nao lida
+            const exists = await checkNotificationExists(ctx.user.id, input.songId, 'favorite_played');
+
+            if (!exists) {
+              // Buscar informacoes da musica
+              const db = await getDb();
+              if (db) {
+                const song = await db.select().from(songs).where(eq(songs.id, input.songId)).limit(1);
+
+                if (song && song.length > 0) {
+                  const songInfo = song[0];
+                  await createNotification(
+                    ctx.user.id,
+                    input.songId,
+                    'favorite_played',
+                    `Sua musica favorita esta tocando!`,
+                    `"${songInfo.title}" de ${songInfo.artist} esta tocando agora na radio`
+                  );
+                }
+              }
+            }
+          }
+
+          return { success: true, likeCount };
+        } catch (error) {
+          console.error('Erro ao verificar musica favorita:', error);
+          throw error;
+        }
       }),
   }),
 

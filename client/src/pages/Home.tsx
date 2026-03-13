@@ -263,7 +263,7 @@ export default function Home() {
               <div className="flex-shrink-0">
                 <div className="bg-gray-900 rounded-lg border border-gray-700 flex flex-col" style={{minHeight: '300px'}}>
                   <h3 className="text-white text-xs font-bold mb-1 p-2 pb-0">video clip</h3>
-                  <div className="p-2 pt-1 flex-1 flex items-center justify-center relative group">
+                  <div className="p-2 pt-1 flex-1 flex items-center justify-center relative group pb-16 md:pb-2">
                     <button className="absolute top-3 right-3 text-white hover:text-yellow-500 transition z-20 opacity-0 group-hover:opacity-100">
                       <Maximize2 size={14} />
                     </button>

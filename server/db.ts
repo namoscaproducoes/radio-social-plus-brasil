@@ -561,3 +561,39 @@ export async function getUsersWhoLikedSong(songId: number, minLikes: number = 2)
     return [];
   }
 }
+
+
+/**
+ * Get the latest vote with user and song information
+ */
+export async function getLatestVote() {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const result = await db.execute(`
+      SELECT 
+        v.id,
+        v.userId,
+        v.songId,
+        v.voteType,
+        v.createdAt,
+        u.name as userName,
+        s.title as songTitle,
+        s.artist as songArtist
+      FROM userVotes v
+      LEFT JOIN users u ON v.userId = u.id
+      LEFT JOIN songs s ON v.songId = s.id
+      ORDER BY v.createdAt DESC
+      LIMIT 1
+    `) as any;
+
+    if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) && result[0].length > 0) {
+      return result[0][0];
+    }
+    return null;
+  } catch (error) {
+    console.error("[Database] Failed to get latest vote:", error);
+    return null;
+  }
+}

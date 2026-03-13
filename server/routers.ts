@@ -3,7 +3,7 @@ import { calculateTrending } from './trending-helper';
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
-import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, addToHistory, getRecentSongHistory, getTopVotedSongsThisMonth, getVoteCountsForSong, addFavorite, removeFavorite, getUserFavorites, createNotification, getUserNotifications, markNotificationAsRead, getUnreadNotificationCount, updateUserProfile, getUserById, getUserLikeCountForSong, checkNotificationExists, getUsersWhoLikedSong } from "./db";
+import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, addToHistory, getRecentSongHistory, getTopVotedSongsThisMonth, getVoteCountsForSong, addFavorite, removeFavorite, getUserFavorites, createNotification, getUserNotifications, markNotificationAsRead, getUnreadNotificationCount, updateUserProfile, getUserById, getUserLikeCountForSong, checkNotificationExists, getUsersWhoLikedSong, getLatestVote } from "./db";
 import { eq, and, gt, desc } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
 import { getIcecastMetadata } from "./icecast-metadata";
@@ -773,6 +773,10 @@ export const appRouter = router({
           throw error;
         }
       }),
+
+    getLatestVote: publicProcedure.query(async () => {
+      return await getLatestVote();
+    }),
   }),
 
   notifications: router({

@@ -6,6 +6,7 @@ import { SongHistory } from "@/components/SongHistory";
 import { TopVotedSongsImproved } from "@/components/TopVotedSongsImproved";
 import { UserProfile } from "@/components/UserProfile";
 import { NotificationCenter } from "@/components/NotificationCenter";
+import { VoteNotification } from "@/components/VoteNotification";
 import { useMetadata } from "@/contexts/MetadataContext";
 import { useEffect, useRef, useState } from "react";
 import { trpc } from "@/lib/trpc";
@@ -203,7 +204,10 @@ export default function Home() {
                       <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
                     </div>
                   </div>
-                  <div className="border-t border-gray-700 p-2 flex-shrink-0">
+                  <div className="border-t border-gray-700 p-2 flex-shrink-0 space-y-2">
+                    <div className="text-xs">
+                      <VoteNotification />
+                    </div>
                     <div className="text-xs">
                       <TopVotedSongsImproved />
                     </div>
@@ -262,7 +266,10 @@ export default function Home() {
                       <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
                     </div>
                   </div>
-                  <div className="border-t border-gray-700 p-2 flex-shrink-0">
+                  <div className="border-t border-gray-700 p-2 flex-shrink-0 space-y-2">
+                    <div className="text-xs">
+                      <VoteNotification />
+                    </div>
                     <div className="text-xs">
                       <TopVotedSongsImproved />
                     </div>

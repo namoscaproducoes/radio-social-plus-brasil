@@ -203,9 +203,14 @@ export default function Home() {
                     <div className="w-full h-full">
                       <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
                     </div>
+                    {/* VoteNotification overlay em telas grandes */}
+                    <div className="absolute bottom-2 left-2 right-2 z-10 hidden md:block max-w-xs">
+                      <VoteNotification />
+                    </div>
                   </div>
                   <div className="border-t border-gray-700 p-2 flex-shrink-0 space-y-2">
-                    <div className="text-xs">
+                    {/* VoteNotification em telas pequenas */}
+                    <div className="text-xs md:hidden">
                       <VoteNotification />
                     </div>
                     <div className="text-xs">
@@ -265,11 +270,12 @@ export default function Home() {
                     <div className="w-full h-full">
                       <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
                     </div>
-                  </div>
-                  <div className="border-t border-gray-700 p-2 flex-shrink-0 space-y-2">
-                    <div className="text-xs">
+                    {/* VoteNotification overlay em telas pequenas */}
+                    <div className="absolute bottom-2 left-2 right-2 z-10 max-w-xs">
                       <VoteNotification />
                     </div>
+                  </div>
+                  <div className="border-t border-gray-700 p-2 flex-shrink-0 space-y-2">
                     <div className="text-xs">
                       <TopVotedSongsImproved />
                     </div>

@@ -580,7 +580,8 @@ export async function getLatestVote() {
         v.createdAt,
         u.name as userName,
         s.title as songTitle,
-        s.artist as songArtist
+        s.artist as songArtist,
+        s.albumCover as albumCover
       FROM userVotes v
       LEFT JOIN users u ON v.userId = u.id
       LEFT JOIN songs s ON v.songId = s.id

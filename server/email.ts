@@ -29,7 +29,7 @@ export async function sendEmail(payload: EmailPayload): Promise<boolean> {
     console.log(`[Email] Assunto: ${payload.subject}`);
 
     const response = await resend.emails.send({
-      from: "onboarding@resend.dev",
+      from: "contato@radiosocialplusbrasil.com.br",
       to: payload.to,
       subject: payload.subject,
       html: payload.html,

@@ -30,14 +30,16 @@ export default function Login() {
 
     try {
       await loginMutation.mutateAsync({ email, password });
-      // Invalidar cache para refletir novo usuário logado
+      // Invalidar cache e refazer query para refletir novo usuário logado
       await utils.auth.me.invalidate();
+      // Aguardar a query ser refazer para garantir que o estado está atualizado
+      await utils.auth.me.refetch();
       await utils.votes.getUserVotes.invalidate();
       await utils.votes.getVoteStats.invalidate();
       setSuccess('Login realizado com sucesso! Redirecionando...');
       setTimeout(() => {
         navigate('/');
-      }, 1500);
+      }, 500);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Erro ao fazer login';
       setError(errorMsg);

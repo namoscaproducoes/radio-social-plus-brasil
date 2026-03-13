@@ -204,7 +204,7 @@ export default function Home() {
                       <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
                     </div>
                     {/* VoteNotification overlay em telas grandes */}
-                    <div className="absolute bottom-2 left-2 right-2 z-10 hidden md:block max-w-xs">
+                    <div className="absolute bottom-0 left-0 right-0 z-10 hidden md:block">
                       <VoteNotification />
                     </div>
                   </div>
@@ -271,7 +271,7 @@ export default function Home() {
                       <YouTubePlayer songTitle={songTitle} artistName={songArtist} />
                     </div>
                     {/* VoteNotification overlay em telas pequenas */}
-                    <div className="absolute bottom-2 left-2 right-2 z-10 max-w-xs">
+                    <div className="absolute bottom-0 left-0 right-0 z-10">
                       <VoteNotification />
                     </div>
                   </div>

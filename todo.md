@@ -639,3 +639,11 @@ Bug corrigido definitivamente. Contabilizacao de votos agora funciona 100% nos d
 - [x] Criar procedure updateMissingAlbumCovers para preencher capas faltantes
 - [x] Corrigir testes que esperavam array mas recebem objeto { songs, stats }
 - [ ] Executar procedure para atualizar capas no banco de dados
+
+
+## Fase 51: Integração de Serviço de E-mail (Resend)
+
+- [x] Verificar implementação atual de recuperação de senha
+- [x] Configurar credenciais do Resend
+- [x] Integrar Resend na procedure forgotPassword
+- [x] Testar envio de e-mail

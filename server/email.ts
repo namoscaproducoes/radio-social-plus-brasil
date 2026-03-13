@@ -1,4 +1,4 @@
-import { ENV } from "./_core/env";
+import { Resend } from "resend";
 
 export interface EmailPayload {
   to: string;
@@ -8,7 +8,7 @@ export interface EmailPayload {
 }
 
 /**
- * Envia um email usando a Manus Forge Email API
+ * Envia um email usando o Resend
  */
 export async function sendEmail(payload: EmailPayload): Promise<boolean> {
   if (!payload.to || !payload.subject || !payload.html) {
@@ -17,44 +17,31 @@ export async function sendEmail(payload: EmailPayload): Promise<boolean> {
   }
 
   try {
-    if (!ENV.forgeApiUrl || !ENV.forgeApiKey) {
-      console.error("[Email] Manus Forge API not configured");
+    const resendApiKey = process.env.RESEND_API_KEY;
+    if (!resendApiKey) {
+      console.error("[Email] Resend API key not configured");
       return false;
     }
 
-    const baseUrl = ENV.forgeApiUrl.endsWith("/") ? ENV.forgeApiUrl : `${ENV.forgeApiUrl}/`;
-    const endpoint = new URL("webdevtoken.v1.WebDevService/SendEmail", baseUrl).toString();
+    const resend = new Resend(resendApiKey);
 
     console.log(`[Email] Enviando email para ${payload.to}`);
     console.log(`[Email] Assunto: ${payload.subject}`);
 
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        authorization: `Bearer ${ENV.forgeApiKey}`,
-        "content-type": "application/json",
-        "connect-protocol-version": "1",
-      },
-      body: JSON.stringify({
-        to: payload.to,
-        subject: payload.subject,
-        html: payload.html,
-        text: payload.text,
-      }),
+    const response = await resend.emails.send({
+      from: "onboarding@resend.dev",
+      to: payload.to,
+      subject: payload.subject,
+      html: payload.html,
+      text: payload.text,
     });
 
-    if (!response.ok) {
-      const detail = await response.text().catch(() => "");
-      console.error(
-        `[Email] Failed to send email (${response.status} ${response.statusText})${
-          detail ? `: ${detail}` : ""
-        }`
-      );
+    if (response.error) {
+      console.error(`[Email] Failed to send email:`, response.error);
       return false;
     }
 
-    console.log(`[Email] Email enviado com sucesso para ${payload.to}!`);
+    console.log(`[Email] Email enviado com sucesso para ${payload.to}! ID: ${response.data?.id}`);
     return true;
   } catch (error) {
     console.error("[Email] Error sending email:", error);

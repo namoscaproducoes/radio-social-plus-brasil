@@ -216,7 +216,7 @@ export function RadioPlayerV2() {
 
           {/* Informações da Música */}
           <div className="w-full text-center space-y-2">
-            <h2 className="text-base font-bold text-white break-words leading-snug">
+            <h2 className="text-lg font-bold text-white break-words leading-snug">
               {metadata.title}
             </h2>
             <p className="text-sm text-slate-300 truncate">

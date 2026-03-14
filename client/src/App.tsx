@@ -14,7 +14,6 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { MetadataProvider } from "./contexts/MetadataContext";
 import { TimezoneProvider } from "./contexts/TimezoneContext";
 import { PlaybackProvider } from "./contexts/PlaybackContext";
-import { RadioPlayerV2 } from "./components/RadioPlayerV2";
 import Home from "./pages/Home";
 
 function Router() {
@@ -53,10 +52,6 @@ function App() {
             >
               <TooltipProvider>
                 <Toaster />
-                {/* Player persiste durante navegação */}
-                <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
-                  <RadioPlayerV2 />
-                </div>
                 <Router />
               </TooltipProvider>
             </ThemeProvider>

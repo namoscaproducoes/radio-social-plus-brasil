@@ -253,9 +253,7 @@ export default function Home() {
                       AO VIVO
                     </button>
                   </div>
-                  <div className="flex-1 flex items-center justify-center px-1 pb-1 min-h-0">
-                    <RadioPlayerV2 />
-                  </div>
+                  {/* Player removido - agora está no App.tsx para persistir entre páginas */}
                 </div>
               </div>
 

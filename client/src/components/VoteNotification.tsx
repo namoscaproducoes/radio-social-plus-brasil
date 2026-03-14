@@ -19,8 +19,10 @@ export function VoteNotification() {
   const [lastVoteId, setLastVoteId] = useState<number | null>(null);
 
   // Query para obter o último voto com polling
+  // Usar intervalo maior para reduzir carga em mobile
   const { data: voteData } = trpc.songs.getLatestVote.useQuery(undefined, {
-    refetchInterval: 2000, // Atualizar a cada 2 segundos
+    refetchInterval: 3000, // Atualizar a cada 3 segundos
+    staleTime: 2500, // Cache por 2.5 segundos
   });
 
   useEffect(() => {

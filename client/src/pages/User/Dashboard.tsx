@@ -14,17 +14,17 @@ export default function UserDashboard() {
   const meQuery = trpc.auth.me.useQuery();
   const logoutMutation = trpc.auth.logout.useMutation();
   const voteStatsQuery = trpc.votes.getVoteStats.useQuery(undefined, {
-    refetchInterval: 5000, // Refetch a cada 5 segundos
+    // Remover polling automático para evitar travamento em mobile
   });
   const userVotesQuery = trpc.votes.getUserVotes.useQuery(undefined, {
-    refetchInterval: 5000, // Refetch a cada 5 segundos
+    // Remover polling automático para evitar travamento em mobile
   });
   const exportUsersQuery = trpc.user.exportUsers.useQuery(undefined, {
     enabled: false, // Não executar automaticamente
   });
   const getAllUsersQuery = trpc.user.getAllUsers.useQuery(undefined, {
     enabled: userInfo?.role === 'admin',
-    refetchInterval: 10000, // Refetch a cada 10 segundos
+    // Remover polling automático para evitar travamento em mobile
   });
   const deleteUserMutation = trpc.user.deleteUser.useMutation();
   const promoteUserMutation = trpc.user.promoteUserToAdmin.useMutation();

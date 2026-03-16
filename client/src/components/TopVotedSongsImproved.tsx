@@ -8,7 +8,7 @@ export function TopVotedSongsImproved() {
       period: 'week',
     },
     {
-      refetchInterval: 5000, // Atualizar a cada 5 segundos
+      staleTime: 30000, // Cache por 30 segundos
     }
   );
 

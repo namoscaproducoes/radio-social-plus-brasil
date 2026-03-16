@@ -1,0 +1,45 @@
+{
+  "query": "SELECT s.id, s.title, s.artist, s.albumCover, COUNT(*) as voteCount FROM songs s LEFT JOIN votes v ON s.id = v.songId WHERE v.createdAt >= DATE_SUB(NOW(), INTERVAL 7 DAY) GROUP BY s.id HAVING voteCount > 0 ORDER BY voteCount DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway04.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 2F3b5g5NUELKcBZ.root --database CNRu7GES3iB6wBFuctvJmZ --execute SELECT s.id, s.title, s.artist, s.albumCover, COUNT(*) as voteCount FROM songs s LEFT JOIN votes v ON s.id = v.songId WHERE v.createdAt >= DATE_SUB(NOW(), INTERVAL 7 DAY) GROUP BY s.id HAVING voteCount > 0 ORDER BY voteCount DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "2250048",
+      "title": "The Greatest",
+      "artist": "Sia",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/8b/81/ba/8b81ba55-0a7f-a0e5-6593-d44f1565cdd1/886446097428.jpg/600x600bb.jpg",
+      "voteCount": "4"
+    },
+    {
+      "id": "2250042",
+      "title": "Dont Worry Be Happy",
+      "artist": "Chart Hits Allstars",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music6/v4/e2/b7/bd/e2b7bd25-bf04-e312-d8f1-a4740b91f35b/cover.jpg/600x600bb.jpg",
+      "voteCount": "3"
+    },
+    {
+      "id": "4380004",
+      "title": "Marquee Moon",
+      "artist": "Television",
+      "albumCover": "NULL",
+      "voteCount": "2"
+    },
+    {
+      "id": "2250017",
+      "title": "I Heard Wonders (Album Version)",
+      "artist": "David Holmes",
+      "albumCover": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/72/08/f6/7208f67f-b3c3-9db8-5cc7-53e4543c0f2a/0602517876323_cover.jpg/600x600bb.jpg",
+      "voteCount": "1"
+    },
+    {
+      "id": "4410016",
+      "title": "All I Wanna Do",
+      "artist": "Sheryl Crow",
+      "albumCover": "NULL",
+      "voteCount": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tartist\talbumCover\tvoteCount\n2250048\tThe Greatest\tSia\thttps://is1-ssl.mzstatic.com/image/thumb/Music115/v4/8b/81/ba/8b81ba55-0a7f-a0e5-6593-d44f1565cdd1/886446097428.jpg/600x600bb.jpg\t4\n2250042\tDont Worry Be Happy\tChart Hits Allstars\thttps://is1-ssl.mzstatic.com/image/thumb/Music6/v4/e2/b7/bd/e2b7bd25-bf04-e312-d8f1-a4740b91f35b/cover.jpg/600x600bb.jpg\t3\n4380004\tMarquee Moon\tTelevision\tNULL\t2\n2250017\tI Heard Wonders (Album Version)\tDavid Holmes\thttps://is1-ssl.mzstatic.com/image/thumb/Music112/v4/72/08/f6/7208f67f-b3c3-9db8-5cc7-53e4543c0f2a/0602517876323_cover.jpg/600x600bb.jpg\t1\n4410016\tAll I Wanna Do\tSheryl Crow\tNULL\t1\n",
+  "stderr": "",
+  "execution_time_ms": 380
+}

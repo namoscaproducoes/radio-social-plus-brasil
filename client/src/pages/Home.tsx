@@ -214,9 +214,13 @@ export default function Home() {
 
               {/* Right: Recent Songs + Vote Notification */}
               <div className="col-span-4 flex-shrink-0 flex flex-col gap-2">
+                {/* VoteNotification - acima das últimas tocadas */}
+                <div className="bg-gray-900 rounded-lg p-3 border-2 border-gray-700 flex-shrink-0">
+                  <VoteNotification />
+                </div>
                 <div className="bg-gray-900 rounded-lg p-2 sm:p-3 border-2 border-gray-700 flex-1 flex flex-col">
                   <h3 className="text-white text-xs sm:text-sm font-bold mb-2 flex-shrink-0">As últimas tocadas</h3>
-                  <div className="space-y-1 overflow-y-auto pr-1 flex-1 text-xs">
+                  <div className="space-y-1 overflow-y-auto flex-1 text-xs">
                     <SongHistory />
                   </div>
                   {/* Google Ads Banner */}
@@ -225,10 +229,6 @@ export default function Home() {
                     <ins className="adsbygoogle" style={{display: 'block'}} data-ad-client="ca-pub-2249929574270161" data-ad-slot="2671039837" data-ad-format="auto" data-full-width-responsive="true"></ins>
                     <script>{`(adsbygoogle = window.adsbygoogle || []).push({});`}</script>
                   </div>
-                </div>
-                {/* VoteNotification - abaixo das últimas tocadas */}
-                <div className="bg-gray-900 rounded-lg p-3 border-2 border-gray-700 flex-shrink-0">
-                  <VoteNotification />
                 </div>
               </div>
             </div>
@@ -275,11 +275,18 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Vote Notification - acima das últimas tocadas */}
+              <div className="flex-shrink-0">
+                <div className="bg-gray-900 rounded-lg p-3 border-2 border-gray-700">
+                  <VoteNotification />
+                </div>
+              </div>
+
               {/* Recent Songs */}
               <div className="flex-shrink-0">
                 <div className="bg-gray-900 rounded-lg p-2 border-2 border-gray-700 flex flex-col" style={{minHeight: '250px'}}>
                   <h3 className="text-white text-xs font-bold mb-2 flex-shrink-0">As últimas tocadas</h3>
-                  <div className="space-y-1 overflow-y-auto pr-1 flex-1 text-xs">
+                  <div className="space-y-1 overflow-y-auto flex-1 text-xs">
                     <SongHistory />
                   </div>
                   {/* Google Ads Banner */}
@@ -288,13 +295,6 @@ export default function Home() {
                     <ins className="adsbygoogle" style={{display: 'block'}} data-ad-client="ca-pub-2249929574270161" data-ad-slot="2671039837" data-ad-format="auto" data-full-width-responsive="true"></ins>
                     <script>{`(adsbygoogle = window.adsbygoogle || []).push({});`}</script>
                   </div>
-                </div>
-              </div>
-
-              {/* Vote Notification - abaixo das últimas tocadas */}
-              <div className="flex-shrink-0">
-                <div className="bg-gray-900 rounded-lg p-3 border-2 border-gray-700">
-                  <VoteNotification />
                 </div>
               </div>
             </div>

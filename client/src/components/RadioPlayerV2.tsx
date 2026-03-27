@@ -206,7 +206,11 @@ export function RadioPlayerV2() {
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
-                  <Music className="w-16 h-16 text-slate-500" />
+                  <img
+                    src="/logo-radio.png"
+                    alt="Rádio Social Plus Brasil"
+                    className="w-20 h-20 object-contain opacity-80"
+                  />
                 </div>
               )}
               {/* Overlay ao hover */}

@@ -49,15 +49,15 @@ export function VoteNotification() {
   const isLike = latestVote.voteType === 'like';
 
   return (
-    <div className="bg-gray-900 border-t border-gray-700 px-2 py-1">
+    <div className="bg-gray-900 px-2 py-1">
       {/* Desktop layout - horizontal */}
-      <div className="hidden md:flex items-center justify-between gap-2 text-xs">
+      <div className="hidden md:flex items-center justify-center gap-3 text-xs">
         {/* Album cover */}
         {latestVote.albumCover && (
           <img 
             src={latestVote.albumCover} 
             alt="Album cover"
-            className="w-8 h-8 rounded flex-shrink-0 object-cover"
+            className="w-10 h-10 rounded flex-shrink-0 object-cover"
           />
         )}
         
@@ -74,22 +74,22 @@ export function VoteNotification() {
         {/* Vote icon */}
         <div className="flex-shrink-0">
           {isLike ? (
-            <ThumbsUp className="w-4 h-4 text-green-500 fill-green-500" />
+            <ThumbsUp className="w-6 h-6 text-green-500 fill-green-500" />
           ) : (
-            <ThumbsDown className="w-4 h-4 text-red-500 fill-red-500" />
+            <ThumbsDown className="w-6 h-6 text-red-500 fill-red-500" />
           )}
         </div>
       </div>
 
       {/* Mobile layout - vertical with line breaks */}
       <div className="md:hidden space-y-1 text-xs">
-        <div className="flex items-start gap-2">
+        <div className="flex items-center justify-center gap-2">
           {/* Album cover */}
           {latestVote.albumCover && (
             <img 
               src={latestVote.albumCover} 
               alt="Album cover"
-              className="w-10 h-10 rounded flex-shrink-0 object-cover"
+              className="w-12 h-12 rounded flex-shrink-0 object-cover"
             />
           )}
           
@@ -104,9 +104,9 @@ export function VoteNotification() {
               </p>
               <div className="flex-shrink-0">
                 {isLike ? (
-                  <ThumbsUp className="w-4 h-4 text-green-500 fill-green-500" />
+                  <ThumbsUp className="w-5 h-5 text-green-500 fill-green-500" />
                 ) : (
-                  <ThumbsDown className="w-4 h-4 text-red-500 fill-red-500" />
+                  <ThumbsDown className="w-5 h-5 text-red-500 fill-red-500" />
                 )}
               </div>
             </div>
@@ -116,7 +116,7 @@ export function VoteNotification() {
 
       {/* Mensagem de login para usuários não autenticados */}
       {!user && (
-        <div className="border-t border-gray-700 mt-1 pt-1">
+        <div className="mt-1 pt-1">
           {/* Desktop layout */}
           <div className="hidden md:flex items-center justify-between gap-3 text-xs py-1">
             <p className="text-gray-300 flex-1">

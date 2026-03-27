@@ -50,7 +50,9 @@ export function VoteNotification() {
             Faça login para o seu nome e voto aparecer aqui
           </p>
           <a
-            href={loginUrl}
+            href="https://radiosocial-cnru7ges.manus.space/auth/login"
+            target="_blank"
+            rel="noopener noreferrer"
             className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold whitespace-nowrap transition-colors"
           >
             Login
@@ -63,7 +65,9 @@ export function VoteNotification() {
             Faça login para o seu nome e voto aparecer aqui
           </p>
           <a
-            href={loginUrl}
+            href="https://radiosocial-cnru7ges.manus.space/auth/login"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-block px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold transition-colors"
           >
             Login

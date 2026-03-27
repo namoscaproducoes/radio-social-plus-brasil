@@ -49,9 +49,9 @@ export function VoteNotification() {
   const isLike = latestVote.voteType === 'like';
 
   return (
-    <div className="bg-gray-900 px-2 py-1">
+    <div className="bg-gray-900 px-2 py-3 flex flex-col items-center">
       {/* Desktop layout - horizontal */}
-      <div className="hidden md:flex items-center justify-center gap-3 text-xs">
+      <div className="hidden md:flex items-center justify-center gap-3 text-xs w-full">
         {/* Album cover */}
         {latestVote.albumCover && (
           <img 
@@ -82,7 +82,7 @@ export function VoteNotification() {
       </div>
 
       {/* Mobile layout - vertical with line breaks */}
-      <div className="md:hidden space-y-1 text-xs">
+      <div className="md:hidden space-y-1 text-xs w-full">
         <div className="flex items-center justify-center gap-2">
           {/* Album cover */}
           {latestVote.albumCover && (

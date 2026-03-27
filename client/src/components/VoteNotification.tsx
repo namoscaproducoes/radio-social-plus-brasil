@@ -49,7 +49,7 @@ export function VoteNotification() {
   const isLike = latestVote.voteType === 'like';
 
   return (
-    <div className="bg-gray-900 px-2 py-3 flex flex-col items-center">
+    <div className="bg-gray-900 px-2 py-6 flex flex-col items-center">
       {/* Desktop layout - horizontal */}
       <div className="hidden md:flex items-center justify-center gap-3 text-xs w-full">
         {/* Album cover */}
@@ -116,9 +116,9 @@ export function VoteNotification() {
 
       {/* Mensagem de login para usuários não autenticados */}
       {!user && (
-        <div className="mt-1 pt-1">
+        <div className="mt-3 pt-3">
           {/* Desktop layout */}
-          <div className="hidden md:flex items-center justify-between gap-3 text-xs py-1">
+          <div className="hidden md:flex items-center justify-between gap-3 text-xs py-2">
             <p className="text-gray-300 flex-1">
               Faça login para o seu nome e voto aparecer aqui
             </p>
@@ -133,7 +133,7 @@ export function VoteNotification() {
           </div>
 
           {/* Mobile layout */}
-          <div className="md:hidden space-y-1 py-1">
+          <div className="md:hidden space-y-1 py-2">
             <p className="text-gray-300 text-xs">
               Faça login para o seu nome e voto aparecer aqui
             </p>

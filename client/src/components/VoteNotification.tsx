@@ -39,44 +39,6 @@ export function VoteNotification() {
     }
   }, [voteData, lastVoteId]);
 
-  // Se não está logado, mostrar mensagem de login
-  if (!user) {
-    const loginUrl = getLoginUrl();
-    return (
-      <div className="bg-gray-900 border-t border-gray-700 px-2 py-1">
-        {/* Desktop layout */}
-        <div className="hidden md:flex items-center justify-between gap-3 text-xs py-2">
-          <p className="text-gray-300 flex-1">
-            Faça login para o seu nome e voto aparecer aqui
-          </p>
-          <a
-            href="https://radiosocial-cnru7ges.manus.space/auth/login"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold whitespace-nowrap transition-colors"
-          >
-            Login
-          </a>
-        </div>
-
-        {/* Mobile layout */}
-        <div className="md:hidden space-y-2 py-2">
-          <p className="text-gray-300 text-xs">
-            Faça login para o seu nome e voto aparecer aqui
-          </p>
-          <a
-            href="https://radiosocial-cnru7ges.manus.space/auth/login"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold transition-colors"
-          >
-            Login
-          </a>
-        </div>
-      </div>
-    );
-  }
-
   if (!latestVote) {
     return null;
   }
@@ -151,6 +113,41 @@ export function VoteNotification() {
           </div>
         </div>
       </div>
+
+      {/* Mensagem de login para usuários não autenticados */}
+      {!user && (
+        <div className="border-t border-gray-700 mt-1 pt-1">
+          {/* Desktop layout */}
+          <div className="hidden md:flex items-center justify-between gap-3 text-xs py-1">
+            <p className="text-gray-300 flex-1">
+              Faça login para o seu nome e voto aparecer aqui
+            </p>
+            <a
+              href="https://radiosocial-cnru7ges.manus.space/auth/login"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold whitespace-nowrap transition-colors"
+            >
+              Login
+            </a>
+          </div>
+
+          {/* Mobile layout */}
+          <div className="md:hidden space-y-1 py-1">
+            <p className="text-gray-300 text-xs">
+              Faça login para o seu nome e voto aparecer aqui
+            </p>
+            <a
+              href="https://radiosocial-cnru7ges.manus.space/auth/login"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold transition-colors"
+            >
+              Login
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

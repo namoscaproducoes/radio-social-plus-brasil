@@ -49,7 +49,7 @@ export function VoteNotification() {
   const isLike = latestVote.voteType === 'like';
 
   return (
-    <div className="bg-gray-900 px-2 py-6 flex flex-col items-center">
+    <div className="bg-gray-900 px-2 py-2 flex flex-col items-center">
       {/* Desktop layout - horizontal */}
       <div className="hidden md:flex items-center justify-center gap-3 text-xs w-full">
         {/* Album cover */}

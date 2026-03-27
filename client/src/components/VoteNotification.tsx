@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
+import { getLoginUrl } from '@/const';
+
+function useAuthLocal() {
+  const { data: user } = trpc.auth.me.useQuery();
+  return { user };
+}
 
 interface VoteData {
   id: number;
@@ -17,6 +23,7 @@ interface VoteData {
 export function VoteNotification() {
   const [latestVote, setLatestVote] = useState<VoteData | null>(null);
   const [lastVoteId, setLastVoteId] = useState<number | null>(null);
+  const { user } = useAuthLocal();
 
   // Query para obter o último voto com polling
   // Usar intervalo maior para reduzir carga em mobile
@@ -31,6 +38,40 @@ export function VoteNotification() {
       setLastVoteId(voteData.id);
     }
   }, [voteData, lastVoteId]);
+
+  // Se não está logado, mostrar mensagem de login
+  if (!user) {
+    const loginUrl = getLoginUrl();
+    return (
+      <div className="bg-gray-900 border-t border-gray-700 px-2 py-1">
+        {/* Desktop layout */}
+        <div className="hidden md:flex items-center justify-between gap-3 text-xs py-2">
+          <p className="text-gray-300 flex-1">
+            Faça login para o seu nome e voto aparecer aqui
+          </p>
+          <a
+            href={loginUrl}
+            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold whitespace-nowrap transition-colors"
+          >
+            Login
+          </a>
+        </div>
+
+        {/* Mobile layout */}
+        <div className="md:hidden space-y-2 py-2">
+          <p className="text-gray-300 text-xs">
+            Faça login para o seu nome e voto aparecer aqui
+          </p>
+          <a
+            href={loginUrl}
+            className="inline-block px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold transition-colors"
+          >
+            Login
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   if (!latestVote) {
     return null;

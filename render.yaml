@@ -1,0 +1,57 @@
+services:
+  - type: web
+    name: radio-social-plus-brasil
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: radio-social-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: VITE_APP_ID
+        scope: all
+      - key: OAUTH_SERVER_URL
+        value: https://api.manus.im
+      - key: VITE_OAUTH_PORTAL_URL
+        value: https://portal.manus.im
+      - key: OWNER_OPEN_ID
+        scope: all
+      - key: OWNER_NAME
+        scope: all
+      - key: BUILT_IN_FORGE_API_URL
+        scope: all
+      - key: BUILT_IN_FORGE_API_KEY
+        scope: all
+      - key: VITE_FRONTEND_FORGE_API_KEY
+        scope: all
+      - key: VITE_FRONTEND_FORGE_API_URL
+        scope: all
+      - key: VITE_APP_TITLE
+        value: Rádio Social Plus Brasil
+      - key: VITE_APP_LOGO
+        value: https://radiosocial-cnru7ges.manus.space/logo.png
+      - key: VITE_ANALYTICS_ENDPOINT
+        scope: all
+      - key: VITE_ANALYTICS_WEBSITE_ID
+        scope: all
+      - key: BRASCAST_AUTH_TOKEN
+        scope: all
+      - key: LASTFM_API_KEY
+        scope: all
+      - key: YOUTUBE_API_KEY
+        scope: all
+      - key: RESEND_API_KEY
+        scope: all
+
+databases:
+  - name: radio-social-db
+    plan: free
+    databaseName: radio_social_db
+    user: radio_user
+    region: oregon

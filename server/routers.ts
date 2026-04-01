@@ -572,6 +572,107 @@ export const appRouter = router({
         });
       }),
 
+    allRanking: publicProcedure
+      .input(
+        z.object({
+          period: z.enum(["day", "week", "month", "year"]).optional().default('week'),
+          genreId: z.number().optional(),
+        }).optional()
+      )
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return [];
+
+        // Calcular data de início baseado no período
+        const now = new Date();
+        let startDate = new Date();
+        const period = input?.period || 'week';
+        
+        switch (period) {
+          case "day":
+            startDate.setHours(0, 0, 0, 0);
+            break;
+          case "week":
+            startDate.setDate(now.getDate() - now.getDay());
+            startDate.setHours(0, 0, 0, 0);
+            break;
+          case "month":
+            startDate.setDate(1);
+            startDate.setHours(0, 0, 0, 0);
+            break;
+          case "year":
+            startDate.setMonth(0, 1);
+            startDate.setHours(0, 0, 0, 0);
+            break;
+          default:
+            // Sem filtro de data
+            startDate = new Date(0);
+        }
+
+        // Converter para string ISO para usar na query
+        const startDateStr = startDate.toISOString();
+
+        let result: any[] = [];
+        try {
+          const query = sql`
+            SELECT 
+              s.id,
+              s.title,
+              s.artist,
+              s."albumCover",
+              s.duration,
+              COALESCE(SUM(CASE WHEN all_votes."voteType" = 'like' THEN 1 ELSE 0 END), 0) as likes,
+              COALESCE(SUM(CASE WHEN all_votes."voteType" = 'dislike' THEN 1 ELSE 0 END), 0) as dislikes,
+              COUNT(all_votes.id) as totalVotes
+            FROM "songs" s
+            LEFT JOIN (
+              SELECT id, "songId", "voteType", "createdAt" FROM "votes"
+              UNION ALL
+              SELECT id, "songId", "voteType", "createdAt" FROM "userVotes"
+            ) all_votes ON s.id = all_votes."songId"
+            WHERE all_votes.id IS NOT NULL AND all_votes."createdAt" >= ${startDateStr}
+            GROUP BY s.id, s.title, s.artist, s."albumCover", s.duration
+            HAVING COUNT(all_votes.id) > 0
+            ORDER BY totalVotes DESC
+          `;
+          result = await db.execute(query)
+        } catch (error: any) {
+          console.error('[All Ranking Query Error]', error?.message || error);
+          result = [];
+        }
+        
+        const rows = Array.isArray(result) ? result : [];
+        
+        const convertedRows = rows.map((row: any, index: number) => {
+          const likes = parseInt(String(row.likes), 10) || 0;
+          const dislikes = parseInt(String(row.dislikes), 10) || 0;
+          const totalVotes = parseInt(String(row.totalVotes), 10) || 0;
+          
+          return {
+            ...row,
+            likes,
+            dislikes,
+            totalVotes,
+            rank: index + 1,
+            trending: 0,
+          };
+        });
+        
+        const totalLikes = convertedRows.reduce((sum: number, row: any) => sum + (row.likes || 0), 0);
+        const totalDislikes = convertedRows.reduce((sum: number, row: any) => sum + (row.dislikes || 0), 0);
+        const totalVotesSum = convertedRows.reduce((sum: number, row: any) => sum + (row.totalVotes || 0), 0);
+        
+        return {
+          songs: convertedRows,
+          stats: {
+            totalLikes: String(totalLikes),
+            totalDislikes: String(totalDislikes),
+            totalVotes: String(totalVotesSum),
+            totalSongs: convertedRows.length,
+          },
+        };
+      }),
+
     ranking: publicProcedure
       .input(
         z.object({
@@ -612,7 +713,7 @@ export const appRouter = router({
         // Converter para string ISO para usar na query
         const startDateStr = startDate.toISOString();
 
-        let result;
+        let result: any[] = [];
         try {
           const query = sql`
             SELECT 

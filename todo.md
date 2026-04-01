@@ -320,6 +320,12 @@
 - [x] Implementar player contínuo ao navegar entre páginas (usar contexto global)
 - [x] Adicionar nome do artista e música ao histórico de votações
 
+## Fase 42: Melhorias no Dashboard Admin
+- [ ] Contabilizar todos os votos em "Músicas Votadas" (não apenas 5)
+- [ ] Contabilizar todos os votos em "Total de Votos"
+- [ ] Contabilizar todos os votos em "Votos Totais"
+- [ ] Listar todas as músicas votadas em "Músicas Mais Votadas" (remover limite de 5)
+
 
 ## Fase 35: Resolução do Problema de Stream Desligando Automaticamente
 - [x] Identificar causa: Icecast interrompendo conexão repetidamente

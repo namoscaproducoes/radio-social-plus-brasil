@@ -577,7 +577,7 @@ export const appRouter = router({
         z.object({
           period: z.enum(["day", "week", "month", "year"]).optional(),
           genreId: z.number().optional(),
-        })
+        }).optional()
       )
       .query(async ({ input }) => {
         const db = await getDb();
@@ -586,8 +586,9 @@ export const appRouter = router({
         // Calcular data de início baseado no período
         const now = new Date();
         let startDate = new Date();
+        const period = input?.period || 'week';
         
-        switch (input.period) {
+        switch (period) {
           case "day":
             startDate.setHours(0, 0, 0, 0);
             break;

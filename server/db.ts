@@ -239,14 +239,10 @@ export async function getRecentSongHistory(limit: number = 20) {
     `;
     const result = await db.execute(query) as any;
 
-    console.log('[getRecentSongHistory] Result type:', typeof result, 'Is array:', Array.isArray(result), 'Length:', result?.length);
-    
     // db.execute com sql template retorna os dados diretamente
     if (Array.isArray(result)) {
-      console.log('[getRecentSongHistory] Returning', result.length, 'items');
       return result;
     }
-    console.log('[getRecentSongHistory] Result is not array, returning empty');
     return [];
   } catch (error) {
     console.error("[Database] Failed to get song history:", error);

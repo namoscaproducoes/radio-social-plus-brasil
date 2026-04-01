@@ -194,6 +194,12 @@
 - [x] Criar seção de músicas favoritas (votadas com like) - estrutura preparada
 - [x] Preparar estrutura para recursos exclusivos futuros
 - [x] Testar fluxo completo de autenticação e dashboard - Registro e login funcionando perfeitamente
+- [x] Testar cadastro com novo usuário (Cleber Teste / cleber@test.com) - FUNCIONANDO!
+- [x] Testar login com credenciais corretas - FUNCIONANDO!
+- [x] Testar menu dropdown do usuário (nome, email, Meu Dashboard, Meu Perfil, Sair) - FUNCIONANDO!
+- [x] Testar logout - FUNCIONANDO!
+- [x] Verificar que botões ENTRAR/REGISTRAR desaparecem quando logado - FUNCIONANDO!
+- [x] Verificar que botões ENTRAR/REGISTRAR reaparecem após logout - FUNCIONANDO!
 
 
 ## Fase 28: Sistema de Recuperação de Senha
@@ -274,6 +280,18 @@
 - [ ] Analisar cache e diferenças entre dev e produção
 - [ ] Limpar cache e forçar rebuild
 - [ ] Testar mudanças no site publicado
+
+## Fase 60: Sistema de Login/Cadastro Independente - COMPLETO
+- [x] Sistema de registro (email/senha) funcionando perfeitamente
+- [x] Sistema de login (email/senha) funcionando perfeitamente
+- [x] Autenticação com JWT e sessão de usuário
+- [x] Menu dropdown do usuário logado com todas as opções
+- [x] Dashboard personalizado do usuário
+- [x] Logout funcionando corretamente
+- [x] Integração com sistema de votação
+- [x] Seção "Voto do Usuário Logado" exibindo último voto
+- [x] Todos os links abrindo em nova aba (target="_blank")
+- [x] Testes manuais completos - TUDO FUNCIONANDO!
 
 
 ## Fase 38: Correção de Upload de Foto - S3 em vez de Base64
@@ -687,3 +705,8 @@ Bug corrigido definitivamente. Contabilizacao de votos agora funciona 100% nos d
 - [ ] Adicionar sininho de notificações sempre visível
 - [ ] Implementar notificações de votos em músicas que o usuário gosta
 - [ ] Implementar notificações quando música sobe no ranking
+
+## Fase 45: Correção de Login e Cadastro
+- [ ] Corrigir redirecionamento de login (não abre em nova aba)
+- [ ] Corrigir redirecionamento de cadastro (não abre em nova aba)
+- [ ] Testar fluxo completo de autenticação

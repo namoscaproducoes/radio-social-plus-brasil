@@ -678,3 +678,12 @@ Bug corrigido definitivamente. Contabilizacao de votos agora funciona 100% nos d
 - [x] Mostrar botão "Login" se não estiver logado
 - [x] Integrar na Home.tsx com dados dinâmicos (já estava integrado)
 - [x] Testar no Render - FUNCIONANDO!
+
+
+## Fase 44: Melhorias na Navegação e Menu de Usuário
+- [ ] Adicionar target="_blank" em links: Entrar, Registrar, Sobre a rádio, Dashboard mais votadas
+- [ ] Melhorar menu de usuário com dropdown mostrando nome, email, "Meu Dashboard", "Meu Perfil", "Sair"
+- [ ] Corrigir VoteNotification para aparecer após votação do usuário
+- [ ] Adicionar sininho de notificações sempre visível
+- [ ] Implementar notificações de votos em músicas que o usuário gosta
+- [ ] Implementar notificações quando música sobe no ranking

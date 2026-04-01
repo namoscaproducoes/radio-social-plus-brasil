@@ -75,12 +75,14 @@ export default function Home() {
                 >
                   Sobre a rádio
                 </a>
-                <button 
-                  onClick={() => window.open('/dashboard', '_blank')}
+                <a 
+                  href="/dashboard"
+                  target="_blank" 
+                  rel="noopener noreferrer"
                   className="text-white hover:text-yellow-500 transition font-medium"
                 >
                   Dashboard mais votadas
-                </button>
+                </a>
               </div>
             </div>
             
@@ -101,18 +103,22 @@ export default function Home() {
                 </>
               ) : (
                 <>
-                  <Button 
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full px-4 py-1 text-xs"
-                    onClick={() => navigate('/auth/register')}
+                  <a 
+                    href="/auth/register"
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full px-4 py-1 text-xs inline-block"
                   >
                     REGISTRAR
-                  </Button>
-                  <Button 
-                    className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-full px-4 py-1 text-xs"
-                    onClick={() => navigate('/auth/login')}
+                  </a>
+                  <a 
+                    href="/auth/login"
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="bg-red-600 hover:bg-red-700 text-white font-bold rounded-full px-4 py-1 text-xs inline-block"
                   >
                     ENTRAR
-                  </Button>
+                  </a>
                 </>
               )}
             </div>
@@ -143,24 +149,22 @@ export default function Home() {
               </button>
               {!isAuthenticated && (
                 <>
-                  <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full py-1 text-xs mb-2"
-                    onClick={() => {
-                      navigate('/auth/register');
-                      setMobileMenuOpen(false);
-                    }}
+                      <a 
+                    href="/auth/register"
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full block text-center bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full py-1 text-xs mb-2"
                   >
                     REGISTRAR
-                  </Button>
-                  <Button 
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-bold rounded-full py-1 text-xs"
-                    onClick={() => {
-                      navigate('/auth/login');
-                      setMobileMenuOpen(false);
-                    }}
+                  </a>
+                  <a 
+                    href="/auth/login"
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full block text-center bg-red-600 hover:bg-red-700 text-white font-bold rounded-full py-1 text-xs"
                   >
                     ENTRAR
-                  </Button>
+                  </a>
                 </>
               )}
             </div>

@@ -580,35 +580,43 @@ export async function getLatestVote() {
   const db = await getDb();
   if (!db) return null;
 
-  try {
-    const result = await db.execute(`
-      SELECT 
-        v.id,
-        v.userId,
-        v.songId,
-        v.voteType,
-        v.createdAt,
-        u.name as userName,
-        s.title as songTitle,
-        s.artist as songArtist,
-        s.albumCover as albumCover
-      FROM (
-        SELECT id, userId, songId, voteType, createdAt FROM userVotes
-        UNION ALL
-        SELECT id, NULL as userId, songId, voteType, createdAt FROM votes
-      ) v
-      LEFT JOIN users u ON v.userId = u.id
-      LEFT JOIN songs s ON v.songId = s.id
-      ORDER BY v.createdAt DESC
-      LIMIT 1
-    `) as any;
+  let lastError: any;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const result = await db.execute(`
+        SELECT 
+          v.id,
+          v.userId,
+          v.songId,
+          v.voteType,
+          v.createdAt,
+          u.name as userName,
+          s.title as songTitle,
+          s.artist as songArtist,
+          s.albumCover as albumCover
+        FROM (
+          SELECT id, userId, songId, voteType, createdAt FROM userVotes
+          UNION ALL
+          SELECT id, NULL as userId, songId, voteType, createdAt FROM votes
+        ) v
+        LEFT JOIN users u ON v.userId = u.id
+        LEFT JOIN songs s ON v.songId = s.id
+        ORDER BY v.createdAt DESC
+        LIMIT 1
+      `) as any;
 
-    if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) && result[0].length > 0) {
-      return result[0][0];
+      if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) && result[0].length > 0) {
+        return result[0][0];
+      }
+      return null;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 2) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 100));
+      }
     }
-    return null;
-  } catch (error) {
-    console.error("[Database] Failed to get latest vote:", error);
-    return null;
   }
+  
+  console.error("[Database] Failed to get latest vote after 3 attempts:", lastError);
+  return null;
 }

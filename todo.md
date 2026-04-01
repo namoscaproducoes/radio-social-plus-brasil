@@ -670,11 +670,11 @@ Bug corrigido definitivamente. Contabilizacao de votos agora funciona 100% nos d
 - [x] Implementar polling em tempo real
 
 ## Fase 43: Seção de Voto do Usuário Logado na Landing Page
-- [ ] Criar componente de seção de voto do usuário logado
-- [ ] Exibir avatar/capa do álbum da música votada
-- [ ] Exibir nome do usuário + "acabou de dar um voto:"
-- [ ] Exibir nome da música e artista votada
-- [ ] Exibir ícone de like/dislike (👍 ou 👎)
-- [ ] Mostrar botão "Login" se não estiver logado
-- [ ] Integrar na Home.tsx com dados dinâmicos
-- [ ] Testar no Render
+- [x] Criar componente de seção de voto do usuário logado (VoteNotification.tsx já existia)
+- [x] Exibir avatar/capa do álbum da música votada
+- [x] Exibir nome do usuário + "acabou de dar um voto:"
+- [x] Exibir nome da música e artista votada
+- [x] Exibir ícone de like/dislike (👍 ou 👎)
+- [x] Mostrar botão "Login" se não estiver logado
+- [x] Integrar na Home.tsx com dados dinâmicos (já estava integrado)
+- [x] Testar no Render - FUNCIONANDO!

@@ -765,7 +765,7 @@ export const appRouter = router({
         // Calcular totais explicitamente no backend
         const totalLikes = convertedRows.reduce((sum: number, row: any) => sum + (row.likes || 0), 0);
         const totalDislikes = convertedRows.reduce((sum: number, row: any) => sum + (row.dislikes || 0), 0);
-        const totalVotesSum = convertedRows.reduce((sum: number, row: any) => sum + (row.totalVotes || 0), 0);
+        const totalVotesSum = totalLikes + totalDislikes; // Total de votos é a soma de likes + dislikes
         
         // Retornar com metadados de totais - como strings para evitar problemas de serialização
         return {

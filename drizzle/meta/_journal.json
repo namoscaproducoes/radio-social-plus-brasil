@@ -1,89 +1,12 @@
 {
-  "version": "7",
-  "dialect": "mysql",
+  "version": "5",
+  "dialect": "postgresql",
   "entries": [
     {
       "idx": 0,
-      "version": "5",
-      "when": 1771972966892,
-      "tag": "0000_sticky_alex_power",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1771973209863,
-      "tag": "0001_robust_paladin",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1772212805153,
-      "tag": "0002_naive_salo",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "5",
-      "when": 1772219252495,
-      "tag": "0003_wooden_kat_farrell",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "5",
-      "when": 1772224572645,
-      "tag": "0004_stale_deathstrike",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "5",
-      "when": 1772472267453,
-      "tag": "0005_shallow_mysterio",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "5",
-      "when": 1772472974047,
-      "tag": "0006_cynical_kylun",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "5",
-      "when": 1772474884120,
-      "tag": "0007_bumpy_morlun",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "5",
-      "when": 1772478680930,
-      "tag": "0008_nice_newton_destine",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "5",
-      "when": 1772480216168,
-      "tag": "0009_groovy_sersi",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "5",
-      "when": 1772818447518,
-      "tag": "0010_adorable_ravenous",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "5",
-      "when": 1772818505193,
-      "tag": "0011_wild_quasimodo",
+      "version": "7",
+      "when": 1775051566843,
+      "tag": "0000_needy_luckman",
       "breakpoints": true
     }
   ]

@@ -163,7 +163,7 @@ export const appRouter = router({
           password: z.string().min(6),
         })
       )
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const db = await getDb();
         if (!db) throw new Error("Database not available");
 
@@ -176,7 +176,7 @@ export const appRouter = router({
         // Gerar openId único para usuários de email/senha
         const openId = `email_${crypto.randomBytes(16).toString('hex')}`;
 
-        const result = await db.insert(users).values({
+        await db.insert(users).values({
           name: input.name,
           email: input.email,
           passwordHash,
@@ -184,7 +184,19 @@ export const appRouter = router({
           openId,
         });
 
-        return { success: true, userId: (result as any).insertId || 0 };
+        // Fazer login automático após registro
+        const { user, token } = await loginUser(input.email, input.password);
+        
+        // Definir cookie com token JWT
+        const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+        ctx.res.cookie(COOKIE_NAME, token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: ONE_YEAR_MS,
+        });
+
+        return { success: true, user, token };
       }),
     
     login: publicProcedure

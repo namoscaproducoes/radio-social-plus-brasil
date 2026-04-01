@@ -3,6 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import Dashboard from "@/pages/Dashboard";
 import Login from "@/pages/Login";
+import Register from "@/pages/Auth/Register";
 import UserDashboard from "@/pages/User/Dashboard";
 import { UserProfile } from "@/pages/UserProfile";
 import { Route, Switch } from "wouter";
@@ -20,7 +21,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/login" component={Login} />
       <Route path="/auth/login" component={Login} />
-      <Route path="/auth/register" component={Login} />
+      <Route path="/auth/register" component={Register} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/user/dashboard" component={UserDashboard} />
       <Route path="/user/profile" component={UserProfile} />

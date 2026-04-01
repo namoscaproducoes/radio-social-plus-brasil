@@ -36,8 +36,8 @@ export default function Dashboard() {
     }
   }, [metadataResponse, setSongTitle, setSongArtist, setAlbumCover]);
 
-  // Fetch dashboard stats - usar allRanking para obter TODAS as músicas votadas
-  const { data: rankingData } = trpc.songs.allRanking.useQuery(
+  // Fetch dashboard stats - usar ranking para obter TODAS as músicas votadas (LIMIT 5 foi removido)
+  const { data: rankingData } = trpc.songs.ranking.useQuery(
     { period: period as any, genreId },
     {
       refetchInterval: 5000, // Atualizar a cada 5 segundos para refletir novos votos

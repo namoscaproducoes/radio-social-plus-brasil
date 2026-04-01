@@ -735,7 +735,6 @@ export const appRouter = router({
             GROUP BY s.id, s.title, s.artist, s."albumCover", s.duration
             HAVING COUNT(all_votes.id) > 0
             ORDER BY totalVotes DESC
-            LIMIT 5
           `;
           result = await db.execute(query)
         } catch (error: any) {

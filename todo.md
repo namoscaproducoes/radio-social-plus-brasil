@@ -321,10 +321,10 @@
 - [x] Adicionar nome do artista e música ao histórico de votações
 
 ## Fase 42: Melhorias no Dashboard Admin
-- [ ] Contabilizar todos os votos em "Músicas Votadas" (não apenas 5)
-- [ ] Contabilizar todos os votos em "Total de Votos"
-- [ ] Contabilizar todos os votos em "Votos Totais"
-- [ ] Listar todas as músicas votadas em "Músicas Mais Votadas" (remover limite de 5)
+- [x] Contabilizar todos os votos em "Músicas Votadas" (não apenas 5) - Query allRanking criada
+- [x] Contabilizar todos os votos em "Total de Votos" - Query allRanking calcula totais
+- [x] Contabilizar todos os votos em "Votos Totais" - Query allRanking calcula totais
+- [x] Listar todas as músicas votadas em "Músicas Mais Votadas" (remover limite de 5) - Dashboard atualizado para usar allRanking
 
 
 ## Fase 35: Resolução do Problema de Stream Desligando Automaticamente

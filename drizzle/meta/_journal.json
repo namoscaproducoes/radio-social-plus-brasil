@@ -8,6 +8,13 @@
       "when": 1775051566843,
       "tag": "0000_needy_luckman",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1775081216098,
+      "tag": "0001_next_ultimates",
+      "breakpoints": true
     }
   ]
 }

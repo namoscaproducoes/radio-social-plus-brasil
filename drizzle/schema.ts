@@ -1,16 +1,16 @@
-import { integer, pgEnum, pgTable, text, timestamp, varchar, bigint } from "drizzle-orm/pg-core";
+import { mysqlTable, varchar, text, int, timestamp, bigint } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
  * Extend this file with additional tables as your product grows.
  * Columns use camelCase to match both database fields and generated types.
  */
-export const users = pgTable("users", {
+export const users = mysqlTable("users", {
   /**
    * Surrogate primary key. Auto-incremented numeric value managed by the database.
    * Use this for relations between tables.
    */
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: int("id").primaryKey().autoincrement(),
   /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
   openId: varchar("openId", { length: 64 }).unique(),
   name: text("name"),
@@ -30,12 +30,12 @@ export type InsertUser = typeof users.$inferInsert;
 /**
  * Songs table - armazena informações das músicas tocadas na rádio
  */
-export const songs = pgTable("songs", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const songs = mysqlTable("songs", {
+  id: int("id").primaryKey().autoincrement(),
   title: varchar("title", { length: 255 }).notNull(),
   artist: varchar("artist", { length: 255 }).notNull(),
   albumCover: text("albumCover"), // URL da capa do álbum
-  duration: integer("duration"), // duração em segundos
+  duration: int("duration"), // duração em segundos
   externalId: varchar("externalId", { length: 255 }).unique(), // ID externo do stream
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
@@ -47,8 +47,8 @@ export type InsertSong = typeof songs.$inferInsert;
 /**
  * Genres table - armazena os gêneros de música
  */
-export const genres = pgTable("genres", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+export const genres = mysqlTable("genres", {
+  id: int("id").primaryKey().autoincrement(),
   name: varchar("name", { length: 100 }).notNull().unique(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
@@ -59,9 +59,9 @@ export type InsertGenre = typeof genres.$inferInsert;
 /**
  * Votes table - armazena votos (likes e dislikes) das músicas
  */
-export const votes = pgTable("votes", {
-  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
-  songId: integer("songId").notNull(),
+export const votes = mysqlTable("votes", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  songId: int("songId").notNull(),
   voteType: varchar("voteType", { length: 10 }).notNull(),
   userId: varchar("userId", { length: 255 }), // ID anônimo ou do usuário
   ipAddress: varchar("ipAddress", { length: 45 }), // IPv4 ou IPv6
@@ -75,9 +75,9 @@ export type InsertVote = typeof votes.$inferInsert;
 /**
  * CurrentSong table - armazena a música atualmente tocando
  */
-export const currentSong = pgTable("currentSong", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  songId: integer("songId"),
+export const currentSong = mysqlTable("currentSong", {
+  id: int("id").primaryKey().autoincrement(),
+  songId: int("songId"),
   title: varchar("title", { length: 255 }).notNull(),
   artist: varchar("artist", { length: 255 }).notNull(),
   albumCover: text("albumCover"),
@@ -91,8 +91,8 @@ export type InsertCurrentSong = typeof currentSong.$inferInsert;
 /**
  * SongHistory table - armazena o histórico das últimas músicas tocadas
  */
-export const songHistory = pgTable("songHistory", {
-  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+export const songHistory = mysqlTable("songHistory", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
   title: varchar("title", { length: 255 }).notNull(),
   artist: varchar("artist", { length: 255 }).notNull(),
   albumCover: text("albumCover"), // URL da capa do álbum
@@ -105,9 +105,9 @@ export type InsertSongHistory = typeof songHistory.$inferInsert;
 /**
  * PasswordResetToken table - armazena tokens para recuperação de senha
  */
-export const passwordResetTokens = pgTable("passwordResetTokens", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer("userId").notNull(),
+export const passwordResetTokens = mysqlTable("passwordResetTokens", {
+  id: int("id").primaryKey().autoincrement(),
+  userId: int("userId").notNull(),
   token: varchar("token", { length: 255 }).notNull().unique(),
   expiresAt: timestamp("expiresAt").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
@@ -119,10 +119,10 @@ export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
 /**
  * UserVotes table - armazena votos (likes e dislikes) de usuários autenticados
  */
-export const userVotes = pgTable("userVotes", {
-  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer("userId").notNull(),
-  songId: integer("songId").notNull(),
+export const userVotes = mysqlTable("userVotes", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  userId: int("userId").notNull(),
+  songId: int("songId").notNull(),
   voteType: varchar("voteType", { length: 10 }).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
@@ -135,10 +135,10 @@ export type InsertUserVote = typeof userVotes.$inferInsert;
 /**
  * Favorites table - armazena as músicas favoritas dos usuários
  */
-export const favorites = pgTable("favorites", {
-  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer("userId").notNull(),
-  songId: integer("songId").notNull(),
+export const favorites = mysqlTable("favorites", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  userId: int("userId").notNull(),
+  songId: int("songId").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
@@ -148,12 +148,10 @@ export type InsertFavorite = typeof favorites.$inferInsert;
 /**
  * Notifications table - armazena notificações para usuários
  */
-export const typeEnum = pgEnum("type", ["new_votes", "favorite_played", "trending", "comment"]);
-
-export const notifications = pgTable("notifications", {
-  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
-  userId: integer("userId").notNull(),
-  songId: integer("songId").notNull(),
+export const notifications = mysqlTable("notifications", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  userId: int("userId").notNull(),
+  songId: int("songId").notNull(),
   type: varchar("type", { length: 20 }).notNull(),
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
@@ -168,12 +166,12 @@ export type InsertNotification = typeof notifications.$inferInsert;
 /**
  * RankingHistory table - armazena o histórico de ranking para calcular trending
  */
-export const rankingHistory = pgTable("rankingHistory", {
-  id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
-  songId: integer("songId").notNull(),
-  rank: integer("rank").notNull(),
-  likes: integer("likes").notNull(),
-  dislikes: integer("dislikes").notNull(),
+export const rankingHistory = mysqlTable("rankingHistory", {
+  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+  songId: int("songId").notNull(),
+  rank: int("rank").notNull(),
+  likes: int("likes").notNull(),
+  dislikes: int("dislikes").notNull(),
   period: varchar("period", { length: 20 }).notNull(), // 'day', 'week', 'month', 'year'
   recordedAt: timestamp("recordedAt").defaultNow().notNull(),
 });

@@ -607,23 +607,30 @@ export const appRouter = router({
         // Converter para string ISO para usar na query
         const startDateStr = startDate.toISOString();
 
-        const result = await db.execute(`
-          SELECT 
-            s.id,
-            s.title,
-            s.artist,
-            s.albumCover,
-            s.duration,
-            COUNT(CASE WHEN v.voteType = 'like' THEN 1 END) as likes,
-            COUNT(CASE WHEN v.voteType = 'dislike' THEN 1 END) as dislikes,
-            COUNT(v.id) as totalVotes
-          FROM songs s
-          INNER JOIN votes v ON s.id = v.songId
-          WHERE v.createdAt >= '${startDateStr}'
-          GROUP BY s.id, s.title, s.artist, s.albumCover, s.duration
-          HAVING COUNT(v.id) > 0
-          ORDER BY totalVotes DESC
-        `)
+        let result;
+        try {
+          result = await db.execute(`
+            SELECT 
+              s.id,
+              s.title,
+              s.artist,
+              s.albumCover,
+              s.duration,
+              COUNT(CASE WHEN v.voteType = 'like' THEN 1 END) as likes,
+              COUNT(CASE WHEN v.voteType = 'dislike' THEN 1 END) as dislikes,
+              COUNT(v.id) as totalVotes
+            FROM songs s
+            INNER JOIN votes v ON s.id = v.songId
+            WHERE v.createdAt >= '${startDateStr}'
+            GROUP BY s.id, s.title, s.artist, s.albumCover, s.duration
+            HAVING COUNT(v.id) > 0
+            ORDER BY totalVotes DESC
+          `)
+        } catch (error: any) {
+          console.error('[Top 5 Query Error]', error?.message || error);
+          // Se a query falhar, retornar lista vazia
+          result = [[], []];
+        }
         
         // db.execute retorna [rows, fields], entao extrair apenas as linhas
         const rows = Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) ? result[0] : [];

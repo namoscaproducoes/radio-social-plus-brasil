@@ -239,8 +239,9 @@ export async function getRecentSongHistory(limit: number = 20) {
     `;
     const result = await db.execute(query) as any;
 
-    if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0])) {
-      return result[0];
+    // db.execute com sql template retorna os dados diretamente
+    if (Array.isArray(result)) {
+      return result;
     }
     return [];
   } catch (error) {

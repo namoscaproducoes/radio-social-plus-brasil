@@ -643,8 +643,8 @@ export const appRouter = router({
           result = [[], []];
         }
         
-        // db.execute retorna [rows, fields], entao extrair apenas as linhas
-        const rows = Array.isArray(result) && result.length > 0 && Array.isArray(result[0]) ? result[0] : [];
+        // db.execute com sql template retorna os dados diretamente como array
+        const rows = Array.isArray(result) ? result : [];
         
         // Converter valores para numero inteiro (evitar Buffer binario)
         const convertedRows = rows.map((row: any, index: number) => {

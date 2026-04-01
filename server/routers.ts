@@ -629,7 +629,7 @@ export const appRouter = router({
               UNION ALL
               SELECT id, songId, voteType, createdAt FROM "userVotes"
             ) all_votes ON s.id = all_votes.songId
-            WHERE all_votes.createdAt >= '${startDateStr}'
+            WHERE all_votes.id IS NOT NULL AND all_votes.createdAt >= '${startDateStr}'
             GROUP BY s.id, s.title, s.artist, s.albumCover, s.duration
             HAVING COUNT(all_votes.id) > 0
             ORDER BY totalVotes DESC

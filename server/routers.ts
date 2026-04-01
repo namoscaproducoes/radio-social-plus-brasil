@@ -618,7 +618,7 @@ export const appRouter = router({
             COUNT(CASE WHEN v.voteType = 'dislike' THEN 1 END) as dislikes,
             COUNT(v.id) as totalVotes
           FROM songs s
-          LEFT JOIN votes v ON s.id = v.songId
+          INNER JOIN votes v ON s.id = v.songId
           WHERE v.createdAt >= '${startDateStr}'
           GROUP BY s.id, s.title, s.artist, s.albumCover, s.duration
           HAVING COUNT(v.id) > 0

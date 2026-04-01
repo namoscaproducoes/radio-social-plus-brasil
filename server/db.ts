@@ -592,7 +592,11 @@ export async function getLatestVote() {
         s.title as songTitle,
         s.artist as songArtist,
         s.albumCover as albumCover
-      FROM userVotes v
+      FROM (
+        SELECT id, userId, songId, voteType, createdAt FROM userVotes
+        UNION ALL
+        SELECT id, NULL as userId, songId, voteType, createdAt FROM votes
+      ) v
       LEFT JOIN users u ON v.userId = u.id
       LEFT JOIN songs s ON v.songId = s.id
       ORDER BY v.createdAt DESC

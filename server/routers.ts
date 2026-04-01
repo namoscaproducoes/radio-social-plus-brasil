@@ -614,14 +614,14 @@ export const appRouter = router({
             s.artist,
             s.albumCover,
             s.duration,
-            CAST((COALESCE(SUM(CASE WHEN v.voteType = 'like' AND v.createdAt >= '${startDateStr}' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'like' AND uv.createdAt >= '${startDateStr}' THEN 1 ELSE 0 END), 0)) AS UNSIGNED) as likes,
-            CAST((COALESCE(SUM(CASE WHEN v.voteType = 'dislike' AND v.createdAt >= '${startDateStr}' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv.voteType = 'dislike' AND uv.createdAt >= '${startDateStr}' THEN 1 ELSE 0 END), 0)) AS UNSIGNED) as dislikes,
-            CAST((COALESCE(COUNT(DISTINCT CASE WHEN v.createdAt >= '${startDateStr}' THEN v.id END), 0) + COALESCE(COUNT(DISTINCT CASE WHEN uv.createdAt >= '${startDateStr}' THEN uv.id END), 0)) AS UNSIGNED) as totalVotes
+            (COALESCE(SUM(CASE WHEN v."voteType" = 'like' AND v."createdAt" >= '${startDateStr}' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv."voteType" = 'like' AND uv."createdAt" >= '${startDateStr}' THEN 1 ELSE 0 END), 0))::integer as likes,
+            (COALESCE(SUM(CASE WHEN v."voteType" = 'dislike' AND v."createdAt" >= '${startDateStr}' THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN uv."voteType" = 'dislike' AND uv."createdAt" >= '${startDateStr}' THEN 1 ELSE 0 END), 0))::integer as dislikes,
+            (COALESCE(COUNT(DISTINCT CASE WHEN v."createdAt" >= '${startDateStr}' THEN v.id END), 0) + COALESCE(COUNT(DISTINCT CASE WHEN uv."createdAt" >= '${startDateStr}' THEN uv.id END), 0))::integer as totalVotes
           FROM songs s
-          LEFT JOIN votes v ON s.id = v.songId
-          LEFT JOIN userVotes uv ON s.id = uv.songId
+          LEFT JOIN votes v ON s.id = v."songId"
+          LEFT JOIN "userVotes" uv ON s.id = uv."songId"
           GROUP BY s.id
-          HAVING totalVotes > 0
+          HAVING (COALESCE(COUNT(DISTINCT CASE WHEN v."createdAt" >= '${startDateStr}' THEN v.id END), 0) + COALESCE(COUNT(DISTINCT CASE WHEN uv."createdAt" >= '${startDateStr}' THEN uv.id END), 0)) > 0
           ORDER BY totalVotes DESC
         `)
         

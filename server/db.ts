@@ -11,7 +11,12 @@ let _client: ReturnType<typeof postgres> | null = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _client = postgres(process.env.DATABASE_URL);
+      _client = postgres(process.env.DATABASE_URL, {
+        ssl: 'require',
+        idle_timeout: 30,
+        connect_timeout: 10,
+        max: 10,
+      });
       _db = drizzle(_client);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
@@ -219,7 +224,8 @@ export async function getRecentSongHistory(limit: number = 20) {
   if (!db) return [];
 
   try {
-    const result = await db.execute(`
+    const { sql } = await import('drizzle-orm');
+    const query = sql`
       SELECT 
         MAX(id) as id,
         title,
@@ -230,7 +236,8 @@ export async function getRecentSongHistory(limit: number = 20) {
       GROUP BY title, artist
       ORDER BY MAX("playedAt") DESC
       LIMIT ${limit}
-    `) as any;
+    `;
+    const result = await db.execute(query) as any;
 
     if (Array.isArray(result) && result.length > 0 && Array.isArray(result[0])) {
       return result[0];

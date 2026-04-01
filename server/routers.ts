@@ -4,7 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { z } from "zod";
 import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, addToHistory, getRecentSongHistory, getTopVotedSongsThisMonth, getVoteCountsForSong, addFavorite, removeFavorite, getUserFavorites, createNotification, getUserNotifications, markNotificationAsRead, getUnreadNotificationCount, updateUserProfile, getUserById, getUserLikeCountForSong, checkNotificationExists, getUsersWhoLikedSong, getLatestVote } from "./db";
-import { eq, and, gt, desc } from "drizzle-orm";
+import { eq, and, gt, desc, sql } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
 import { getIcecastMetadata } from "./icecast-metadata";
 import { songs, users, passwordResetTokens, userVotes, votes } from "../drizzle/schema";
@@ -614,15 +614,15 @@ export const appRouter = router({
 
         let result;
         try {
-          result = await db.execute(`
+          const query = sql`
             SELECT 
               s.id,
               s.title,
               s.artist,
-              s.albumCover,
+              s."albumCover",
               s.duration,
-              COALESCE(SUM(CASE WHEN all_votes.voteType = 'like' THEN 1 ELSE 0 END), 0) as likes,
-              COALESCE(SUM(CASE WHEN all_votes.voteType = 'dislike' THEN 1 ELSE 0 END), 0) as dislikes,
+              COALESCE(SUM(CASE WHEN all_votes."voteType" = 'like' THEN 1 ELSE 0 END), 0) as likes,
+              COALESCE(SUM(CASE WHEN all_votes."voteType" = 'dislike' THEN 1 ELSE 0 END), 0) as dislikes,
               COUNT(all_votes.id) as totalVotes
             FROM "songs" s
             LEFT JOIN (
@@ -630,12 +630,13 @@ export const appRouter = router({
               UNION ALL
               SELECT id, "songId", "voteType", "createdAt" FROM "userVotes"
             ) all_votes ON s.id = all_votes."songId"
-            WHERE all_votes.id IS NOT NULL AND all_votes.createdAt >= '${startDateStr}'
-            GROUP BY s.id, s.title, s.artist, s.albumCover, s.duration
+            WHERE all_votes.id IS NOT NULL AND all_votes."createdAt" >= ${startDateStr}
+            GROUP BY s.id, s.title, s.artist, s."albumCover", s.duration
             HAVING COUNT(all_votes.id) > 0
             ORDER BY totalVotes DESC
             LIMIT 5
-          `)
+          `;
+          result = await db.execute(query)
         } catch (error: any) {
           console.error('[Top 5 Query Error]', error?.message || error);
           // Se a query falhar, retornar lista vazia

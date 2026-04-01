@@ -7,7 +7,7 @@ import { getCurrentSong, getSongsWithVotes, getVotesForSong, addVote, getDb, add
 import { eq, and, gt, desc } from "drizzle-orm";
 import { searchItunesAlbumCover } from "./metadata";
 import { getIcecastMetadata } from "./icecast-metadata";
-import { songs, users, passwordResetTokens, userVotes } from "../drizzle/schema";
+import { songs, users, passwordResetTokens, userVotes, votes } from "../drizzle/schema";
 import crypto from "crypto";
 import { youtubeRouter } from "./youtube-router";
 import bcrypt from "bcryptjs";
@@ -24,7 +24,7 @@ const METADATA_CACHE_TTL = 30000; // 30 segundos
 export const appRouter = router({
   system: systemRouter,
   votes: router({
-    addVote: protectedProcedure
+    addVote: publicProcedure
       .input(
         z.object({
           songId: z.number(),
@@ -34,73 +34,77 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {
         const db = await getDb();
         if (!db) throw new Error("Database not available");
-        if (!ctx.user) throw new Error("User not authenticated");
 
-        // Verificar se o usuário já votou nesta música
-        const existingVote = await db
-          .select()
-          .from(userVotes)
-          .where(
-            and(
-              eq(userVotes.userId, ctx.user.id),
-              eq(userVotes.songId, input.songId)
-            )
-          )
-          .limit(1);
-
-        if (existingVote && existingVote.length > 0) {
-          // Atualizar voto existente
-          await db
-            .update(userVotes)
-            .set({ voteType: input.voteType })
+        // Se o usuário está logado, usar tabela userVotes
+        if (ctx.user) {
+          const existingVote = await db
+            .select()
+            .from(userVotes)
             .where(
               and(
                 eq(userVotes.userId, ctx.user.id),
                 eq(userVotes.songId, input.songId)
               )
-            );
-        } else {
-          // Criar novo voto
-          await db.insert(userVotes).values({
-            userId: ctx.user.id,
-            songId: input.songId,
-            voteType: input.voteType,
-          });
-        }
+            )
+            .limit(1);
 
-        // Se o voto eh um like, notificar usuarios que ja curtiram essa musica 2+ vezes
-        if (input.voteType === 'like') {
-          try {
-            // Buscar usuarios que ja curtiram essa musica 2+ vezes
-            const usersToNotify = await getUsersWhoLikedSong(input.songId, 2);
-            
-            // Buscar informacoes da musica
-            const song = await db.select().from(songs).where(eq(songs.id, input.songId)).limit(1);
-            
-            if (song && song.length > 0) {
-              const songInfo = song[0];
+          if (existingVote && existingVote.length > 0) {
+            await db
+              .update(userVotes)
+              .set({ voteType: input.voteType })
+              .where(
+                and(
+                  eq(userVotes.userId, ctx.user.id),
+                  eq(userVotes.songId, input.songId)
+                )
+              );
+          } else {
+            await db.insert(userVotes).values({
+              userId: ctx.user.id,
+              songId: input.songId,
+              voteType: input.voteType,
+            });
+          }
+
+          if (input.voteType === 'like') {
+            try {
+              const usersToNotify = await getUsersWhoLikedSong(input.songId, 2);
+              const song = await db.select().from(songs).where(eq(songs.id, input.songId)).limit(1);
               
-              // Notificar cada usuario (exceto o que acabou de votar)
-              for (const userId of usersToNotify) {
-                if (userId !== ctx.user.id) {
-                  // Verificar se ja existe notificacao nao lida
-                  const exists = await checkNotificationExists(userId, input.songId, 'new_votes');
-                  
-                  if (!exists) {
-                    await createNotification(
-                      userId,
-                      input.songId,
-                      'new_votes',
-                      `Alguem curtiu "${songInfo.title}"`,
-                      `Um usuario tambem gostou de "${songInfo.title}" de ${songInfo.artist}`
-                    );
+              if (song && song.length > 0) {
+                const songInfo = song[0];
+                for (const userId of usersToNotify) {
+                  if (userId !== ctx.user.id) {
+                    const exists = await checkNotificationExists(userId, input.songId, 'new_votes');
+                    if (!exists) {
+                      await createNotification(
+                        userId,
+                        input.songId,
+                        'new_votes',
+                        `Alguem curtiu "${songInfo.title}"`,
+                        `Um usuario tambem gostou de "${songInfo.title}" de ${songInfo.artist}`
+                      );
+                    }
                   }
                 }
               }
+            } catch (error) {
+              console.error('Erro ao notificar usuarios:', error);
             }
-          } catch (error) {
-            console.error('Erro ao notificar usuarios:', error);
           }
+        } else {
+          // Usuário anônimo - usar tabela votes com ID anônimo
+          const anonymousId = crypto.randomUUID();
+          const ipAddress = ctx.req?.ip || ctx.req?.socket?.remoteAddress || 'unknown';
+          const userAgent = ctx.req?.headers['user-agent'] || 'unknown';
+          
+          await db.insert(votes).values({
+            songId: input.songId,
+            voteType: input.voteType,
+            userId: anonymousId,
+            ipAddress: ipAddress,
+            userAgent: userAgent,
+          });
         }
 
         return { success: true };
@@ -616,15 +620,20 @@ export const appRouter = router({
               s.artist,
               s.albumCover,
               s.duration,
-              COUNT(CASE WHEN v.voteType = 'like' THEN 1 END) as likes,
-              COUNT(CASE WHEN v.voteType = 'dislike' THEN 1 END) as dislikes,
-              COUNT(v.id) as totalVotes
+              COALESCE(SUM(CASE WHEN all_votes.voteType = 'like' THEN 1 ELSE 0 END), 0) as likes,
+              COALESCE(SUM(CASE WHEN all_votes.voteType = 'dislike' THEN 1 ELSE 0 END), 0) as dislikes,
+              COUNT(all_votes.id) as totalVotes
             FROM songs s
-            INNER JOIN votes v ON s.id = v.songId
-            WHERE v.createdAt >= '${startDateStr}'
+            LEFT JOIN (
+              SELECT id, songId, voteType, createdAt FROM votes
+              UNION ALL
+              SELECT id, songId, voteType, createdAt FROM "userVotes"
+            ) all_votes ON s.id = all_votes.songId
+            WHERE all_votes.createdAt >= '${startDateStr}'
             GROUP BY s.id, s.title, s.artist, s.albumCover, s.duration
-            HAVING COUNT(v.id) > 0
+            HAVING COUNT(all_votes.id) > 0
             ORDER BY totalVotes DESC
+            LIMIT 5
           `)
         } catch (error: any) {
           console.error('[Top 5 Query Error]', error?.message || error);

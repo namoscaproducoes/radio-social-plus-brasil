@@ -2,10 +2,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import Dashboard from "@/pages/Dashboard";
-import Login from "@/pages/Auth/Login";
-import Register from "@/pages/Auth/Register";
-import ForgotPassword from "@/pages/Auth/ForgotPassword";
-import ResetPassword from "@/pages/Auth/ResetPassword";
+import Login from "@/pages/Login";
 import UserDashboard from "@/pages/User/Dashboard";
 import { UserProfile } from "@/pages/UserProfile";
 import { Route, Switch } from "wouter";
@@ -21,11 +18,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/login" component={Login} />
       <Route path="/dashboard" component={Dashboard} />
-      <Route path="/auth/login" component={Login} />
-      <Route path="/auth/register" component={Register} />
-      <Route path="/auth/forgot-password" component={ForgotPassword} />
-      <Route path="/auth/reset-password" component={ResetPassword} />
       <Route path="/user/dashboard" component={UserDashboard} />
       <Route path="/user/profile" component={UserProfile} />
       <Route path="/404" component={NotFound} />

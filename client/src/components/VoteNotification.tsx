@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ThumbsUp, ThumbsDown } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
-import { getLoginUrl } from '@/const';
+
 
 function useAuthLocal() {
   const { data: user } = trpc.auth.me.useQuery();

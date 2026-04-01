@@ -12,9 +12,9 @@ import crypto from "crypto";
 import { youtubeRouter } from "./youtube-router";
 import bcrypt from "bcryptjs";
 import { sendPasswordResetEmail } from "./email";
-import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
+import { COOKIE_NAME } from "@shared/const";
 
-import { sdk } from "./_core/sdk";
+import { generateToken, registerUser, loginUser } from "./auth-standalone";
 
 // Cache em memória para metadados
 let metadataCache: any = null;
@@ -191,45 +191,27 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ input, ctx }) => {
-        const db = await getDb();
-        if (!db) throw new Error("Database not available");
-
-        const userResult = await db.select().from(users).where(eq(users.email, input.email)).limit(1);
-        if (!userResult || userResult.length === 0) {
-          throw new Error("Email ou senha incorretos");
-        }
-
-        const user = userResult[0];
-
-        if (!user.passwordHash) {
-          throw new Error("Usuário não configurado para login por email");
-        }
-
-        const isPasswordValid = await bcrypt.compare(input.password, user.passwordHash);
-        if (!isPasswordValid) {
-          throw new Error("Email ou senha incorretos");
-        }
-
-        await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, user.id));
-
-        // Criar sessão JWT e cookie usando openId
-        const sessionToken = await sdk.createSessionToken(user.openId || user.id.toString(), {
-          name: user.name || "",
-          expiresInMs: ONE_YEAR_MS,
+        const { user, token } = await loginUser(input.email, input.password);
+        
+        // Definir cookie com token JWT
+        const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+        ctx.res.cookie(COOKIE_NAME, token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: ONE_YEAR_MS,
         });
 
-        const cookieOptions = getSessionCookieOptions(ctx.req);
-        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
-
-        return { success: true, user: { id: user.id, email: user.email, name: user.name } };
+        return { success: true, user, token };
       }),
     
     logout: publicProcedure.mutation(({ ctx }) => {
-      const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
-      return {
-        success: true,
-      } as const;
+      ctx.res.clearCookie(COOKIE_NAME, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+      });
+      return { success: true } as const;
     }),
     forgotPassword: publicProcedure
       .input(

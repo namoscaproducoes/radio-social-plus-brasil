@@ -147,7 +147,7 @@ export default function Dashboard() {
           </Card>
           <Card className="bg-gray-800 border-yellow-500 p-3 md:p-6 col-span-2 md:col-span-1">
             <div className="text-gray-400 text-xs md:text-sm mb-2">Votos Totais</div>
-            <div className="text-2xl md:text-3xl font-bold text-yellow-500">{mostVotedSong?.totalVotes || 0}</div>
+            <div className="text-2xl md:text-3xl font-bold text-yellow-500">{(stats as any)?.totalVotes || 0}</div>
           </Card>
         </div>
 

@@ -10,6 +10,7 @@ import { serveStatic, setupVite } from "./vite";
 import streamRouter from "../stream";
 import youtubeRouter from "../youtube-api";
 import superjson from "superjson";
+import cookieParser from "cookie-parser";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -34,9 +35,14 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
   
-  // CORS middleware global
+  // Middleware para parsear cookies
+  app.use(cookieParser());
+  
+  // CORS middleware global - permitir cookies
   app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    // Permitir origem do cliente (não usar * com credentials)
+    const origin = req.headers.origin || '*';
+    res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -49,6 +55,7 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // Stream proxy

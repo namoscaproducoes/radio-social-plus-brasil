@@ -1,15 +1,18 @@
 import { eq, desc } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import { InsertUser, users, songs, InsertSong, votes, InsertVote, currentSong, InsertCurrentSong, songHistory, InsertSongHistory } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let _client: ReturnType<typeof postgres> | null = null;
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      _client = postgres(process.env.DATABASE_URL);
+      _db = drizzle(_client);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -68,9 +71,11 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       updateSet.lastSignedIn = new Date();
     }
 
-    await db.insert(users).values(values).onDuplicateKeyUpdate({
-      set: updateSet,
-    });
+    // PostgreSQL: delete then insert (upsert)
+    if (values.openId) {
+      await db.delete(users).where(eq(users.openId, values.openId));
+    }
+    await db.insert(users).values(values);
   } catch (error) {
     console.error("[Database] Failed to upsert user:", error);
     throw error;
@@ -133,14 +138,11 @@ export async function upsertSong(song: InsertSong) {
   if (!db) return null;
 
   try {
-    await db.insert(songs).values(song).onDuplicateKeyUpdate({
-      set: {
-        title: song.title,
-        artist: song.artist,
-        albumCover: song.albumCover,
-        duration: song.duration,
-      },
-    });
+    // PostgreSQL: delete then insert (upsert)
+    if (song.externalId) {
+      await db.delete(songs).where(eq(songs.externalId, song.externalId));
+    }
+    await db.insert(songs).values(song);
     return song;
   } catch (error) {
     console.error("[Database] Failed to upsert song:", error);

@@ -100,7 +100,7 @@ export async function registerUser(email: string, password: string, name: string
     userId: user.id,
     email: user.email || '',
     name: user.name || '',
-    role: user.role,
+    role: (user.role as 'user' | 'admin') || 'user',
   });
 
   return {
@@ -108,7 +108,7 @@ export async function registerUser(email: string, password: string, name: string
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role,
+      role: (user.role as 'user' | 'admin') || 'user',
     },
     token,
   };
@@ -155,7 +155,7 @@ export async function loginUser(email: string, password: string) {
     userId: user.id,
     email: user.email || '',
     name: user.name || '',
-    role: user.role,
+    role: (user.role as 'user' | 'admin') || 'user',
   });
 
   return {
@@ -163,7 +163,7 @@ export async function loginUser(email: string, password: string) {
       id: user.id,
       email: user.email,
       name: user.name,
-      role: user.role,
+      role: (user.role as 'user' | 'admin') || 'user',
     },
     token,
   };
@@ -192,6 +192,6 @@ export async function getUserByToken(token: string) {
     id: user.id,
     email: user.email,
     name: user.name,
-    role: user.role,
+    role: (user.role as 'user' | 'admin') || 'user',
   };
 }

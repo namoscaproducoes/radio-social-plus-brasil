@@ -542,15 +542,12 @@ export const appRouter = router({
         const externalId = `${input.songTitle}-${input.songArtist}`.toLowerCase().replace(/[^a-z0-9]/g, "");
         
         // Upsert da música
+        // PostgreSQL: delete then insert (upsert)
+        await db.delete(songs).where(eq(songs.externalId, externalId));
         await db.insert(songs).values({
           title: input.songTitle,
           artist: input.songArtist,
           externalId: externalId,
-        }).onDuplicateKeyUpdate({
-          set: {
-            title: input.songTitle,
-            artist: input.songArtist,
-          },
         });
 
         // Buscar o ID da música que foi inserida/atualizada

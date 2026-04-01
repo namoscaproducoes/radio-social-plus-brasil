@@ -575,7 +575,7 @@ export const appRouter = router({
     ranking: publicProcedure
       .input(
         z.object({
-          period: z.enum(["day", "week", "month", "year"]).optional(),
+          period: z.enum(["day", "week", "month", "year"]).optional().default('week'),
           genreId: z.number().optional(),
         }).optional()
       )
@@ -683,10 +683,10 @@ export const appRouter = router({
       .input(
         z.object({
           limit: z.number().min(1).max(50).optional().default(20),
-        })
+        }).optional()
       )
       .query(async ({ input }) => {
-        return await getRecentSongHistory(input.limit);
+        return await getRecentSongHistory(input?.limit);
       }),
 
     addToHistory: publicProcedure

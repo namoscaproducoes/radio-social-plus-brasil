@@ -106,15 +106,15 @@ export async function getSongsWithVotes() {
       s.id,
       s.title,
       s.artist,
-      s.albumCover,
+      s."albumCover",
       s.duration,
-      COUNT(CASE WHEN v.voteType = 'like' THEN 1 END) as likes,
-      COUNT(CASE WHEN v.voteType = 'dislike' THEN 1 END) as dislikes,
-      COUNT(v.id) as totalVotes
-    FROM songs s
-    LEFT JOIN votes v ON s.id = v.songId
+      COUNT(CASE WHEN v."voteType" = 'like' THEN 1 END) as likes,
+      COUNT(CASE WHEN v."voteType" = 'dislike' THEN 1 END) as dislikes,
+      COUNT(v.id) as "totalVotes"
+    FROM "songs" s
+    LEFT JOIN "votes" v ON s.id = v."songId"
     GROUP BY s.id
-    ORDER BY totalVotes DESC
+    ORDER BY "totalVotes" DESC
   `);
   // db.execute retorna [rows, fields], então extrair apenas as linhas
   return Array.isArray(result) && result.length > 0 ? result[0] : [];
@@ -224,11 +224,11 @@ export async function getRecentSongHistory(limit: number = 20) {
         MAX(id) as id,
         title,
         artist,
-        MAX(albumCover) as albumCover,
-        MAX(playedAt) as playedAt
-      FROM songHistory
+        MAX("albumCover") as "albumCover",
+        MAX("playedAt") as "playedAt"
+      FROM "songHistory"
       GROUP BY title, artist
-      ORDER BY MAX(playedAt) DESC
+      ORDER BY MAX("playedAt") DESC
       LIMIT ${limit}
     `) as any;
 
@@ -256,13 +256,13 @@ export async function getTopVotedSongsThisMonth(voteType: 'like' | 'dislike' = '
     SELECT 
       s.title,
       s.artist,
-      s.albumCover,
-      COUNT(DISTINCT v.id) as voteCount
-    FROM songs s
-    INNER JOIN votes v ON s.id = v.songId AND v.voteType = '${voteType}'
-    GROUP BY s.id, s.title, s.artist, s.albumCover
+      s."albumCover",
+      COUNT(DISTINCT v.id) as "voteCount"
+    FROM "songs" s
+    INNER JOIN "votes" v ON s.id = v."songId" AND v."voteType" = '${voteType}'
+    GROUP BY s.id, s.title, s.artist, s."albumCover"
     HAVING COUNT(DISTINCT v.id) > 0
-    ORDER BY voteCount DESC
+    ORDER BY "voteCount" DESC
     LIMIT ${limit}
   `);
 

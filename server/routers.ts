@@ -402,8 +402,8 @@ export const appRouter = router({
 
         // Buscar músicas sem capa
         const result = await db.execute(`
-          SELECT id, title, artist FROM songs 
-          WHERE albumCover IS NULL OR albumCover = '' 
+          SELECT id, title, artist FROM "songs" 
+          WHERE "albumCover" IS NULL OR "albumCover" = '' 
           LIMIT ${input.limit}
         `);
 
@@ -624,12 +624,12 @@ export const appRouter = router({
               COALESCE(SUM(CASE WHEN all_votes.voteType = 'like' THEN 1 ELSE 0 END), 0) as likes,
               COALESCE(SUM(CASE WHEN all_votes.voteType = 'dislike' THEN 1 ELSE 0 END), 0) as dislikes,
               COUNT(all_votes.id) as totalVotes
-            FROM songs s
+            FROM "songs" s
             LEFT JOIN (
-              SELECT id, songId, voteType, createdAt FROM votes
+              SELECT id, "songId", "voteType", "createdAt" FROM "votes"
               UNION ALL
-              SELECT id, songId, voteType, createdAt FROM "userVotes"
-            ) all_votes ON s.id = all_votes.songId
+              SELECT id, "songId", "voteType", "createdAt" FROM "userVotes"
+            ) all_votes ON s.id = all_votes."songId"
             WHERE all_votes.id IS NOT NULL AND all_votes.createdAt >= '${startDateStr}'
             GROUP BY s.id, s.title, s.artist, s.albumCover, s.duration
             HAVING COUNT(all_votes.id) > 0

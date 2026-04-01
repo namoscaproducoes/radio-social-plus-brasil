@@ -66,21 +66,16 @@ export default function Dashboard() {
     likePercentage: song.totalVotes > 0 ? Math.round((song.likes / song.totalVotes) * 100) : 0,
   }));
   
-  // Calcular totais manualmente no frontend para evitar problemas de serialização
-  let totalLikesCalc = 0;
-  let totalDislikesCalc = 0;
-  let totalVotesCalc = 0;
-  
-  for (const song of topSongs) {
-    totalLikesCalc += song.likes || 0;
-    totalDislikesCalc += song.dislikes || 0;
-    totalVotesCalc += song.totalVotes || 0;
-  }
-  
-  const stats = {
-    totalVotes: totalVotesCalc,
-    totalLikes: totalLikesCalc,
-    totalDislikes: totalDislikesCalc,
+  // Usar stats retornados pela query se disponíveis
+  const stats = rankingData_?.stats ? {
+    totalVotes: parseInt(rankingData_.stats.totalVotes) || 0,
+    totalLikes: parseInt(rankingData_.stats.totalLikes) || 0,
+    totalDislikes: parseInt(rankingData_.stats.totalDislikes) || 0,
+    totalSongs: rankingData_.stats.totalSongs || topSongs.length,
+  } : {
+    totalVotes: topSongs.reduce((sum: number, song: any) => sum + (song.totalVotes || 0), 0),
+    totalLikes: topSongs.reduce((sum: number, song: any) => sum + (song.likes || 0), 0),
+    totalDislikes: topSongs.reduce((sum: number, song: any) => sum + (song.dislikes || 0), 0),
     totalSongs: topSongs.length,
   };
   
